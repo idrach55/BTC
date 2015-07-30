@@ -51,3 +51,26 @@ class OrderFeedDownload:
 
 	def cls_callback(self):
 		print "[i] closed"
+		
+class TradeFeedDownload:
+	def __init__(self, filename):
+		self.filename = filename
+		self.received = 0
+		listener = Listener(self.msg_callback, self.err_callback, self.cls_callback)
+
+	def msg_callback(self, msg):
+		price = None
+		size = None
+		side = None
+		if msg["type"] == "match":
+			self.received += 1
+			with open(self.filename, "a") as csv:
+				csv.write("%s,%s,%s,%s\n" % (msg["time"], msg["side"], msg["price"], msg["size"]))
+			print "[i] received: %d   \r" % self.received,
+			sys.stdout.flush()
+
+	def err_callback(self, err):
+		print "[!] " + err
+
+	def cls_callback(self):
+		print "[i] closed" 
