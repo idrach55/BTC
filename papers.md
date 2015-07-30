@@ -1,4 +1,4 @@
-A list of papers which I've found that may be applicable to microstructure modeling and market making algorithms.
+A list of papers which are applicable to microstructure modeling and market making algorithms.
 
 - Price dynamics in a Markovian limit order market by Rama Cont & Adrien de Larrard
   - http://arxiv.org/pdf/1104.4596.pdf
