@@ -7,7 +7,7 @@ Test book with strategy that publishes simple stats.
 
 import sys
 
-from strat import Strategy
+from cbe.strat import Strategy
 
 class TestBook(Strategy):
 	def __init__(self, keyfile):
@@ -23,4 +23,4 @@ class TestBook(Strategy):
 		return True, state
 
 if __name__ == "__main__":
-	test = TestBook("keys.txt")
+	test = TestBook("../../keys.txt")
