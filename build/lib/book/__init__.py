@@ -1,2 +1,2 @@
-import book
-import bookbuilder
+from book import *
+from bookbuilder import *

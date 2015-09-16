@@ -13,7 +13,8 @@ from time import clock
 
 def wss(msgq):
 	def on_message(ws, msg): 
-		msgq.put(json.loads(msg))
+		if msg is not None:
+			msgq.put(json.loads(msg))
 
 	def on_error(ws, err):   
 		print "[!] wss error: " + json.loads(err)
@@ -21,7 +22,8 @@ def wss(msgq):
 	def on_close(ws):        
 		print "[i] wss closed"
 
-	def on_open(ws):         
+	def on_open(ws):   
+		print "DEBUG1"      
 		ws.send(json.dumps({"type":"subscribe", "product_id":"BTC-USD"}))
 
 	ws = websocket.WebSocketApp("wss://ws-feed.exchange.coinbase.com",
@@ -32,22 +34,21 @@ def wss(msgq):
 	ws.run_forever()
 
 def bookbuilder(book, delay):
-	time_a = clock()
 	msgq = Queue()
 	p = Process(target = wss, args=(msgq,))
 	p.start()
-	begun = False
-	while True:
+	
+	time_a = clock()
+	time_b = clock()
+	while time_b - time_a < delay:
 		time_b = clock()
-		if time_b - time_a < delay:
-			continue
-		elif not begun:
-			seq = book.begin()
-			msg = msgq.get()
-			while msg["sequence"] < seq: 
-				msg = msgq.get()
-			begun = True
 
+	seq = book.begin()
+	msg = msgq.get()
+	while msg["sequence"] < seq: 
+		msg = msgq.get()
+
+	while True:
 		msg = msgq.get()
 		if not book.update(msg):
 			break
