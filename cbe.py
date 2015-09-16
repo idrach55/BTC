@@ -5,16 +5,25 @@ Description:
 Class to handle exchange connectivity.
 '''
 
-import json, hmac, hashlib, time, requests, base64
+import json
+import hmac
+import hashlib
+import time
+import requests
+import base64
+import sslfix
 from requests.auth import AuthBase
+
+# Read authorization keys from file.
+def read_keys(filename):
+	with open(filename, "r") as f:
+		return f.read().split("\n")
 
 # Authorizes coinbase exchange calls.
 class Authorizer(AuthBase):
 	# Initialize authorizer with keys and passphrase.
-    def __init__(self, api_key, secret_key, passphrase):
-        self.api_key = api_key
-        self.secret_key = secret_key
-        self.passphrase = passphrase
+    def __init__(self, keys):
+        self.api_key, self.secret_key, self.passphrase = keys
 
     # This method is called by the requests when authentication is needed.
     def __call__(self, request):
@@ -33,7 +42,7 @@ class Authorizer(AuthBase):
         return request
 
 # Connects to coinbase exchange.
-class CoinbaseExchange(object):
+class CBEProtocol(object):
 	# Initialize with api url and instance of authorizer class.
     def __init__(self, auth):
         self.api_url = "https://api.exchange.coinbase.com/"
