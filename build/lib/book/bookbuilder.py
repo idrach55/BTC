@@ -22,8 +22,7 @@ def wss(msgq):
 	def on_close(ws):        
 		print "[i] wss closed"
 
-	def on_open(ws):   
-		print "DEBUG1"      
+	def on_open(ws):       
 		ws.send(json.dumps({"type":"subscribe", "product_id":"BTC-USD"}))
 
 	ws = websocket.WebSocketApp("wss://ws-feed.exchange.coinbase.com",
