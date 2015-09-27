@@ -1,120 +1,148 @@
 '''
 Author: Isaac Drachman
-Date:   09/05/2015
+Date:   09/27/2015
 Description:
-Class to handle a live (real-time) book.
+New class to handle a live (real-time) book. Slightly based on Coinbase's node.js library.
 '''
 
+from bintrees import FastRBTree
 from bookbuilder import bookbuilder
 
 class Book:
 	def __init__(self, cbe, delay, strathandle=None):
 		self.cbe = cbe
 		self.strathandle = strathandle
+
+		self.ordersById = {}
+		self.bids = FastRBTree()
+		self.asks = FastRBTree()
+
 		bookbuilder(self, delay)
 
-	def convert_string_to_cents(self, strvalue):
-		return int(100. * float(strvalue))
+	# Order operations.
+	def _getOrderById(self, orderId):
+		try:
+			return self.ordersById[orderId]
+		except:
+			return None
 
-	def format_book(self):
-		for side in ["bids", "asks"]:
-			for idx in range(len(self.book[side])):
-				self.book[side][idx][0] = self.convert_string_to_cents(self.book[side][idx][0])
-				self.book[side][idx][1] = float(self.book[side][idx][1])
+	def _getOrderId(self, order):
+		try:
+			return order["order_id"]
+		except KeyError:
+			return order["id"]
 
+	def _getOrderSize(self, order):
+		try:
+			return float(order["size"])
+		except KeyError:
+			return float(order["remaining_size"])
+
+	# Return red-black binary tree by side of book. 
+	def _getOrderTree(self, side):
+		return self.bids if side == "buy" else self.asks
+
+	# Download orderbook via the REST api and add to trees.
 	def begin(self):
-		response = self.cbe.get_book(level=2)
-		self.book = response.json()
-		self.format_book()
-		self.sequence = self.book["sequence"]
-		return self.sequence
+		book = self.cbe.get_book(level=3).json()
+		for bid in book["bids"]:
+			order = {"id":    bid[2],
+					 "side":  "buy",
+					 "price": float(bid[0]),
+					 "size":  float(bid[1])}
+			self.add(order)
+		for ask in book["asks"]:
+			order = {"id":    ask[2],
+					 "side":  "sell",
+					 "price": float(ask[0]),
+					 "size":  float(ask[1])}
+			self.add(order)
+		return book["sequence"]
 
-	def adj_price_level(self, price, amt, side):
-		bookside = self.book[side]
-		condition = lambda idx: bookside[idx][0] > price if side == "bids" else bookside[idx][0] < price
-		
-		idx = 0
-		while idx < len(bookside) and condition(idx):
-			idx += 1
+	# Orderbook messages...
+	def add(self, order):
+		order = {"id":    self._getOrderId(order),
+				 "side":  order["side"],
+				 "price": float(order["price"]),
+				 "size":  self._getOrderSize(order)}
+		tree = self._getOrderTree(order["side"])
+		try:
+			tree[order["price"]].append(order)
+		except KeyError:
+			tree[order["price"]] = [order]
+		self.ordersById[order["id"]] = order
 
-		if idx == len(bookside):
-			bookside.append([price, amt])
-		elif bookside[idx][0] == price:
-			bookside[idx][1] += amt
-			if bookside[idx][1] < 0.00000001:
-				bookside.pop(idx)
+	def remove(self, orderId):
+		order = self._getOrderById(orderId)
+		if order is None:
+			return
+
+		tree = self._getOrderTree(order["side"])
+		if len(tree[order["price"]]) > 1:
+			tree[order["price"]].remove(order)
 		else:
-			if idx == 0:
-				bookside.insert(0, [price, amt])
-			else:
-				bookside.insert(idx, [price, amt])
-		self.book[side] = bookside
+			del tree[order["price"]]
+		del self.ordersById[orderId]
 
-	def update(self, msg):
-		if msg["sequence"] < self.sequence:
-			return True
+	def match(self, matched):
+		price = float(matched["price"])
+		size = float(matched["size"])
 
-		side = "bids"
-		if msg["side"] == "sell": 
-			side = "asks"
-		price = 0
-		if msg["type"] in ["match", "open", "change"]:
-			price = self.convert_string_to_cents(msg["price"])
-		if msg["type"] == "done" and msg["order_type"] == "limit":
-			price = self.convert_string_to_cents(msg["price"])
+		tree = self._getOrderTree(matched["side"])
+		assert(tree[price][0]["id"] == matched["maker_order_id"])
 
-		if msg["type"] == "match":
-			self.adj_price_level(price, -float(msg["size"]), side)
-		elif msg["type"] == "open":
-			self.adj_price_level(price, float(msg["remaining_size"]), side)
-		elif msg["type"] == "done" and msg["order_type"] == "limit" and float(msg["remaining_size"]) > 0.0:
-			self.adj_price_level(price, -float(msg["remaining_size"]), side)	
-		elif msg["type"] == "change":
-			diff = msg["new_size"] - msg["old_size"]
-			if (side == "asks" and price <= self.book[side][-1][0]) or (side == "bids" and price >= self.book[side][-1][0]):
-				self.adj_price_level(price, diff, side)	
+		tree[price][0]["size"] -= size
+		self.ordersById[matched["maker_order_id"]] = tree[price][0]
+		assert(tree[price][0]["size"] >= 0)
 
-		self.sequence = msg["sequence"]
+		if tree[price][0]["size"] == 0:
+			self.remove(matched["maker_order_id"])
 
-		if self.strathandle:
-			strat, state = self.strathandle
-			status, state = strat.update(self, state)
-			self.strathandle = (strat, state)
-			return status
-		return True
+	def change(self, changed):
+		order = self.ordersById[changed["order_id"]]
+		old_size = float(changed["old_size"])
+		new_size = float(changed["new_size"])
 
-	# GET functions.
-	def get_best_price(self, side):
-		return 0.01 * self.book[side][0][0]
-
-	def get_best_size(self, side):
-		return self.book[side][0][1]
-
-	def get_best_quote(self, side):
-		return (self.get_best_price(side), self.get_best_size(side))
-
-	def get_spread(self):
-		return self.get_best_price("asks") - self.get_best_price("bids")
-
-	def get_mid_point(self):
-		return 0.5 * (self.get_best_price("asks") + self.get_best_price("bids"))
-
-	def get_vwap(self, side, throughprice):
-		throughprice = int(100. * throughprice)
-		bookside = self.book[side]
-		condition = lambda idx: bookside[idx][0] >= throughprice if side == "bids" else bookside[idx][0] <= throughprice
+		tree = self._getOrderTree(changed["side"])
+		assert(tree[order["price"]][tree[order["price"]].index(order)]["size"] == old_size)
 		
-		idx = 0
-		weight = 0.0
-		volume = 0.0 
-		while idx < len(bookside) and condition(idx):
-			weight += 0.01 * bookside[idx][0] * bookside[idx][1]
-			volume += bookside[idx][1]
-			idx += 1
+		tree[order["price"]][tree[order["price"]].index(order)]["size"] = new_size
+		self.ordersById[order["id"]] = tree[order["price"]][tree[order["price"]].index(order)]
+	# End of orderbook messages.
 
-		if idx == len(bookside):
-			if side == "asks" and bookside[idx-1][0] < throughprice:
-				return (False, None)
+	# Get functionality.
+	def getBestBidPrice(self):
+		return self._getOrderTree("buy").min_item()[0]
 
-		return (True, weight / volume) 
+	def getBestAskPrice(self):
+		return self._getOrderTree("sell").min_item()[0]
 
+	def getBestBidQuote(self):
+		price, orders = self._getOrderTree("buy").max_item()
+		size = 0.0
+		for order in orders:
+			size += order["size"]
+		return (price, size)
+
+	def getBestAskQuote(self):
+		price, orders = self._getOrderTree("sell").min_item()
+		size = 0.0
+		for order in orders:
+			size += order["size"]
+		return (price, size)
+
+	# Called by bookbuilder with message off queue.
+	def update(self, msg):
+		if msg["type"] == "open":
+			self.add(msg)
+		elif msg["type"] == "done":
+			self.remove(msg["order_id"])
+		elif msg["type"] == "match":
+			self.match(msg)
+		elif msg["type"] == "change":
+			self.change(msg)
+
+		# Relay to strategy.
+		if self.strathandle is not None:
+			return self.strathandle[0].update(self, self.strathandle[1])
+		return True

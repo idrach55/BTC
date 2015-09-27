@@ -46,7 +46,6 @@ def bookbuilder(book, delay):
 	msg = msgq.get()
 	while msg["sequence"] < seq: 
 		msg = msgq.get()
-
 	while True:
 		msg = msgq.get()
 		if not book.update(msg):

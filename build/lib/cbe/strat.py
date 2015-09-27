@@ -18,7 +18,7 @@ class Strategy:
 				 	  "risky":   Risky(self.cbe)}
 
 	def create_book(self):
-		Book(self.cbe, 5.0, (self, self.state))
+		Book(self.cbe, 3.0, (self, self.state))
 
 	def update(self, book, state):
 		pass

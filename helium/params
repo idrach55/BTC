@@ -1,0 +1,4 @@
+# Parameters.
+params = {"widths": 	   	 [(11, 0.30), (15, 0.30), (21, 0.40)],
+		  "offer_size":      1.0,
+		  "update_thresh": 	 0.0002}

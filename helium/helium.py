@@ -6,17 +6,12 @@ Simple price ladder algorithm.
 '''
 
 import time
+import sys
 
 from util import picklefix
 from cbe.strat import Strategy
 from math import ceil, floor
 from multiprocessing import Pool
-
-# Default parameters.
-params = {"widths": 	   	 [(7, 0.10), (9, 0.20), (11, 0.25), (13, 0.35)],
-		  "offer_size":      1.0,
-		  "update_thresh": 	 0.0001,
-		  "position_target": 1.0}
 
 class Helium(Strategy):
 	def __init__(self, keyfile, params):
@@ -53,13 +48,6 @@ class Helium(Strategy):
 		return True, state
 
 	def ladder(self, book, state):
-		'''
-		success, position = self.state["risky"].get_positions()
-		if not success:
-			return state
-		posdiff = position["BTC"] - state["params"]["position_target"]
-		'''
-
 		mid = book.get_mid_point()
 		bestask, bestbid = book.get_best_price("asks"), book.get_best_price("bids")
 
@@ -93,4 +81,5 @@ class Helium(Strategy):
 			return trade_id
 
 if __name__ == "__main__":
+	execfile(sys.argv[1])
 	helium = Helium("../keys.txt", params)
