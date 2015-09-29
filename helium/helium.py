@@ -19,18 +19,18 @@ class Helium(Strategy):
 		Strategy.__init__(self, keyfile)
 
 		# Customize strategy.
+		self.params = params
 		self.state["mid"] = None
-		self.state["params"] = params
 
 		# Start book.
 		self.create_book()
 
 	def update(self, book, state):
-		mid = book.get_mid_point()
-		if not state["mid"] or abs((mid - state["mid"])/state["mid"]) > state["params"]["update_thresh"]:
-			print "\n[i] update: mid is %f"%mid
-			time_a = time.clock()
+		mid = book.getMidPrice()
+		if not state["mid"] or self.wasMidChangeSufficient(state["mid"], mid):
+			print "\n%0.2f|%0.4f|%0.2f" % (book.getBestBidPrice(), mid, book.getBestAskPrice())
 
+			time_a = time.clock()
 			state["control"].cancelall()
 			asks, bids = self.ladder(book, state)
 			
@@ -40,19 +40,22 @@ class Helium(Strategy):
 			pool.close(); pool.join()
 			
 			state["control"].open_orders += [oid for oid in ask_ids if oid] + [oid for oid in bid_ids if oid]
-			
 			time_b = time.clock()
-			print "[i] ladder submitted in %0.2f ms" % (1000. * (time_b - time_a))
+
+			print "submitted: %0.2f ms" % (1000. * (time_b - time_a))
 
 			state["mid"] = mid
 		return True, state
 
+	def wasMidChangeSufficient(self, oldmid, newmid):
+		return abs((newmid - oldmid) / oldmid) >= self.params["update_thresh"]
+
 	def ladder(self, book, state):
-		mid = book.get_mid_point()
-		bestask, bestbid = book.get_best_price("asks"), book.get_best_price("bids")
+		mid = book.getMidPrice()
+		bestbid, bestask = book.getBestBidPrice(), book.getBestAskPrice()
 
 		asks, bids = [], []
-		for spread, weight in state["params"]["widths"]:
+		for spread, weight in self.params["widths"]:
 			ask = 0.01 * ceil(100. * (mid + 0.005 * spread))
 			bid = 0.01 * floor(100. * (mid - 0.005 * spread))
 
@@ -61,8 +64,8 @@ class Helium(Strategy):
 			if bid >= bestask:
 				bid = bestask - 0.01
 
-			bidsize = weight * state["params"]["offer_size"]
-			asksize = weight * state["params"]["offer_size"]
+			bidsize = weight * self.params["offer_size"]
+			asksize = weight * self.params["offer_size"]
 			
 			asks.append({"size": asksize, "price": ask, "state": state})
 			bids.append({"size": bidsize, "price": bid, "state": state})
@@ -71,15 +74,19 @@ class Helium(Strategy):
 	def poolsubmitask(self, order_data):
 		success, trade_id = order_data["state"]["control"].ask(order_data["size"], order_data["price"])
 		if success: 
-			print "[t] ask %f at %f" % (order_data["size"], order_data["price"])
+			print "ask: %0.4f|%0.2f" % (order_data["size"], order_data["price"])
 			return trade_id
 
 	def poolsubmitbid(self, order_data):
 		success, trade_id = order_data["state"]["control"].bid(order_data["size"], order_data["price"])
 		if success: 
-			print "[t] bid %f at %f" % (order_data["size"], order_data["price"])
+			print "bid: %0.4f|%0.2f" % (order_data["size"], order_data["price"])
 			return trade_id
 
 if __name__ == "__main__":
+	if len(sys.argv) < 2:
+		print "usage: python helium.py [params-file]"
+		quit()
+
 	execfile(sys.argv[1])
 	helium = Helium("../keys.txt", params)

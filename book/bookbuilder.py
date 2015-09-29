@@ -9,7 +9,7 @@ import websocket
 import json
 
 from multiprocessing import Process, Queue
-from time import clock
+from time import clock, sleep
 
 def wss(msgq):
 	def on_message(ws, msg): 
@@ -37,17 +37,17 @@ def bookbuilder(book, delay):
 	p = Process(target = wss, args=(msgq,))
 	p.start()
 	
-	time_a = clock()
-	time_b = clock()
-	while time_b - time_a < delay:
-		time_b = clock()
+	sleep(delay)
 
-	seq = book.begin()
+	book.begin()
 	msg = msgq.get()
-	while msg["sequence"] < seq: 
+	while msg["sequence"] < book.sequence: 
 		msg = msgq.get()
+
 	while True:
 		msg = msgq.get()
+		if msg["sequence"] < book.sequence:
+			continue
 		if not book.update(msg):
 			break
 	p.join()

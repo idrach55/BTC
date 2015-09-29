@@ -44,7 +44,7 @@ class Book:
 
 	# Download orderbook via the REST api and add to trees.
 	def begin(self):
-		book = self.cbe.get_book(level=3).json()
+		book = self.cbe.get_book(level=2).json()
 		for bid in book["bids"]:
 			order = {"id":    bid[2],
 					 "side":  "buy",
@@ -57,7 +57,7 @@ class Book:
 					 "price": float(ask[0]),
 					 "size":  float(ask[1])}
 			self.add(order)
-		return book["sequence"]
+		self.sequence = book["sequence"]
 
 	# Orderbook messages...
 	def add(self, order):
@@ -112,7 +112,7 @@ class Book:
 
 	# Get functionality.
 	def getBestBidPrice(self):
-		return self._getOrderTree("buy").min_item()[0]
+		return self._getOrderTree("buy").max_item()[0]
 
 	def getBestAskPrice(self):
 		return self._getOrderTree("sell").min_item()[0]
@@ -131,8 +131,13 @@ class Book:
 			size += order["size"]
 		return (price, size)
 
+	def getMidPrice(self):
+		return 0.5 * (self.getBestBidPrice() + self.getBestAskPrice())
+
 	# Called by bookbuilder with message off queue.
 	def update(self, msg):
+		self.sequence = msg["sequence"]
+
 		if msg["type"] == "open":
 			self.add(msg)
 		elif msg["type"] == "done":

@@ -1,4 +1,4 @@
 # Parameters.
-params = {"widths": 	   	 [(11, 0.30), (15, 0.30), (21, 0.40)],
+params = {"widths": 	   	 [(3, 0.30), (5, 0.30), (7, 0.40)],
 		  "offer_size":      1.0,
-		  "update_thresh": 	 0.0002}
+		  "update_thresh": 	 0.0001}
