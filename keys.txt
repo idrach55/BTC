@@ -1,3 +1,3 @@
-53e073b0daa05852ea7be8e347f4361b
-tfm7TrUidKYqjOTdZhYk+HE8RxJf3lECZCXvFq+ycIMYWkHBxQiO0lX9UJo1Oq14jP99ps35x4smJgl+xHKrUQ==
-bnymellon
+api key here
+secret key here
+passphrase here
