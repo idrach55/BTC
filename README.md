@@ -2,4 +2,4 @@
 Bitcoin (coinbase) algorithmic trading API
 
 # Usage info
-Instead of packages, library is now just individual files (modules.) Usage info needed... 
+Using python3, run the file `testbook.py` to view live top-of-book sizes and prices.
