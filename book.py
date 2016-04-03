@@ -1,139 +1,137 @@
-'''
-Author: Isaac Drachman
-Date:   09/27/2015
-Description:
-New class to handle a live (real-time) book. Slightly based on Coinbase's node.js library.
-'''
-
 from bintrees import FastRBTree
 from collections import namedtuple
-from blobprotocol import BlobProtocol
+from blobprotocol import BlobClient
+from pprint import pprint
+
+import requests
+
+
+Order = namedtuple('Order', ['oid', 'side', 'price', 'size'])
 
 class InsufficientSizeForVWAP(Exception):
 	pass
 
-class Book(BlobProtocol):
-	def __init__(self, cbe, strathandle=None):
-		self.cbe = cbe
-		self.strathandle = strathandle
+class BookClient:
+	def onBookConnected(self, book):
+		self.book = book
+
+	def add(self, oid, side, price, size):
+		raise NotImplementedError
+
+	def change(self, oid, side, newsize):
+		raise NotImplementedError
+
+	def match(self, oid, side, price, size):
+		raise NotImplementedError
+
+	def done(self, oid):
+		raise NotImplementedError
+
+class Book(BlobClient):
+	def __init__(self, protocol, debug=False):
+		BlobClient.__init__(self, protocol)
+
+		self.debug = debug
+		self.clients = []
 
 		self.ordersById = {}
 		self.bids = FastRBTree()
 		self.asks = FastRBTree()
 
-		self.subscribe()
-
-	# Order operations.
-	def _getOrderById(self, orderId):
-		try:
-			return self.ordersById[orderId]
-		except:
-			return None
-
-	def _getOrderId(self, order):
-		try:
-			return order["order_id"]
-		except KeyError:
-			return order["id"]
-
-	def _getOrderSize(self, order):
-		try:
-			return float(order["size"])
-		except KeyError:
-			return float(order["remaining_size"])
-
-	# Return red-black binary tree by side of book. 
-	def _getOrderTree(self, side):
-		return self.bids if side == "buy" else self.asks
+	def addClient(self, client):
+		self.clients.append(client)
+		client.onBookConnected(self)
 
 	# Download orderbook via the REST api and add to trees.
-	def begin(self):
-		book = self.cbe.get_book(level=3).json()
+	def onOpen(self):
+		r = requests.get('https://api.exchange.coinbase.com/products/BTC-USD/book', params={'level': 3})
+		book = r.json()
 		for bid in book["bids"]:
-			order = {"id":    bid[2],
-					 "side":  "buy",
-					 "price": float(bid[0]),
-					 "size":  float(bid[1])}
-			self.add(order)
+			self.add(bid[2], "buy", float(bid[0]), float(bid[1]))
 		for ask in book["asks"]:
-			order = {"id":    ask[2],
-					 "side":  "sell",
-					 "price": float(ask[0]),
-					 "size":  float(ask[1])}
-			self.add(order)
+			self.add(ask[2], "sell", float(ask[0]), float(ask[1]))
 		self.sequence = book["sequence"]
 
+		if self.debug:
+			pprint('downloaded (bids: %d, asks: %d)' % (len(self.bids), len(self.asks)))
+
 	# Orderbook messages.
-	def add(self, order):
-		order = {"id":    self._getOrderId(order),
-				 "side":  order["side"],
-				 "price": float(order["price"]),
-				 "size":  self._getOrderSize(order)}
-		tree = self._getOrderTree(order["side"])
+	def add(self, oid, side, price, size):
+		order = Order(oid, side, price, size)
+		tree = self._getOrderTree(order.side)
 		try:
-			tree[order["price"]].append(order)
+			tree[order.price].append(order)
 		except KeyError:
-			tree[order["price"]] = [order]
-		self.ordersById[order["id"]] = order
+			tree[order.price] = [order]
+		self.ordersById[order.oid] = order
 
-	def remove(self, orderId):
-		order = self._getOrderById(orderId)
+		if self.debug:
+			pprint('added (%s, %s, $ %0.2f, %0.4f BTC)' % (oid, side, price, size))
+		for client in self.clients:
+			client.add(oid, side, price, size)
+
+	def change(self, oid, side, newsize):
+		order = self._getOrderById(oid)
 		if order is None:
 			return
+		tree = self._getOrderTree(side)
+		tree[order.price][tree[order.price].index(order)] = Order(oid, side, order.price, newsize)
+		self.ordersById[order.oid] = tree[order.price][tree[order.price].index(order)]
 
-		tree = self._getOrderTree(order["side"])
-		if len(tree[order["price"]]) > 1:
-			tree[order["price"]].remove(order)
+		if self.debug:
+			pprint('changed (%s, %s, $ %0.2f, %0.2f BTC)' % (oid, side, order.price, newsize))
+		for client in self.clients:
+			client.change(oid, side, newsize)
+
+	def match(self, oid, side, price, size):
+		tree = self._getOrderTree(side)
+		if self._getOrderById(oid) is None or tree[price][0].oid != oid:
+			return
+		tree[price][0] = Order(tree[price][0].oid, tree[price][0].side, tree[price][0].price, tree[price][0].size - size)
+		self.ordersById[oid] = tree[price][0]
+		if tree[price][0].size <= 0:
+			self.done(oid)
+
+		if self.debug:
+			pprint('matched (%s, %s, $ %0.2f, %0.4f BTC)' % (oid, side, price, size))
+		for client in self.clients:
+			client.match(oid, side, price, size)
+
+	def done(self, oid):
+		order = self._getOrderById(oid)
+		if order is None:
+			return
+		tree = self._getOrderTree(order.side)
+		if len(tree[order.price]) > 1:
+			tree[order.price].remove(order)
 		else:
-			del tree[order["price"]]
-		del self.ordersById[orderId]
+			del tree[order.price]
+		del self.ordersById[oid]
 
-	def match(self, matched):
-		price = float(matched["price"])
-		size = float(matched["size"])
-
-		tree = self._getOrderTree(matched["side"])
-		if self._getOrderById(matched["maker_order_id"]) is None or tree[price][0]["id"] != matched["maker_order_id"]:
-			return
-
-		tree[price][0]["size"] -= size
-		self.ordersById[matched["maker_order_id"]] = tree[price][0]
-
-		if tree[price][0]["size"] <= 0:
-			self.remove(matched["maker_order_id"])
-
-	def change(self, changed):
-		order = self._getOrderById(changed["order_id"])
-		if order is None:
-			return
-		old_size = float(changed["old_size"])
-		new_size = float(changed["new_size"])
-
-		tree = self._getOrderTree(changed["side"])
-		assert(tree[order["price"]][tree[order["price"]].index(order)]["size"] == old_size)
-		
-		tree[order["price"]][tree[order["price"]].index(order)]["size"] = new_size
-		self.ordersById[order["id"]] = tree[order["price"]][tree[order["price"]].index(order)]
+		if self.debug:
+			pprint('removed (%s)' % (oid,))
+		for client in self.clients:
+			client.done(oid)
 
 	# Get functionality.
-	def getBestBid(self):
+	def getBestBidPrice(self):
 		return self._getOrderTree("buy").max_item()[0]
 
-	def getBestAsk(self):
+	def getBestAskPrice(self):
 		return self._getOrderTree("sell").min_item()[0]
 
 	def getBestBidQuote(self):
 		price, orders = self._getOrderTree("buy").max_item()
 		size = 0.0
 		for order in orders:
-			size += order["size"]
+			size += order.size
 		return (price, size)
 
 	def getBestAskQuote(self):
 		price, orders = self._getOrderTree("sell").min_item()
 		size = 0.0
 		for order in orders:
-			size += order["size"]
+			size += order.size
 		return (price, size)
 
 	def getMidPrice(self):
@@ -143,7 +141,7 @@ class Book(BlobProtocol):
 		side = "buy" if target < 0 else "sell"
 		tree = self._getOrderTree(side)
 		iterator = tree.items(True) if target < 0 else tree.items()
-		levels = [(l[0], sum([o["size"] for o in l[1]])) for l in iterator]
+		levels = [(l[0], sum([o.size for o in l[1]])) for l in iterator]
 		
 		avgprice = 0.0
 		target = abs(target)
@@ -158,10 +156,13 @@ class Book(BlobProtocol):
 			idx += 1
 		return avgprice / cumsize
 
-	# Called by bookbuilder with message off queue.
-	def update(self, msg):
-		BlobProtocol.update(self, msg)
+	# Order operations.
+	def _getOrderById(self, oid):
+		try:
+			return self.ordersById[oid]
+		except:
+			return None
 
-		# Relay to strategy.
-		if self.strathandle is not None:
-			self.strathandle.update(self, msg)
+	# Return red-black binary tree by side of book. 
+	def _getOrderTree(self, side):
+		return self.bids if side == "buy" else self.asks

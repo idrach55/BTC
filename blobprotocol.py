@@ -1,71 +1,90 @@
-import websocket
+from autobahn.twisted.websocket import WebSocketClientProtocol
+from pprint import pprint
+
 import json
 
-from multiprocessing import Process, Queue
 
-def wss(msgq):
-	def on_message(ws, msg): 
-		if msg is not None:
-			msgq.put(json.loads(msg))
+class BlobClient:
+    def __init__(self, protocol):
+        protocol.client = self
+        self.sequence = 0
 
-	def on_error(ws, err):   
-		print "[!] wss error: " + json.loads(err)
+    def onOpen(self):
+        raise NotImplementedError
 
-	def on_close(ws):        
-		print "[i] wss closed"
+    def add(self, oid, side, price, size):
+        raise NotImplementedError
 
-	def on_open(ws):       
-		ws.send(json.dumps({"type":"subscribe", "product_id":"BTC-USD"}))
+    def change(self, oid, side, newsize):
+        raise NotImplementedError
 
-	ws = websocket.WebSocketApp("wss://ws-feed.exchange.coinbase.com", 
-								on_message = on_message, 
-								on_error   = on_error, 
-								on_close   = on_close, 
-								on_open    = on_open)
-	ws.run_forever()	
+    def match(self, oid, side, price, size):
+        raise NotImplementedError
 
+    def done(self, oid):
+        raise NotImplementedError
 
-class BlobProtocol:
-	def __init__(self):
-		pass
+class BlobProtocol(WebSocketClientProtocol):
+    def onOpen(self):
+        msg = json.dumps({'type': 'subscribe', 'product_id': 'BTC-USD'})
+        self.sendMessage(msg.encode('utf-8'), isBinary=False)
+        self.client.onOpen()
 
-	def subscribe(self):
-		msgq = Queue()
-		p = Process(target = wss, args=(msgq,))
-		p.start()
+    def onMessage(self, payload, isBinary):
+        if not isBinary:
+            msg = json.loads(payload.decode('utf8'))
+            if msg["sequence"] <= self.client.sequence:
+                return
+            if msg["type"] == "open":
+                self.add(msg)
+            elif msg["type"] == "change":
+                self.change(msg)
+            elif msg["type"] == "match":
+                self.match(msg)
+            elif msg["type"] == "done":
+                self.done(msg)
 
-		self.begin()
+    def add(self, msg):
+        oid   = self._getOrderId(msg)
+        side  = msg["side"]
+        price = float(msg["price"])
+        size  = self._getOrderSize(msg)
+        self.client.add(oid, side, price, size)
 
-		while True:
-			msg = msgq.get()
-			if msg["sequence"] <= self.sequence:
-				continue
-			self.update(msg)
-		p.join()
+    def change(self, msg):
+        oid  = msg["order_id"]
+        side = msg["side"]
+        size = msg["new_size"]
+        self.client.change(oid, side, size)
 
-	def begin(self):
-		raise NotImplementedError
+    def match(self, msg):
+        oid   = msg["maker_order_id"]
+        side  = msg["side"]
+        price = float(msg["price"])
+        size  = float(msg["size"])
+        self.client.match(oid, side, price, size)
 
-	def add(self, msg):
-		raise NotImplementedError
+    def done(self, msg):
+        oid = msg["order_id"]
+        self.client.done(oid)
 
-	def change(self, msg):
-		raise NotImplementedError
+    def _getOrderId(self, order):
+        try:
+            return order["order_id"]
+        except KeyError:
+            return order["id"]
 
-	def remove(self, msg):
-		raise NotImplementedError
+    def _getOrderSize(self, order):
+        try:
+            return float(order["size"])
+        except KeyError:
+            return float(order["remaining_size"])
 
-	def match(self, msg):
-		raise NotImplementedError
-
-	def update(self, msg):
-		self.sequence = msg["sequence"]
-
-		if msg["type"] == "open":
-			self.add(msg)
-		elif msg["type"] == "done":
-			self.remove(msg["order_id"])
-		elif msg["type"] == "match":
-			self.match(msg)
-		elif msg["type"] == "change":
-			self.change(msg)
+'''
+if __name__ == '__main__':
+    log.startLogging(sys.stdout)
+    factory = WebSocketClientFactory('wss://ws-feed.exchange.coinbase.com')
+    factory.protocol = BlobProtocol
+    connectWS(factory)
+    reactor.run()
+'''

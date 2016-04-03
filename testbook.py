@@ -1,26 +1,46 @@
-'''
-Author: Isaac Drachman
-Date:   09/05/2015
-Description:
-Test book with strategy that publishes simple stats.
-'''
+from autobahn.twisted.websocket import WebSocketClientFactory, connectWS
+from twisted.python import log
+from twisted.internet import reactor
+from pprint import pprint
+
+from blobprotocol import BlobProtocol
+from book import Book, BookClient
 
 import sys
-from strategy import Strategy
 
-class TestStrat(Strategy):
-	def __init__(self, keyfile):
-		Strategy.__init__(self, keyfile)
-		self.book()
 
-	def update(self, book, msg):
-		Strategy.update(self, book, msg)
+class TestBook(BookClient):
+	def onOpen(self):
+		pass
 
-		bidprice, bidsize = book.getBestBidQuote()
-		askprice, asksize = book.getBestAskQuote()
-		print "(%f) %f | %f (%f)    \r"%(bidsize, bidprice, askprice, asksize),
-		sys.stdout.flush()
-		return True
+	def add(self, oid, side, price, size):
+		self.update()
 
-if __name__ == "__main__":
-	test = TestStrat("keys.txt")
+	def change(self, oid, side, newsize):
+		self.update()
+
+	def match(self, oid, side, price, size):
+		self.update()
+
+	def done(self, oid):
+		self.update()
+
+	def update(self):
+		if len(self.book.bids) == 0 or len(self.book.asks) == 0:
+			return
+		bidprice, bidsize = self.book.getBestBidQuote()
+		askprice, asksize = self.book.getBestAskQuote()
+		pprint('$ %0.2f (%0.4f) | (%0.4f) $ %0.2f' % (bidprice, bidsize, asksize, askprice))
+
+if __name__ == '__main__':
+    log.startLogging(sys.stdout)
+    factory = WebSocketClientFactory('wss://ws-feed.exchange.coinbase.com')
+
+    factory.protocol = BlobProtocol
+
+    tb = TestBook()
+    bb = Book(factory.protocol, debug=False)
+    bb.addClient(tb)
+
+    connectWS(factory)
+    reactor.run()
