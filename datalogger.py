@@ -12,11 +12,16 @@ import time
 import pandas
 
 
-class VolMonitor(BookClient):
-	# Setup a volatility monitor which records the midpoint every `dt` seconds.
-	def __init__(self, delta, debug=False):
+class DataLogger(BookClient):
+	# Logs the TOB bid/ask every `delta` seconds for a total of `duration` seconds.
+	def __init__(self, delta, duration, fname):
 		self.delta = delta
-		self.series = pandas.Series()
+		self.duration = duration
+		self.fname = fname
+
+		self.stamps = []
+		self.bids = []
+		self.asks = []
 
 	def onOpen(self):
 		pass
@@ -39,17 +44,23 @@ class VolMonitor(BookClient):
 			return
 
 		stamp = time.time()
-		mid = self.book.getMidPrice()
-		if len(self.series) > 0 and stamp - self.series.index[-1] < self.delta:
+		ask = self.book.getBestAskPrice()
+		bid = self.book.getBestBidPrice()
+		if len(self.stamps) > 0 and stamp - self.stamps[-1] < self.delta:
 			return
-		self.series = self.series.append(pandas.Series({stamp: mid}))
+		self.stamps.append(stamp)
+		self.asks.append(ask)
+		self.bids.append(bid)
+		if self.stamps[-1] - self.stamps[0] >= self.duration:
+			self.close()
 
-		# Print the hourly volatility based on these samples.
-		if debug:
-			pprint('volatility: %0.1f%%' % (100. * self.getVolatility()))
-
-	def getHourlyVolatility(self):
-		return math.sqrt(3600. / self.delta) * self.series.pct_change()[1:].std()
+	def close(self):
+		df = pandas.DataFrame()
+		df["bid"] = self.bids
+		df["ask"] = self.asks
+		df.index  = self.stamps
+		df.to_csv(self.fname)
+		quit(0)
 		
 
 if __name__ == '__main__':
@@ -58,9 +69,13 @@ if __name__ == '__main__':
 
     factory.protocol = BlobProtocol
 
-    vm = VolMonitor(1.0)
+    delta = float(sys.argv[1])
+    duration = float(sys.argv[2])
+    filename = sys.argv[3]
+
+    dl = DataLogger(delta, duration, filename+".csv")
     bb = Book(factory.protocol, debug=False)
-    bb.addClient(vm)
+    bb.addClient(dl)
 
     connectWS(factory)
     reactor.run()
