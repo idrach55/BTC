@@ -75,8 +75,10 @@ class Book(BlobClient):
 		if order is None:
 			return
 		tree = self._getOrderTree(side)
-		tree[order.price][tree[order.price].index(order)] = Order(oid, side, order.price, newsize)
-		self.ordersById[order.oid] = tree[order.price][tree[order.price].index(order)]
+		oidx = tree[order.price].index(order)
+
+		tree[order.price][oidx] = Order(oid, side, order.price, newsize)
+		self.ordersById[order.oid] = tree[order.price][oidx]
 
 		if self.debug:
 			pprint('changed (%s, %s, $ %0.2f, %0.2f BTC)' % (oid, side, order.price, newsize))
