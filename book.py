@@ -136,7 +136,7 @@ class Book(BlobClient):
 			size += order.size
 		return (price, size)
 
-	def getMidPrice(self):
+	def getMid(self):
 		return 0.5 * (self.getBestBidPrice() + self.getBestAskPrice())
 
 	def getVWAP(self, target):
