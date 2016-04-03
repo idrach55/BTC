@@ -9,7 +9,7 @@ from book import Book, BookClient
 import sys
 
 
-class TestBook(BookClient):
+class MidPointMonitor(BookClient):
 	def onOpen(self):
 		pass
 
@@ -38,9 +38,9 @@ if __name__ == '__main__':
 
     factory.protocol = BlobProtocol
 
-    tb = TestBook()
+    mm = MidPointMonitor()
     bb = Book(factory.protocol, debug=False)
-    bb.addClient(tb)
+    bb.addClient(mm)
 
     connectWS(factory)
     reactor.run()
