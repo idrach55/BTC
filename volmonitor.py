@@ -18,9 +18,6 @@ class VolMonitor(BookClient):
 		self.delta = delta
 		self.series = pandas.Series()
 
-	def onOpen(self):
-		pass
-
 	def add(self, oid, side, price, size):
 		self.update()
 
