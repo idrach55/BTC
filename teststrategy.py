@@ -11,10 +11,16 @@ class LazyRESTProtcol:
 
 class DummyRESTProtocol:
 	def __init__(self):
-		self.count = 0
+		self.asks = 0
+		self.bids = 0
 
 	def request(self, params):
-		return True, "A%d" % self.count
+		if params["side"] == "buy":
+			self.bids += 1
+			return True, "B%d" % self.bids
+		else:
+			self.asks += 1
+			return True, "A%d" % self.asks
 
 class MyTest(unittest.TestCase):
 	def test_onPlaceFail(self):
@@ -28,25 +34,40 @@ class MyTest(unittest.TestCase):
 		class Demo(Strategy):
 			def onPlace(self, oid, side, price, size):
 				Strategy.onPlace(self, oid, side, price, size)
-				assert oid == "A0"
-				assert self.openOrders.get("A0") == Order("A0", "buy", 100.00, 1.0)
+				assert oid == "B1"
+				assert self.openOrders.get("B1") == Order("B1", "buy", 100.00, 1.0)
 		strat = Demo(DummyRESTProtocol())
 		strat.bid(1.0, 100.00)
 
 	def test_onCompleteFill(self):
 		class Demo(Strategy):
 			def onCompleteFill(self, order):
-				assert order.oid == "A0"
-				assert self.openOrders.get("A0") is None
+				assert order.oid == "B1"
+				assert self.openOrders.get("B1") is None
 		strat = Demo(DummyRESTProtocol())
 		strat.bid(1.0, 100.00)
-		strat.match("A0", "buy", 100.00, 1.0)
+		strat.match("B1", "buy", 100.00, 1.0)
 
 	def test_onPartialFill(self):
 		class Demo(Strategy):
 			def onPartialFill(self, order, remaining):
-				assert order.oid == "A0"
+				assert order.oid == "B1"
 				assert remaining == 0.5
 		strat = Demo(DummyRESTProtocol())
 		strat.bid(1.0, 100.00)
-		strat.match("A0", "buy", 100.00, 0.5)
+		strat.match("B1", "buy", 100.00, 0.5)
+
+	def test_getOpenSize(self):
+		class Demo(Strategy):
+			def onPlace(self, oid, side, price, size):
+				Strategy.onPlace(self, oid, side, price, size)
+				if oid == "B1":
+					assert self.getOpenSize() == (1.0, 0.0)
+				elif oid == "B2":
+					assert self.getOpenSize() == (1.5, 0.0)
+				elif oid == "A1":
+					assert self.getOpenSize() == (1.5, 0.5)
+		strat = Demo(DummyRESTProtocol())
+		strat.bid(1.0, 100.00)
+		strat.bid(0.5, 101.00)
+		strat.ask(0.5, 102.00)

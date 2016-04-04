@@ -1,3 +1,4 @@
+
 from book import Book, Order
 
 import unittest
@@ -11,7 +12,7 @@ class MyTest(unittest.TestCase):
 	def test_add(self):
 		book = Book(DummyBlobProtocol())
 
-		# Create following book
+		# Create following book.
 		'''
 		A 1.0 - 100.00 | 100.10 - 0.75 C
 		B 0.5 -  99.50 | 101.00 - 0.5  D
@@ -21,7 +22,7 @@ class MyTest(unittest.TestCase):
 		book.add("C", "sell", 100.10, 0.75)
 		book.add("D", "sell", 101.00, 0.5)
 
-		# Get orders and assert
+		# Get orders and assert.
 		bids = [bid for bid in book.bids.items()]
 		asks = [ask for ask in book.asks.items()]
 
@@ -33,7 +34,7 @@ class MyTest(unittest.TestCase):
 	def test_change(self):
 		book = Book(DummyBlobProtocol())
 
-		# Create following book
+		# Create following book.
 		'''
 		A 1.0 - 100.00 | 100.10 - 0.75 C
 		B 0.5 -  99.50 | 101.00 - 0.5  D
@@ -43,7 +44,7 @@ class MyTest(unittest.TestCase):
 		book.add("C", "sell", 100.10, 0.75)
 		book.add("D", "sell", 101.00, 0.5)
 
-		# Halve the size of order D
+		# Halve the size of order D.
 		'''
 		A 1.0 - 100.00 | 100.10 - 0.75 C
 		B 0.5 -  99.50 | 101.00 - 0.25 D

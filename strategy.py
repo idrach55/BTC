@@ -50,8 +50,8 @@ class Authorizer(AuthBase):
         return request
 
 class Strategy(BookClient):
-	def __init__(self, REST):
-		self.REST = REST
+	def __init__(self, rest):
+		self.rest = rest
 		self.openOrders = {}
 
 	# BookClient methods.
@@ -95,6 +95,16 @@ class Strategy(BookClient):
 	def onCompleteFill(self, order):
 		pass
 
+	def getOpenSize(self):
+		bidSize = 0.0
+		askSize = 0.0
+		for order in self.openOrders.values():
+			if order.side == "buy":
+				bidSize += order.size
+			elif order.side == "sell":
+				askSize += order.size
+		return bidSize, askSize
+
 	# Submit trade.
 	def trade(self, size, side, price=None, otype="limit", product_id="BTC-USD", post_only=True):
 		if otype == "limit" and not price:
@@ -111,7 +121,7 @@ class Strategy(BookClient):
 			params["post_only"] = True
 
 		# Send request.
-		success, res = self.REST.request(params)
+		success, res = self.rest.request(params)
 		if success == True: 
 			self.onPlace(res, side, price, size)
 		else: 
