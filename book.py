@@ -117,26 +117,36 @@ class Book(BlobClient):
 
 	# Get functionality.
 	def getBestBidPrice(self):
+		if len(self.bids) == 0:
+			return None
 		return self._getOrderTree("buy").max_item()[0]
 
 	def getBestAskPrice(self):
+		if len(self.asks) == 0:
+			return None
 		return self._getOrderTree("sell").min_item()[0]
 
 	def getBestBidQuote(self):
+		if len(self.bids) == 0:
+			return None, None
 		price, orders = self._getOrderTree("buy").max_item()
 		size = 0.0
 		for order in orders:
 			size += order.size
-		return (price, size)
+		return price, size
 
 	def getBestAskQuote(self):
+		if len(self.asks) == 0:
+			return None
 		price, orders = self._getOrderTree("sell").min_item()
 		size = 0.0
 		for order in orders:
 			size += order.size
-		return (price, size)
+		return price, size
 
 	def getMid(self):
+		if len(self.bids) == 0 or len(self.asks) == 0:
+			return None
 		return 0.5 * (self.getBestBidPrice() + self.getBestAskPrice())
 
 	def getVWAP(self, target):
