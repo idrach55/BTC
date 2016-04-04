@@ -4,6 +4,7 @@
 
 from requests.auth import AuthBase
 from book import BookClient, Order
+from pprint import pprint
 
 import hashlib
 import time
@@ -12,7 +13,7 @@ import hmac
 
 
 # Read authorization keys from file.
-def read_keys(filename):
+def readKeys(filename):
 	with open(filename, "r") as f:
 		return f.read().split("\n")
 
