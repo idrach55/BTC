@@ -32,3 +32,21 @@ class MyTest(unittest.TestCase):
 				assert self.openOrders.get("A0") == Order("A0", "buy", 100.00, 1.0)
 		strat = Demo(DummyRESTProtocol())
 		strat.bid(1.0, 100.00)
+
+	def test_onCompleteFill(self):
+		class Demo(Strategy):
+			def onCompleteFill(self, order):
+				assert order.oid == "A0"
+				assert self.openOrders.get("A0") is None
+		strat = Demo(DummyRESTProtocol())
+		strat.bid(1.0, 100.00)
+		strat.match("A0", "buy", 100.00, 1.0)
+
+	def test_onPartialFill(self):
+		class Demo(Strategy):
+			def onPartialFill(self, order, remaining):
+				assert order.oid == "A0"
+				assert remaining == 0.5
+		strat = Demo(DummyRESTProtocol())
+		strat.bid(1.0, 100.00)
+		strat.match("A0", "buy", 100.00, 0.5)

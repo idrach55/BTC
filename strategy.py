@@ -65,7 +65,7 @@ class Strategy(BookClient):
 		# Look for our fills here!
 		order = self.openOrders.get(oid)
 		if order is not None:
-			remaining = orde.size - size
+			remaining = order.size - size
 			if remaining <= 0:
 				del self.openOrders[oid]
 				self.onCompleteFill(order)
