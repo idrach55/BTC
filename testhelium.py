@@ -12,7 +12,7 @@ class MyTest(unittest.TestCase):
 	def test_update_bids(self):
 		class Demo(Helium):
 			def __init__(self, rest):
-				Helium.__init__(self, rest, spreadFactor=1.0, tradeSize=1.0)
+				Helium.__init__(self, rest, spread=0.10, tradeSize=1.0)
 
 			def onPlace(self, oid, side, price, size):
 				assert oid  == "B1"
@@ -45,7 +45,7 @@ class MyTest(unittest.TestCase):
 	def test_onPartialFill(self):
 		class Demo(Helium):
 			def __init__(self, rest):
-				Helium.__init__(self, rest, spreadFactor=1.0, tradeSize=1.0)
+				Helium.__init__(self, rest, spread=0.10, tradeSize=1.0)
 				self.waitingForAsk = False
 
 			def onPlace(self, oid, side, price, size):
@@ -87,7 +87,7 @@ class MyTest(unittest.TestCase):
 	def test_onCompleteFill(self):
 		class Demo(Helium):
 			def __init__(self, rest):
-				Helium.__init__(self, rest, spreadFactor=1.0, tradeSize=1.0)
+				Helium.__init__(self, rest, spread=0.10, tradeSize=1.0)
 				self.waitingForAsk = False
 
 			def onPlace(self, oid, side, price, size):

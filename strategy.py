@@ -64,7 +64,9 @@ class Strategy(BookClient):
 
 	# BookClient methods.
 	def add(self, oid, side, price, size):
-		self.update()
+		# Don't pass on adds since they come through on book setup.
+		# self.update()
+		pass
 
 	def change(self, oid, side, newsize):
 		self.update()
@@ -73,6 +75,8 @@ class Strategy(BookClient):
 		# Look for our fills here!
 		order = self.openOrders.get(oid)
 		if order is not None:
+			if self.debug:
+				pprint("match on our order: %s" % oid)
 			remaining = order.size - size
 			if remaining <= 0:
 				del self.openOrders[oid]
@@ -92,7 +96,7 @@ class Strategy(BookClient):
 
 	def onPlace(self, oid, side, price, size):
 		if self.debug:
-			pprint('trade confirmed')
+			pprint('trade confirmed: %s' % oid)
 		order = Order(oid, side, price, size)
 		self.openOrders[oid] = order
 
