@@ -43,14 +43,16 @@ class Helium(Strategy):
 	def onPartialFill(self, order, remaining):
 		Strategy.onPartialFill(self, order, remaining)
 
-		price = order.price + self.spread
-		self.ask(self.tradeSize - remaining, price)
+		if order.side == "buy":
+			price = order.price + self.spread
+			self.ask(self.tradeSize - remaining, price)
 
 	def onCompleteFill(self, order):
 		Strategy.onCompleteFill(self, order)
 
-		price = order.price + self.spread
-		self.ask(self.tradeSize, price)
+		if order.side == "buy":
+			price = order.price + self.spread
+			self.ask(self.tradeSize, price)
 
 
 if __name__ == '__main__':

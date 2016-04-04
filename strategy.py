@@ -12,6 +12,7 @@ import json
 import hmac
 import base64
 import requests
+import math
 import codecs
 
 
@@ -27,7 +28,7 @@ class RESTProtocol:
 
 	def request(self, params):
 		if self.debug:
-			pprint("submitted trade: %s" % str(params))
+			pprint('trade: %s' % str(params))
 		r = requests.post("https://api.exchange.coinbase.com/orders", json=params, auth=self.auth)
 		if r.status_code == 200:
 			return True, r.json()["id"]
@@ -75,8 +76,6 @@ class Strategy(BookClient):
 		# Look for our fills here!
 		order = self.openOrders.get(oid)
 		if order is not None:
-			if self.debug:
-				pprint("match on our order: %s" % oid)
 			remaining = order.size - size
 			if remaining <= 0:
 				del self.openOrders[oid]
@@ -96,13 +95,13 @@ class Strategy(BookClient):
 
 	def onPlace(self, oid, side, price, size):
 		if self.debug:
-			pprint('trade confirmed: %s' % oid)
+			pprint('onPlace: %s' % oid)
 		order = Order(oid, side, price, size)
 		self.openOrders[oid] = order
 
 	def onPlaceFail(self, reason):
 		if self.debug:
-			pprint('trade rejected: %s' % reason)
+			pprint('onPlaceFail: %s' % reason)
 
 	def onPartialFill(self, order, remaining):
 		if self.debug:
@@ -145,7 +144,9 @@ class Strategy(BookClient):
 			self.onPlaceFail(res)
 
 	def ask(self, size, price):
-		self.trade(size, "sell", price=round(price, 2))
+		price = math.ceil(100 * price) / 100.
+		self.trade(size, "sell", price=price)
 
 	def bid(self, size, price):
-		self.trade(size, "buy", price=round(price, 2))
+		price = math.floor(100 * price) / 100.
+		self.trade(size, "buy", price=price)
