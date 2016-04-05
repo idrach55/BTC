@@ -24,7 +24,7 @@ class Helium(Strategy):
 	def update(self):
 		if not self.enabled:
 			return
-			
+
 		mid = self.book.getMid()
 		# Not enough on book to get mid.
 		if mid is None:
@@ -77,5 +77,5 @@ if __name__ == '__main__':
 
     connectWS(factory)
 
-    reactor.callLater(1.0, hh.enable)
+    reactor.callLater(5.0, hh.enable)
     reactor.run()
