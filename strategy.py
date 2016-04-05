@@ -61,13 +61,17 @@ class Strategy(BookClient):
 	def __init__(self, rest, debug=False):
 		self.rest = rest
 		self.debug = debug
+
+		self.enabled = True
 		self.openOrders = {}
+
+	# Makes strategy wait while book is primed.
+	def enable(self):
+		self.enabled = True
 
 	# BookClient methods.
 	def add(self, oid, side, price, size):
-		# Don't pass on adds since they come through on book setup.
-		# self.update()
-		pass
+		self.update()
 
 	def change(self, oid, side, newsize):
 		self.update()
@@ -91,7 +95,8 @@ class Strategy(BookClient):
 
 	# Main update loop.
 	def update(self):
-		pass
+		if not self.enabled:
+			return
 
 	def onPlace(self, oid, side, price, size):
 		if self.debug:

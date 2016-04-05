@@ -22,6 +22,9 @@ class Helium(Strategy):
 
 	# Main update loop.
 	def update(self):
+		if not self.enabled:
+			return
+			
 		mid = self.book.getMid()
 		# Not enough on book to get mid.
 		if mid is None:
@@ -67,8 +70,12 @@ if __name__ == '__main__':
     tradeSize = float(sys.argv[2])
 
     hh = Helium(rest, spread=spread, tradeSize=tradeSize, debug=True)
+    hh.enabled = False
+
     bb = Book(factory.protocol, debug=False)
     bb.addClient(hh)
 
     connectWS(factory)
+
+    reactor.callLater(1.0, hh.enable)
     reactor.run()
