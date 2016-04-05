@@ -110,7 +110,9 @@ class Strategy(BookClient):
 		if not self.enabled:
 			return
 
-	def lockdown(self):
+	def lockdown(self, reason):
+		if self.debug:
+			pprint("lockdown: %s" % reason)
 		success = self.rest.submitCancelAll()
 		self.disable()
 
