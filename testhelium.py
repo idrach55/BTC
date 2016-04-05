@@ -6,13 +6,23 @@ import pytest
 
 from testbook import DummyBlobProtocol
 from teststrategy import DummyRESTProtocol
-from params import params
+
+
+params = {
+	"debug" 		 : False
+	"dumpOnLockdown" : True,
+	"maxDistance" 	 : 2.00, 
+	"spread" 		 : 0.10, 
+	"tradeSize" 	 : 1.0, 
+	"volThresh" 	 : 2.75,
+}
+
 
 class MyTest(unittest.TestCase):
 	def test_update_bids(self):
 		class Demo(Helium):
 			def __init__(self, rest):
-				Helium.__init__(self, rest, params)
+				Helium.__init__(self, rest, testParams)
 
 			def onPlace(self, oid, side, price, size):
 				assert oid  == "B1"
@@ -45,7 +55,7 @@ class MyTest(unittest.TestCase):
 	def test_onPartialFill(self):
 		class Demo(Helium):
 			def __init__(self, rest):
-				Helium.__init__(self, rest, params)
+				Helium.__init__(self, rest, testParams)
 				self.waitingForAsk = False
 
 			def onPlace(self, oid, side, price, size):
@@ -88,7 +98,7 @@ class MyTest(unittest.TestCase):
 	def test_onCompleteFill(self):
 		class Demo(Helium):
 			def __init__(self, rest):
-				Helium.__init__(self, rest, params)
+				Helium.__init__(self, rest, testParams)
 				self.waitingForAsk = False
 
 			def onPlace(self, oid, side, price, size):
@@ -134,6 +144,9 @@ class MyTest(unittest.TestCase):
 				return 50.00
 
 		class Demo(Helium):
+			def __init__(self, rest):
+				Helium.__init__(self, rest, testParams)
+
 			def lockdown(self, reason):
 				assert reason == "excessive volatility"
 
@@ -162,11 +175,10 @@ class MyTest(unittest.TestCase):
 		book.change("D", "sell", 1.0)
 
 	def test_lockdownOnMaxDistance(self):
-		class DemoVolMonitor:
-			def getHourlyVolatility(self):
-				return 0.10
-
 		class Demo(Helium):
+			def __init__(self, rest):
+				Helium.__init__(self, rest, testParams)
+
 			def lockdown(self, reason):
 				assert reason == "max distance exceeded"
 
@@ -187,7 +199,6 @@ class MyTest(unittest.TestCase):
 		book.add("D", "sell", 101.00, 0.5)
 
 		strat = Demo(DummyRESTProtocol())
-		strat.volmonitor = DemoVolMonitor()
 		book.addClient(strat)
 
 		# Update the book to trigger update().
@@ -213,6 +224,3 @@ class MyTest(unittest.TestCase):
 		book.done("B")
 		book.done("C")
 		book.done("D") 
-
-		print("%0.2f"%book.getMid())
-		assert 1 == 0

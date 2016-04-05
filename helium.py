@@ -11,20 +11,21 @@ import math
 import scipy.stats
 
 from blobprotocol import BlobProtocol
+from volmonitor import VolMonitor
 from book import Book
 from strategy import RESTProtocol, Strategy, readKeys
 from params import params
 
 
 class Helium(Strategy):
-	def __init__(self, rest, params=params):
+	def __init__(self, rest, params):
 		Strategy.__init__(self, rest, debug=params["debug"])
 
 		self.spread = params["spread"]
 		self.tradeSize = params["tradeSize"]
+		self.dumpOnLockdown = params["dumpOnLockdown"]
 		self.volThresh = params["volThresh"]
-		self.maxRevertTime = params["maxRevertTime"]
-		self.minRevertProb = params["minRevertProb"]
+		self.maxDistance = params["maxDistance"]
 
 		self.volmonitor = None
 		self.previousMid = None
@@ -35,9 +36,9 @@ class Helium(Strategy):
 			return
 
 		mid = self.book.getMid()
-		# Not enough on book to get mid.
-		if mid is None:
-			return
+		## Not enough on book to get mid.
+		#if mid is None:
+		#	return
 		# If no change in midpoint, skip.
 		if self.previousMid is not None and self.previousMid == mid:
 			return
@@ -46,6 +47,12 @@ class Helium(Strategy):
 			price = mid - self.spread/2.
 			self.bid(self.tradeSize, price)
 
+		# If outstanding asks are too far from mid, lockdown.
+		if askSize > 0.0:
+			price = list(self.openOrders.values())[0].price
+			if price - mid > self.maxDistance:
+				self.lockdown("max distance exceeded")
+
 		# Check for excessive volatility and lockdown if need be.
 		if self.volmonitor is None:
 			return
@@ -53,22 +60,6 @@ class Helium(Strategy):
 		vol = self.volmonitor.getHourlyVolatility()
 		if vol >= self.volThresh:
 			self.lockdown("excessive volatility")
-
-		# If outstanding asks are too far from mid, lockdown.
-		if askSize > 0.0:
-			price = list(self.openOrders.values())[0].price
-			# Compute probability of reaching ask within a certain time given where mid is now.
-			# Assumes dS = (sigma)dW.
-			# sigma is hourly as estimated by volmonitor
-			p = 1. - scipy.stats.norm.cdf((price - mid)/(math.sqrt(self.maxRevertTime/3600.)*vol))
-			if self.debug:
-				pprint("reversion prob is %0.1f%%" % (100. * p))
-			if p < self.minRevertProb:
-				# Ditch positions...
-				#for order in self.openOrders.values():
-				#	if order.side == "sell":
-				#		self.trade(order.size, order.side, type="market")
-				self.lockdown("max distance exceeded")
 
 	def lockdown(self, reason):
 		Strategy.lockdown(self, reason)
@@ -107,7 +98,7 @@ if __name__ == '__main__':
     hh = Helium(rest, params=params)
     hh.enabled = False
 
-    vm = Volmonitor(1.0)
+    vm = VolMonitor(1.0)
     hh.volmonitor = vm
 
     bb = Book(factory.protocol, debug=False)

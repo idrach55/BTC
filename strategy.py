@@ -70,6 +70,7 @@ class Strategy(BookClient):
 	def __init__(self, rest, debug=False):
 		self.rest = rest
 		self.debug = debug
+		self.dumpOnLockdown = False
 
 		self.enabled = True
 		self.openOrders = {}
@@ -110,10 +111,18 @@ class Strategy(BookClient):
 		if not self.enabled:
 			return
 
+	def dumpBTC(self):
+		bidSize, askSize = self.getOpenSize()
+		success = self.rest.submitCancelAll()
+		self.trade(askSize, "sell", otype="market")
+
 	def lockdown(self, reason):
 		if self.debug:
 			pprint("lockdown: %s" % reason)
-		success = self.rest.submitCancelAll()
+		if self.dumpOnLockdown:
+			self.dumpBTC()
+		else:
+			success = self.rest.submitCancelAll()
 		self.disable()
 
 	def onPlace(self, oid, side, price, size):
@@ -159,9 +168,10 @@ class Strategy(BookClient):
 		if otype == "limit":
 			params["post_only"] = True
 
-		# Send request.
+		# Send request. There's no need to trigger onPlace for market orders
+		# since they will only occur with lockdown.
 		success, res = self.rest.submitTrade(params)
-		if success: 
+		if success and otype == "limit": 
 			self.onPlace(res, side, price, size)
 		else: 
 			self.onPlaceFail(res)

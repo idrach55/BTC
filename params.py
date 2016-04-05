@@ -1,8 +1,8 @@
 params = {
-	"spread" : 0.10, 
-	"tradeSize" : 1.0, 
-	"volThresh" : 2.75, 
-	"maxRevertTime" : 120.0,
-	"minRevertProb" : 0.10,
-	"debug" : False
+	"debug" 		 : True
+	"dumpOnLockdown" : False,
+	"maxDistance" 	 : 2.00, 
+	"spread" 		 : 0.10, 
+	"tradeSize" 	 : 0.5, 
+	"volThresh" 	 : 2.75,
 }
