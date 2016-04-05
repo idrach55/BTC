@@ -93,7 +93,7 @@ class Strategy(BookClient):
 		order = self.openOrders.get(oid)
 		if order is not None:
 			remaining = order.size - size
-			if remaining <= 0:
+			if remaining <= 0.00000001:
 				del self.openOrders[oid]
 				self.onCompleteFill(order)
 			else:
@@ -113,7 +113,7 @@ class Strategy(BookClient):
 	def lockdown(self):
 		success = self.rest.submitCancelAll()
 		self.disable()
-		
+
 	def onPlace(self, oid, side, price, size):
 		if self.debug:
 			pprint('onPlace: %s' % oid)

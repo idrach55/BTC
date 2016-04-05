@@ -1,0 +1,4 @@
+autobahn>=0.13.0
+twisted>=16.0.0
+pandas>=0.18.0
+requests>=2.9.1
