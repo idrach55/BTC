@@ -6,7 +6,7 @@ import pytest
 
 
 class LazyRESTProtcol:
-	def request(self, params):
+	def submitTrade(self, params):
 		return False, "did not feel like it"
 
 class DummyRESTProtocol:
@@ -14,13 +14,18 @@ class DummyRESTProtocol:
 		self.asks = 0
 		self.bids = 0
 
-	def request(self, params):
+	def submitTrade(self, params):
+		oid = None
 		if params["side"] == "buy":
 			self.bids += 1
-			return True, "B%d" % self.bids
+			oid = "B%d" % self.bids
 		else:
 			self.asks += 1
-			return True, "A%d" % self.asks
+			oid = "A%d" % self.asks
+		return True, oid
+
+	def submitCancelAll(self):
+		return True, None
 
 class MyTest(unittest.TestCase):
 	def test_onPlaceFail(self):

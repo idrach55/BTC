@@ -37,6 +37,9 @@ class Helium(Strategy):
 			price = mid - self.spread/2.
 			self.bid(self.tradeSize, price)
 
+	def lockdown(self):
+		Strategy.lockdown(self)
+
 	def onPlace(self, oid, side, price, size):
 		Strategy.onPlace(self, oid, side, price, size)
 
@@ -61,7 +64,6 @@ class Helium(Strategy):
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
     factory = WebSocketClientFactory('wss://ws-feed.exchange.coinbase.com')
-
     factory.protocol = BlobProtocol
 
     rest = RESTProtocol(readKeys('keys.txt'), debug=True)

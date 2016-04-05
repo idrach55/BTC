@@ -16,7 +16,8 @@ import pandas
 # Namely, if dS = (sigma)dW, then this estimates sigma.
 class VolMonitor(BookClient):
 	def __init__(self, delta, debug=False):
-		self.delta = 1.0
+		self.delta = delta
+		self.debug = debug
 		self.mids = []
 
 	def add(self, oid, side, price, size):
@@ -32,23 +33,22 @@ class VolMonitor(BookClient):
 		pass
 		
 	def generateStamp(self):
-		mid = self.book.getMidPrice()
+		mid = self.book.getMid()
 		self.mids.append(mid)
-		if debug:
-			pprint('volatility: %0.1f%%' % self.getHourlyVolatility())
+		if self.debug:
+			pprint('volatility: %0.4f' % self.getHourlyVolatility())
 		reactor.callLater(self.delta, self.generateStamp)
 
 	def getHourlyVolatility(self):
 		series = pandas.Series(self.mids)
-		return sqrt(3600. / self.delta)*(series - series.shift(1)).std()
+		return math.sqrt(3600. / self.delta)*(series - series.shift(1)).std()
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
     factory = WebSocketClientFactory('wss://ws-feed.exchange.coinbase.com')
-
     factory.protocol = BlobProtocol
 
-    vm = VolMonitor(1.0)
+    vm = VolMonitor(1.0, debug=True)
     bb = Book(factory.protocol, debug=False)
     bb.addClient(vm)
 

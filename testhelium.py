@@ -50,6 +50,7 @@ class MyTest(unittest.TestCase):
 
 			def onPlace(self, oid, side, price, size):
 				Helium.onPlace(self, oid, side, price, size)
+				self.book.add(oid, side, price, size)
 				if self.waitingForAsk:
 					assert oid == "A1"
 					assert side == "sell"
@@ -92,6 +93,7 @@ class MyTest(unittest.TestCase):
 
 			def onPlace(self, oid, side, price, size):
 				Helium.onPlace(self, oid, side, price, size)
+				self.book.add(oid, side, price, size)
 				if self.waitingForAsk:
 					assert oid == "A1"
 					assert side == "sell"

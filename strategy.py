@@ -26,12 +26,21 @@ class RESTProtocol:
 		self.auth = Authorizer(keys)
 		self.debug = debug
 
-	def request(self, params):
+	def submitTrade(self, params):
 		if self.debug:
 			pprint('trade: %s' % str(params))
 		r = requests.post("https://api.exchange.coinbase.com/orders", json=params, auth=self.auth)
 		if r.status_code == 200:
 			return True, r.json()["id"]
+		else:
+			return False, r.json()["message"]
+
+	def submitCancelAll(self):
+		if self.debug:
+			pprint('cancelling all orders')
+		r = requests.delete("https://api.exchange.coinbase.com/orders", auth=self.auth)
+		if r.status_code == 200:
+			return True, None
 		else:
 			return False, r.json()["message"]
 
@@ -69,6 +78,9 @@ class Strategy(BookClient):
 	def enable(self):
 		self.enabled = True
 
+	def disable(self):
+		self.enabled = False
+
 	# BookClient methods.
 	def add(self, oid, side, price, size):
 		self.update()
@@ -98,6 +110,10 @@ class Strategy(BookClient):
 		if not self.enabled:
 			return
 
+	def lockdown(self):
+		success = self.rest.submitCancelAll()
+		self.disable()
+		
 	def onPlace(self, oid, side, price, size):
 		if self.debug:
 			pprint('onPlace: %s' % oid)
@@ -142,7 +158,7 @@ class Strategy(BookClient):
 			params["post_only"] = True
 
 		# Send request.
-		success, res = self.rest.request(params)
+		success, res = self.rest.submitTrade(params)
 		if success: 
 			self.onPlace(res, side, price, size)
 		else: 

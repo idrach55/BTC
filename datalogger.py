@@ -60,7 +60,6 @@ class DataLogger(BookClient):
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
     factory = WebSocketClientFactory('wss://ws-feed.exchange.coinbase.com')
-
     factory.protocol = BlobProtocol
 
     delta = float(sys.argv[1])
