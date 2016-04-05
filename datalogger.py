@@ -35,9 +35,6 @@ class DataLogger(BookClient):
 	def done(self, oid):
 		pass
 
-	def update(self):
-		pass
-
 	def generateStamp(self):
 		stamp = time.time()
 		ask = self.book.getBestAskPrice()

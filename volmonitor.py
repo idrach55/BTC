@@ -12,42 +12,35 @@ import time
 import pandas
 
 
+# This records the std. deviation of the midpoint change every delta seconds.  
+# Namely, if dS = (sigma)dW, then this estimates sigma.
 class VolMonitor(BookClient):
-	# Setup a volatility monitor which records the midpoint every `dt` seconds.
 	def __init__(self, delta, debug=False):
-		self.delta = delta
-		self.series = pandas.Series()
+		self.delta = 1.0
+		self.mids = []
 
 	def add(self, oid, side, price, size):
-		self.update()
+		pass
 
 	def change(self, oid, side, newsize):
-		self.update()
+		pass
 
 	def match(self, oid, side, price, size):
-		self.update()
+		pass
 
 	def done(self, oid):
-		self.update()
-
-	# Update from book messages and record midpoint if necessary.
-	def update(self):
-		if len(self.book.bids) == 0 or len(self.book.asks) == 0:
-			return
-
-		stamp = time.time()
+		pass
+		
+	def generateStamp(self):
 		mid = self.book.getMidPrice()
-		if len(self.series) > 0 and stamp - self.series.index[-1] < self.delta:
-			return
-		self.series = self.series.append(pandas.Series({stamp: mid}))
-
-		# Print the hourly volatility based on these samples.
+		self.mids.append(mid)
 		if debug:
-			pprint('volatility: %0.1f%%' % (100. * self.getVolatility()))
+			pprint('volatility: %0.1f%%' % self.getHourlyVolatility())
+		reactor.callLater(self.delta, self.generateStamp)
 
 	def getHourlyVolatility(self):
-		return math.sqrt(3600. / self.delta) * self.series.pct_change()[1:].std()
-		
+		series = pandas.Series(self.mids)
+		return sqrt(3600. / self.delta)*(series - series.shift(1)).std()
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
@@ -60,4 +53,6 @@ if __name__ == '__main__':
     bb.addClient(vm)
 
     connectWS(factory)
+
+    reactor.callLater(1.0, vm.generateStamp)
     reactor.run()
