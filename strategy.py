@@ -74,6 +74,7 @@ class Strategy(BookClient):
 
 		self.enabled = True
 		self.openOrders = {}
+		self.position = 0.
 
 	# Makes strategy wait while book is primed.
 	def enable(self):
@@ -112,24 +113,28 @@ class Strategy(BookClient):
 			return
 
 	def dumpBTC(self):
-		bidSize, askSize = self.getOpenSize()
-		success = self.rest.submitCancelAll()
-		self.trade(askSize, "sell", otype="market")
+		self.trade(self.position, "sell", otype="market")
 
 	def lockdown(self, reason):
 		if self.debug:
 			pprint("lockdown: %s" % reason)
+
+		success = self.rest.submitCancelAll()
 		if self.dumpOnLockdown:
 			self.dumpBTC()
-		else:
-			success = self.rest.submitCancelAll()
 		self.disable()
 
-	def onPlace(self, oid, side, price, size):
+	def onPlace(self, oid, side, price, size, otype):
 		if self.debug:
 			pprint('onPlace: %s' % oid)
-		order = Order(oid, side, price, size)
-		self.openOrders[oid] = order
+
+		if otype == "limit":
+			order = Order(oid, side, price, size)
+			self.openOrders[oid] = order
+		elif otype == "market" and side == "buy":
+			self.position += size
+		elif otype == "market" and side == "sell":
+			self.position -= size
 
 	def onPlaceFail(self, reason):
 		if self.debug:
@@ -139,9 +144,19 @@ class Strategy(BookClient):
 		if self.debug:
 			pprint('onPartialFill: %s, with %0.4f remaining' % (str(order), remaining))
 
+		if order.side == "buy":
+			self.position += order.size - remaining
+		else:
+			self.position -= order.size - remaining
+
 	def onCompleteFill(self, order):
 		if self.debug:
 			pprint('onCompleteFill: %s' % (str(order)))
+
+		if order.side == "buy":
+			self.position += order.size
+		else:
+			self.position -= order.size
 
 	def getOpenSize(self):
 		bidSize = 0.0
@@ -171,8 +186,8 @@ class Strategy(BookClient):
 		# Send request. There's no need to trigger onPlace for market orders
 		# since they will only occur with lockdown.
 		success, res = self.rest.submitTrade(params)
-		if success and otype == "limit": 
-			self.onPlace(res, side, price, size)
+		if success: 
+			self.onPlace(res, side, price, size, otype)
 		else: 
 			self.onPlaceFail(res)
 

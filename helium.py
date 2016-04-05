@@ -64,8 +64,8 @@ class Helium(Strategy):
 	def lockdown(self, reason):
 		Strategy.lockdown(self, reason)
 
-	def onPlace(self, oid, side, price, size):
-		Strategy.onPlace(self, oid, side, price, size)
+	def onPlace(self, oid, side, price, size, otype):
+		Strategy.onPlace(self, oid, side, price, size, otype)
 
 	def onPlaceFail(self, reason):
 		Strategy.onPlaceFail(self, reason)

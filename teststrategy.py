@@ -37,8 +37,8 @@ class MyTest(unittest.TestCase):
 
 	def test_onPlace(self):
 		class Demo(Strategy):
-			def onPlace(self, oid, side, price, size):
-				Strategy.onPlace(self, oid, side, price, size)
+			def onPlace(self, oid, side, price, size, otype):
+				Strategy.onPlace(self, oid, side, price, size, otype)
 				assert oid == "B1"
 				assert self.openOrders.get("B1") == Order("B1", "buy", 100.00, 1.0)
 		strat = Demo(DummyRESTProtocol())
@@ -64,8 +64,8 @@ class MyTest(unittest.TestCase):
 
 	def test_getOpenSize(self):
 		class Demo(Strategy):
-			def onPlace(self, oid, side, price, size):
-				Strategy.onPlace(self, oid, side, price, size)
+			def onPlace(self, oid, side, price, size, otype):
+				Strategy.onPlace(self, oid, side, price, size, otype)
 				if oid == "B1":
 					assert self.getOpenSize() == (1.0, 0.0)
 				elif oid == "B2":
@@ -76,3 +76,14 @@ class MyTest(unittest.TestCase):
 		strat.bid(1.0, 100.00)
 		strat.bid(0.5, 101.00)
 		strat.ask(0.5, 102.00)
+
+	def test_dumpOnLockdown(self):
+		class Demo(Strategy):
+			def onPlace(self, oid, side, price, size, otype):
+				Strategy.onPlace(self, oid, side, price, size, otype)
+				assert otype == "market"
+				assert size == 1.0
+		strat = Demo(DummyRESTProtocol())
+		strat.dumpOnLockdown = True
+		strat.position = 1.0
+		strat.lockdown("no reason")

@@ -8,15 +8,14 @@ from testbook import DummyBlobProtocol
 from teststrategy import DummyRESTProtocol
 
 
-params = {
-	"debug" 		 : False
+testParams = {
+	"debug" 		 : False,
 	"dumpOnLockdown" : True,
 	"maxDistance" 	 : 2.00, 
 	"spread" 		 : 0.10, 
 	"tradeSize" 	 : 1.0, 
-	"volThresh" 	 : 2.75,
+	"volThresh" 	 : 1.75
 }
-
 
 class MyTest(unittest.TestCase):
 	def test_update_bids(self):
@@ -24,7 +23,7 @@ class MyTest(unittest.TestCase):
 			def __init__(self, rest):
 				Helium.__init__(self, rest, testParams)
 
-			def onPlace(self, oid, side, price, size):
+			def onPlace(self, oid, side, price, size, otype):
 				assert oid  == "B1"
 				assert side == "buy"
 				assert price == 100.00
@@ -58,8 +57,8 @@ class MyTest(unittest.TestCase):
 				Helium.__init__(self, rest, testParams)
 				self.waitingForAsk = False
 
-			def onPlace(self, oid, side, price, size):
-				Helium.onPlace(self, oid, side, price, size)
+			def onPlace(self, oid, side, price, size, otype):
+				Helium.onPlace(self, oid, side, price, size, otype)
 				self.book.add(oid, side, price, size)
 				if self.waitingForAsk:
 					assert oid == "A1"
@@ -101,8 +100,8 @@ class MyTest(unittest.TestCase):
 				Helium.__init__(self, rest, testParams)
 				self.waitingForAsk = False
 
-			def onPlace(self, oid, side, price, size):
-				Helium.onPlace(self, oid, side, price, size)
+			def onPlace(self, oid, side, price, size, otype):
+				Helium.onPlace(self, oid, side, price, size, otype)
 				self.book.add(oid, side, price, size)
 				if self.waitingForAsk:
 					assert oid == "A1"
@@ -182,8 +181,8 @@ class MyTest(unittest.TestCase):
 			def lockdown(self, reason):
 				assert reason == "max distance exceeded"
 
-			def onPlace(self, oid, side, price, size):
-				Helium.onPlace(self, oid, side, price, size)
+			def onPlace(self, oid, side, price, size, otype):
+				Helium.onPlace(self, oid, side, price, size, otype)
 				self.book.add(oid, side, price, size)
 
 		book = Book(DummyBlobProtocol())
