@@ -23,36 +23,33 @@ class DataLogger(BookClient):
 		self.bids = []
 		self.asks = []
 
-	def onOpen(self):
+	def add(self, oid, side, price, size):
 		pass
 
-	def add(self, oid, side, price, size):
-		self.update()
-
 	def change(self, oid, side, newsize):
-		self.update()
+		pass
 
 	def match(self, oid, side, price, size):
-		self.update()
+		pass
 
 	def done(self, oid):
-		self.update()
+		pass
 
-	# Update from book messages and record midpoint if necessary.
 	def update(self):
-		if len(self.book.bids) == 0 or len(self.book.asks) == 0:
-			return
+		pass
 
+	def generateStamp(self):
 		stamp = time.time()
 		ask = self.book.getBestAskPrice()
 		bid = self.book.getBestBidPrice()
-		if len(self.stamps) > 0 and stamp - self.stamps[-1] < self.delta:
-			return
+
 		self.stamps.append(stamp)
 		self.asks.append(ask)
 		self.bids.append(bid)
 		if self.stamps[-1] - self.stamps[0] >= self.duration:
 			self.close()
+		else:
+			reactor.callLater(self.delta, self.generateStamp)
 
 	def close(self):
 		df = pandas.DataFrame()
@@ -60,7 +57,7 @@ class DataLogger(BookClient):
 		df["ask"] = self.asks
 		df.index  = self.stamps
 		df.to_csv(self.fname)
-		quit(0)
+		reactor.stop()
 		
 
 if __name__ == '__main__':
@@ -78,4 +75,6 @@ if __name__ == '__main__':
     bb.addClient(dl)
 
     connectWS(factory)
+
+    reactor.callLater(1.0, dl.generateStamp)
     reactor.run()

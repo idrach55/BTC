@@ -45,14 +45,14 @@ class Helium(Strategy):
 
 		if order.side == "buy":
 			price = order.price + self.spread
-			self.ask(self.tradeSize - remaining, price)
+			self.ask(order.size - remaining, price)
 
 	def onCompleteFill(self, order):
 		Strategy.onCompleteFill(self, order)
 
 		if order.side == "buy":
 			price = order.price + self.spread
-			self.ask(self.tradeSize, price)
+			self.ask(order.size, price)
 
 
 if __name__ == '__main__':

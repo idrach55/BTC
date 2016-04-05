@@ -145,6 +145,7 @@ class Strategy(BookClient):
 
 	def ask(self, size, price):
 		price = math.ceil(100 * price) / 100.
+		size  = math.floor(1e8 * size) / 1e8
 		self.trade(size, "sell", price=price)
 
 	def bid(self, size, price):
