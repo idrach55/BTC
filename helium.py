@@ -63,7 +63,10 @@ if __name__ == '__main__':
 
     rest = RESTProtocol(readKeys('keys.txt'), debug=True)
 
-    hh = Helium(rest, spread=0.10, tradeSize=0.2, debug=True)
+    spread = float(sys.argv[1])
+    tradeSize = float(sys.argv[2])
+
+    hh = Helium(rest, spread=spread, tradeSize=tradeSize, debug=True)
     bb = Book(factory.protocol, debug=False)
     bb.addClient(hh)
 
