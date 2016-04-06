@@ -1,3 +1,7 @@
+# Author: Isaac Drachman
+# Description:
+# Class implementations for Book and its client, BookClient.
+
 from bintrees import FastRBTree
 from collections import namedtuple
 from blobprotocol import BlobClient
@@ -6,11 +10,15 @@ from pprint import pprint
 import requests
 
 
+# Nifty namedtuples are nifty. 
 Order = namedtuple('Order', ['oid', 'side', 'price', 'size'])
 
 class InsufficientSizeForVWAP(Exception):
 	pass
 
+# This is fed all messages off the book.
+# It is often useful to consolidate them into
+# an update method.
 class BookClient:
 	def onBookConnected(self, book):
 		self.book = book
@@ -27,13 +35,18 @@ class BookClient:
 	def done(self, oid):
 		raise NotImplementedError
 
+	def onSequenceGap(self):
+		raise NotImplementedError
+
 class Book(BlobClient):
 	def __init__(self, protocol, debug=False):
 		BlobClient.__init__(self, protocol)
 
 		self.debug = debug
+		# A book can forward messages to multiple BookClients.
 		self.clients = []
 
+		# Internal data structures for storing orders.
 		self.ordersById = {}
 		self.bids = FastRBTree()
 		self.asks = FastRBTree()
@@ -50,12 +63,13 @@ class Book(BlobClient):
 			self.add(bid[2], "buy", float(bid[0]), float(bid[1]))
 		for ask in book["asks"]:
 			self.add(ask[2], "sell", float(ask[0]), float(ask[1]))
+		# Track sequence since the BlobProtocol will check this off us to look for gaps.
 		self.sequence = book["sequence"]
 
 		if self.debug:
 			pprint('downloaded (bids: %d, asks: %d)' % (len(self.bids), len(self.asks)))
 
-	# Orderbook messages.
+	# Orderbook messages require lots of tree manipulations.
 	def add(self, oid, side, price, size):
 		order = Order(oid, side, price, size)
 		tree = self._getOrderTree(order.side)
@@ -115,7 +129,13 @@ class Book(BlobClient):
 		for client in self.clients:
 			client.done(oid)
 
-	# Get functionality.
+	def onSequenceGap(self):
+		if self.debug:
+			pprint('sequence gap')
+		for client in self.clients:
+			client.onSequenceGap()
+
+	# Get functionality, mostly self-explanatory.
 	def getBestBidPrice(self):
 		if len(self.bids) == 0:
 			return None
@@ -149,6 +169,9 @@ class Book(BlobClient):
 			return None
 		return 0.5 * (self.getBestBidPrice() + self.getBestAskPrice())
 
+	# Returns VWAP for a given target size.
+	# Positive sizes will sweep up the asks.
+	# Negative sizes will sweep down the bids.
 	def getVWAP(self, target):
 		side = "buy" if target < 0 else "sell"
 		tree = self._getOrderTree(side)

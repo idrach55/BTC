@@ -38,10 +38,12 @@ class Helium(Strategy):
 		# If no change in midpoint, skip.
 		if self.previousMid is not None and self.previousMid == mid:
 			return
+
+		# We want bids + position = tradeSize...
 		bidSize, askSize = self.getOpenSize()
-		if bidSize == 0.0 and self.position == 0.0:
+		if bidSize + self.position < self.tradeSize:
 			price = mid - self.spread/2.
-			self.bid(self.tradeSize, price)
+			self.bid(self.tradeSize - bidSize - self.position, price)
 
 		# If outstanding asks are too far from mid, lockdown.
 		if askSize > 0.0:
@@ -49,10 +51,11 @@ class Helium(Strategy):
 			if price - mid > self.maxDistance:
 				self.lockdown("max distance exceeded")
 
-		# Check for excessive volatility and lockdown if need be.
+		# We leave the vol monitor as optional, skip checks if not found.
 		if self.volmonitor is None:
 			return
 
+		# Check for excessive volatility and lockdown if need be.
 		vol = self.volmonitor.getHourlyVolatility()
 		if vol >= self.volThresh:
 			self.lockdown("excessive volatility")

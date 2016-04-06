@@ -1,6 +1,6 @@
-##################################
-#	    UNDER CONSTRUCTION		 #
-##################################
+# Author: Isaac Drachman
+# Description:
+# Class implementations for Strategy, RESTProtocol, and Authorizer.
 
 from requests.auth import AuthBase
 from book import BookClient, Order
@@ -21,11 +21,14 @@ def readKeys(filename):
 	with open(filename, "r") as f:
 		return f.read().split("\n")
 
+# This is the outlet to the exchange via the REST api.
+# We use this to submit orders, cancel requests, and soon to get account data.
 class RESTProtocol:
 	def __init__(self, keys, debug=False):
 		self.auth = Authorizer(keys)
 		self.debug = debug
 
+	# Submit a trade.
 	def submitTrade(self, params):
 		if self.debug:
 			pprint('trade: %s' % str(params))
@@ -35,6 +38,9 @@ class RESTProtocol:
 		else:
 			return False, r.json()["message"]
 
+	# Submit a cancelAll.
+	# TODO: this should be duplicated/modified to create a 
+	# method for cancelling single orders.
 	def submitCancelAll(self):
 		if self.debug:
 			pprint('cancelling all orders')
@@ -66,12 +72,17 @@ class Authorizer(AuthBase):
         })
         return request
 
+# A strategy is book client attached to a REST protocol.
 class Strategy(BookClient):
 	def __init__(self, rest, debug=False):
 		self.rest = rest
+
+		# These are the only parameters.
+		# Subclasses of Strategy should combine these into a params dict.
 		self.debug = debug
 		self.dumpOnLockdown = False
 
+		# Track enabled: has the book been primed, open orders, and BTC position.		
 		self.enabled = True
 		self.openOrders = {}
 		self.position = 0.
@@ -95,17 +106,25 @@ class Strategy(BookClient):
 		order = self.openOrders.get(oid)
 		if order is not None:
 			remaining = order.size - size
+
+			# Adjust internal BTC position accordingly. 
+			self.position += size if order.side == "buy" else -size
+
+			# Check with some epsilon for complete vs. partial fills.
 			if remaining <= 0.00000001:
 				del self.openOrders[oid]
 				self.onCompleteFill(order)
 			else:
 				self.openOrders[oid] = Order(oid, side, price, remaining)
 				self.onPartialFill(order, remaining)
+		# Relay!
 		self.update()
 
 	def done(self, oid):
 		self.update()
-	# End of BookClient methods.
+
+	def onSequenceGap(self):
+		self.lockdown('sequence gap')
 
 	# Main update loop.
 	def update(self):
@@ -124,17 +143,22 @@ class Strategy(BookClient):
 			self.dumpBTC()
 		self.disable()
 
+	# We assume 100% fill rate on market orders.
+	# Since the blob protocol (for now) only handles
+	# maker_order_id on matches we would not see
+	# our market orders. Since we don't do it too often
+	# this has not been changed.
 	def onPlace(self, oid, side, price, size, otype):
 		if self.debug:
 			pprint('onPlace: %s' % oid)
 
+		# If limit order, add to openOrders.
+		# If market order, change BTC position now.
 		if otype == "limit":
 			order = Order(oid, side, price, size)
 			self.openOrders[oid] = order
-		elif otype == "market" and side == "buy":
-			self.position += size
-		elif otype == "market" and side == "sell":
-			self.position -= size
+		elif otype == "market"
+			self.position += size if side == "buy" else -size
 
 	def onPlaceFail(self, reason):
 		if self.debug:
@@ -144,19 +168,9 @@ class Strategy(BookClient):
 		if self.debug:
 			pprint('onPartialFill: %s, with %0.4f remaining' % (str(order), remaining))
 
-		if order.side == "buy":
-			self.position += order.size - remaining
-		else:
-			self.position -= order.size - remaining
-
 	def onCompleteFill(self, order):
 		if self.debug:
 			pprint('onCompleteFill: %s' % (str(order)))
-
-		if order.side == "buy":
-			self.position += order.size
-		else:
-			self.position -= order.size
 
 	def getOpenSize(self):
 		bidSize = 0.0
@@ -191,6 +205,11 @@ class Strategy(BookClient):
 		else: 
 			self.onPlaceFail(res)
 
+	# Prices and sizes cannot be too precise.
+	# Therefore, ceiling ask prices and floor bid prices.
+	# TODO: this is not general enough. The above method
+	# should do this on its own in some way. Additionally
+	# only sizes on asks are fixed, but not bids.
 	def ask(self, size, price):
 		price = math.ceil(100 * price) / 100.
 		size  = math.floor(1e8 * size) / 1e8
