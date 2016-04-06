@@ -2,7 +2,7 @@ params = {
 	"debug" 		 : True,
 	"dumpOnLockdown" : False,
 	"maxDistance" 	 : 2.00, 
-	"spread" 		 : 0.15, 
-	"tradeSize" 	 : 1.00, 
+	"spread" 		 : 0.02, 
+	"tradeSize" 	 : 0.10, 
 	"volThresh" 	 : 1.75
 }

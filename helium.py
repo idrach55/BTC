@@ -14,18 +14,17 @@ from blobprotocol import BlobProtocol
 from volmonitor import VolMonitor
 from book import Book
 from strategy import RESTProtocol, Strategy, readKeys
-from params import params
 
 
 class Helium(Strategy):
 	def __init__(self, rest, params):
-		Strategy.__init__(self, rest, debug=params["debug"])
+		Strategy.__init__(self, rest, debug=params['debug'])
 
-		self.spread = params["spread"]
-		self.tradeSize = params["tradeSize"]
-		self.dumpOnLockdown = params["dumpOnLockdown"]
-		self.volThresh = params["volThresh"]
-		self.maxDistance = params["maxDistance"]
+		self.spread = params['spread']
+		self.tradeSize = params['tradeSize']
+		self.dumpOnLockdown = params['dumpOnLockdown']
+		self.volThresh = params['volThresh']
+		self.maxDistance = params['maxDistance']
 
 		self.volmonitor = None
 		self.previousMid = None
@@ -36,14 +35,11 @@ class Helium(Strategy):
 			return
 
 		mid = self.book.getMid()
-		## Not enough on book to get mid.
-		#if mid is None:
-		#	return
 		# If no change in midpoint, skip.
 		if self.previousMid is not None and self.previousMid == mid:
 			return
 		bidSize, askSize = self.getOpenSize()
-		if bidSize == 0.0 and askSize == 0.0:
+		if bidSize == 0.0 and self.position == 0.0:
 			price = mid - self.spread/2.
 			self.bid(self.tradeSize, price)
 
@@ -91,8 +87,8 @@ if __name__ == '__main__':
     factory.protocol = BlobProtocol
 
     # Setup params from params.py.
-    # paramsFile = 'params.py'
-    # exec(compile(open(paramsFile).read(), paramsFile, 'exec')) 
+    paramsFile = sys.argv[1]
+    exec(compile(open(paramsFile).read(), paramsFile, 'exec')) 
 
     rest = RESTProtocol(readKeys('keys.txt'), debug=True)
     hh = Helium(rest, params=params)
