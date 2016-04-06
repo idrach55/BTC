@@ -13,49 +13,49 @@ import pandas
 
 
 class DataLogger(BookClient):
-	# Logs the TOB bid/ask every `delta` seconds for a total of `duration` seconds.
-	def __init__(self, delta, duration, fname):
-		self.delta = delta
-		self.duration = duration
-		self.fname = fname
+    # Logs the TOB bid/ask every `delta` seconds for a total of `duration` seconds.
+    def __init__(self, delta, duration, fname):
+        self.delta = delta
+        self.duration = duration
+        self.fname = fname
 
-		self.stamps = []
-		self.bids = []
-		self.asks = []
+        self.stamps = []
+        self.bids = []
+        self.asks = []
 
-	def add(self, oid, side, price, size):
-		pass
+    def add(self, oid, side, price, size):
+        pass
 
-	def change(self, oid, side, newsize):
-		pass
+    def change(self, oid, side, newsize):
+        pass
 
-	def match(self, oid, side, price, size):
-		pass
+    def match(self, oid, side, price, size):
+        pass
 
-	def done(self, oid):
-		pass
+    def done(self, oid):
+        pass
 
-	def generateStamp(self):
-		stamp = time.time()
-		ask = self.book.getBestAskPrice()
-		bid = self.book.getBestBidPrice()
+    def generateStamp(self):
+        stamp = time.time()
+        ask = self.book.getBestAskPrice()
+        bid = self.book.getBestBidPrice()
 
-		self.stamps.append(stamp)
-		self.asks.append(ask)
-		self.bids.append(bid)
-		if self.stamps[-1] - self.stamps[0] >= self.duration:
-			self.close()
-		else:
-			reactor.callLater(self.delta, self.generateStamp)
+        self.stamps.append(stamp)
+        self.asks.append(ask)
+        self.bids.append(bid)
+        if self.stamps[-1] - self.stamps[0] >= self.duration:
+            self.close()
+        else:
+            reactor.callLater(self.delta, self.generateStamp)
 
-	def close(self):
-		df = pandas.DataFrame()
-		df["bid"] = self.bids
-		df["ask"] = self.asks
-		df.index  = self.stamps
-		df.to_csv(self.fname)
-		reactor.stop()
-		
+    def close(self):
+        df = pandas.DataFrame()
+        df["bid"] = self.bids
+        df["ask"] = self.asks
+        df.index  = self.stamps
+        df.to_csv(self.fname)
+        reactor.stop()
+        
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
