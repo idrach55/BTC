@@ -35,10 +35,10 @@ class DataLogger(BookClient):
     def done(self, oid):
         pass
 
-    def generateStamp(self):
+    def generate_stamp(self):
         stamp = time.time()
-        ask = self.book.getBestAskPrice()
-        bid = self.book.getBestBidPrice()
+        ask = self.book.get_best_ask()
+        bid = self.book.get_best_bid()
 
         self.stamps.append(stamp)
         self.asks.append(ask)
@@ -46,7 +46,7 @@ class DataLogger(BookClient):
         if self.stamps[-1] - self.stamps[0] >= self.duration:
             self.close()
         else:
-            reactor.callLater(self.delta, self.generateStamp)
+            reactor.callLater(self.delta, self.generate_stamp)
 
     def close(self):
         df = pandas.DataFrame()
@@ -72,5 +72,5 @@ if __name__ == '__main__':
 
     connectWS(factory)
 
-    reactor.callLater(1.0, dl.generateStamp)
+    reactor.callLater(1.0, dl.generate_stamp)
     reactor.run()
