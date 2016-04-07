@@ -17,7 +17,8 @@ class DemoHelium(Helium):
             "max_distance"     : 2.00, 
             "spread_factor"    : 1.0, 
             "trade_size"       : 1.0, 
-            "vol_thresh"       : 1.75
+            "vol_thresh"       : 1.75,
+            "stop_loss"        : 0.30,
         })
 
     def on_place(self, oid, side, price, size, otype):
@@ -94,7 +95,7 @@ class MyTest(unittest.TestCase):
         assert strat.enabled == False
         assert strat.lockdown_reason == "excessive volatility"
 
-    def test_lockdownOnMaxDistance(self):
+    def test_lockdown_max_distance(self):
         book = DemoBook()
         strat = DemoHelium()
         book.add_client(strat)
@@ -120,3 +121,16 @@ class MyTest(unittest.TestCase):
         book.done("Z4") 
         assert strat.enabled == False
         assert strat.lockdown_reason == "max distance exceeded"
+
+    def test_lockdown_stop_loss(self):
+        book = DemoBook()
+        strat = DemoHelium()
+        book.add_client(strat)
+
+        strat.track_pnl = 1.0
+        strat.profit_loss = -15.00
+        # Update the book to trigger update().
+        book.change("Z4", "sell", 1.0)
+
+        assert strat.enabled == False
+        assert strat.lockdown_reason == "stop loss of 0.30 triggered"

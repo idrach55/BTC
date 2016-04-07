@@ -35,8 +35,7 @@ class RESTProtocol:
         r = requests.post("https://api.exchange.coinbase.com/orders", json=params, auth=self.auth)
         if r.status_code == 200:
             return True, r.json()["id"]
-        else:
-            return False, r.json()["message"]
+        return False, r.json()["message"]
 
     # Submit a cancelAll.
     # TODO: this should be duplicated/modified to create a 
@@ -47,8 +46,22 @@ class RESTProtocol:
         r = requests.delete("https://api.exchange.coinbase.com/orders", auth=self.auth)
         if r.status_code == 200:
             return True, None
-        else:
-            return False, r.json()["message"]
+        return False, r.json()["message"]
+
+    def get_balances(self):
+        r = requests.get("https://api.exchange.coinbase.com/accounts", auth=self.auth)
+        if r.status_code == 200:
+            accounts = r.json()
+            btc = 0.0
+            usd = 0.0
+            if accounts[0]["currency"] == "USD":
+                usd = float(accounts[0]["balance"])
+                btc = float(accounts[1]["balance"])
+            elif accounts[0]["currency"] == "BTC":
+                btc = float(accounts[0]["balance"])
+                usd = float(accounts[1]["balance"])
+            return True, usd, btc
+        return False, None, None
 
 # Authorizes coinbase exchange calls.
 class Authorizer(AuthBase):
@@ -87,6 +100,22 @@ class Strategy(BookClient):
         self.lockdown_reason = None
         self.open_orders = {}
         self.position = 0.
+        self.first_mark = None
+        self.profit_loss = None
+
+    def compute_pnl(self):
+        if self.first_mark is None:
+            self.first_mark = self.mark_positions()
+            pnl = 0.
+        pnl = self.mark_positions() - self.first_mark
+        if self.debug and (self.profit_loss is None or abs(pnl - self.profit_loss) > 0.001):
+            pprint("pnl update: %0.3f USD" % pnl)
+        self.profit_loss = pnl
+
+    def mark_positions(self):
+        success, usd, btc = self.rest.get_balances()
+        if success:
+            return usd + btc * self.book.get_mid()
 
     # Makes strategy wait while book is primed.
     def enable(self):
@@ -151,7 +180,7 @@ class Strategy(BookClient):
     # this has not been changed.
     def on_place(self, oid, side, price, size, otype):
         if self.debug:
-            pprint('onPlace: %s' % oid)
+            pprint('on_place: %s' % oid)
 
         # If limit order, add to open_orders.
         # If market order, change BTC position now.
@@ -163,15 +192,15 @@ class Strategy(BookClient):
 
     def on_place_fail(self, reason):
         if self.debug:
-            pprint('onPlaceFail: %s' % reason)
+            pprint('on_place_fail: %s' % reason)
 
     def on_partial_fill(self, order, remaining):
         if self.debug:
-            pprint('onPartialFill: %s, with %0.4f remaining' % (str(order), remaining))
+            pprint('on_partial_fill: %s, with %0.4f remaining' % (str(order), remaining))
 
     def on_complete_fill(self, order):
         if self.debug:
-            pprint('onCompleteFill: %s' % (str(order)))
+            pprint('on_complete_fill: %s' % (str(order)))
 
     def get_open_size(self):
         bid_size = 0.0
