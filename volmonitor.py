@@ -33,7 +33,7 @@ class VolMonitor(BookClient):
         pass
         
     def generate_stamp(self):
-        mid = self.book.getMid()
+        mid = self.book.get_mid()
         self.mids.append(mid)
         if self.debug:
             pprint('volatility: %0.4f' % self.get_hourly_volatility())
