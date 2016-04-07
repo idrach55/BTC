@@ -84,6 +84,7 @@ class Strategy(BookClient):
 
         # Track enabled: has the book been primed, open orders, and BTC position.       
         self.enabled = True
+        self.lockdownReason = None
         self.openOrders = {}
         self.position = 0.
 
@@ -137,7 +138,7 @@ class Strategy(BookClient):
     def lockdown(self, reason):
         if self.debug:
             pprint("lockdown: %s" % reason)
-
+        self.lockdownReason = reason
         success = self.rest.submitCancelAll()
         if self.dumpOnLockdown:
             self.dumpBTC()
@@ -187,6 +188,9 @@ class Strategy(BookClient):
         if otype == "limit" and not price:
             self.onPlaceFail("price not specified")
 
+        # Prevent size from being too precise.
+        size  = math.floor(1e8 * size) / 1e8
+
         # Fill order parameters.
         params = {"type":       otype,
                   "side":       side,
@@ -212,7 +216,6 @@ class Strategy(BookClient):
     # only sizes on asks are fixed, but not bids.
     def ask(self, size, price):
         price = math.ceil(100 * price) / 100.
-        size  = math.floor(1e8 * size) / 1e8
         self.trade(size, "sell", price=price)
 
     def bid(self, size, price):

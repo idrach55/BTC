@@ -27,63 +27,52 @@ class DummyRESTProtocol:
     def submitCancelAll(self):
         return True, None
 
+class DemoStrategy(Strategy):
+    def __init__(self):
+        Strategy.__init__(self, DummyRESTProtocol())
+
 class MyTest(unittest.TestCase):
     def test_onPlaceFail(self):
-        class Demo(Strategy):
-            def onPlaceFail(self, reason):
-                assert reason == "did not feel like it"
-        strat = Demo(LazyRESTProtcol())
+        strat = Strategy(LazyRESTProtcol())
         strat.ask(1.0, 100.00)
+        assert strat.openOrders == {}
 
     def test_onPlace(self):
-        class Demo(Strategy):
-            def onPlace(self, oid, side, price, size, otype):
-                Strategy.onPlace(self, oid, side, price, size, otype)
-                assert oid == "B1"
-                assert self.openOrders.get("B1") == Order("B1", "buy", 100.00, 1.0)
-        strat = Demo(DummyRESTProtocol())
+        strat = DemoStrategy()
         strat.bid(1.0, 100.00)
+        assert strat.openOrders["B1"] == Order("B1", "buy", 100.00, 1.0)
 
     def test_onCompleteFill(self):
-        class Demo(Strategy):
-            def onCompleteFill(self, order):
-                assert order.oid == "B1"
-                assert self.openOrders.get("B1") is None
-        strat = Demo(DummyRESTProtocol())
+        strat = DemoStrategy()
         strat.bid(1.0, 100.00)
         strat.match("B1", "buy", 100.00, 1.0)
+        assert strat.openOrders == {}
 
     def test_onPartialFill(self):
-        class Demo(Strategy):
-            def onPartialFill(self, order, remaining):
-                assert order.oid == "B1"
-                assert remaining == 0.5
-        strat = Demo(DummyRESTProtocol())
+        strat = DemoStrategy()
         strat.bid(1.0, 100.00)
         strat.match("B1", "buy", 100.00, 0.5)
+        assert strat.openOrders["B1"] == Order("B1", "buy", 100.00, 0.5)
 
     def test_getOpenSize(self):
-        class Demo(Strategy):
-            def onPlace(self, oid, side, price, size, otype):
-                Strategy.onPlace(self, oid, side, price, size, otype)
-                if oid == "B1":
-                    assert self.getOpenSize() == (1.0, 0.0)
-                elif oid == "B2":
-                    assert self.getOpenSize() == (1.5, 0.0)
-                elif oid == "A1":
-                    assert self.getOpenSize() == (1.5, 0.5)
-        strat = Demo(DummyRESTProtocol())
+        strat = DemoStrategy()
         strat.bid(1.0, 100.00)
+        assert strat.getOpenSize() == (1.0, 0.0)
         strat.bid(0.5, 101.00)
+        assert strat.getOpenSize() == (1.5, 0.0)
         strat.ask(0.5, 102.00)
+        assert strat.getOpenSize() == (1.5, 0.5)
+
+    def test_lockdown(self):
+        strat = DemoStrategy()
+        strat.lockdown("no reason")
+        assert strat.enabled == False
+        assert strat.lockdownReason == "no reason"
 
     def test_dumpOnLockdown(self):
-        class Demo(Strategy):
-            def onPlace(self, oid, side, price, size, otype):
-                Strategy.onPlace(self, oid, side, price, size, otype)
-                assert otype == "market"
-                assert size == 1.0
-        strat = Demo(DummyRESTProtocol())
+        strat = DemoStrategy()
         strat.dumpOnLockdown = True
         strat.position = 1.0
         strat.lockdown("no reason")
+        assert strat.enabled == False
+        assert strat.position == 0.0
