@@ -5,6 +5,7 @@
 from autobahn.twisted.websocket import WebSocketClientFactory, connectWS
 from twisted.python import log
 from twisted.internet import reactor
+from pprint import pprint
 
 import sys
 import math
@@ -44,14 +45,13 @@ class Helium(Strategy):
             bid_vwap = self.book.get_best_bid()
         mid = 0.5*(ask_vwap + bid_vwap)
 
-        if self.initial_marking is None:
+        if self.initial_marking is None and self.stop_loss is not None:
             success, usd, btc = self.rest.get_balances()
             if success:
                 self.usd_position = usd
-                self.btc_position = btc
                 self.initial_marking = self.usd_position
                 if self.debug:
-                    pprint("initial positions read %0.2f USD and %0.4f BTC" % (usd, btc))
+                    pprint("initial positions read %0.2f USD" % usd)
 
         # We want bids + position = trade_size...
         bid_size, ask_size = self.get_open_size()
