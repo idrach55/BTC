@@ -25,17 +25,11 @@ class Helium(Strategy):
         self.dump_on_lockdown = params['dump_on_lockdown']
         self.vol_thresh       = params['vol_thresh']
         self.max_distance     = params['max_distance']
-        self.track_pnl        = params.get('track_pnl')
         self.stop_loss        = params.get('stop_loss')
 
         self.volmonitor = None
         self.previous_mid = None
         self.spread = None
-
-    def compute_pnl(self):
-        Strategy.compute_pnl(self)
-        if self.track_pnl is not None:
-            reactor.callLater(self.track_pnl, self.compute_pnl)
 
     # Main update loop.
     def update(self):
@@ -50,12 +44,21 @@ class Helium(Strategy):
             bid_vwap = self.book.get_best_bid()
         mid = 0.5*(ask_vwap + bid_vwap)
 
+        if self.initial_marking is None:
+            success, usd, btc = self.rest.get_balances()
+            if success:
+                self.usd_position = usd
+                self.btc_position = btc
+                self.initial_marking = self.usd_position
+                if self.debug:
+                    pprint("initial positions read %0.2f USD and %0.4f BTC" % (usd, btc))
+
         # We want bids + position = trade_size...
         bid_size, ask_size = self.get_open_size()
-        if bid_size + self.position < self.trade_size - 0.00000001:
+        if bid_size + self.btc_position < self.trade_size - 0.00000001:
             self.spread = self.spread_factor * 0.5 * (ask_vwap - bid_vwap) 
             price = mid - self.spread
-            self.bid(self.trade_size - bid_size - self.position, price)
+            self.bid(self.trade_size - bid_size - self.btc_position, price)
 
         # If outstanding asks are too far from mid, lockdown.
         if ask_size > 0.0:
@@ -64,8 +67,10 @@ class Helium(Strategy):
                 self.lockdown("max distance exceeded")
 
         # If stop-loss triggered, lockdown.
-        if self.track_pnl is not None and self.profit_loss < -self.stop_loss:
-            self.lockdown("stop loss of %0.2f triggered" % self.stop_loss)
+        if self.stop_loss is not None:
+            marked = self.btc_position * mid + self.usd_position
+            if marked - self.initial_marking <= -self.stop_loss:
+                self.lockdown("stop loss of %0.2f triggered" % self.stop_loss)
 
         # We leave the vol monitor as optional, skip checks if not found.
         if self.volmonitor is None:
@@ -119,9 +124,6 @@ if __name__ == '__main__':
     bb.add_client(vm)
 
     connectWS(factory)
-
-    if params.get("track_pnl") is not None:
-        reactor.callLater(1.0, hh.compute_pnl)
 
     reactor.callLater(1.0, vm.generate_stamp)
     reactor.callLater(1.0, hh.enable)

@@ -8,18 +8,18 @@ from testbook import DummyBlobProtocol
 from teststrategy import DummyRESTProtocol
 
 
+testparams = {
+                "debug"            : False,
+                "dump_on_lockdown" : True,
+                "max_distance"     : 2.00, 
+                "spread_factor"    : 1.0, 
+                "trade_size"       : 1.0, 
+                "vol_thresh"       : 1.75
+             }
+
 class DemoHelium(Helium):
     def __init__(self):
-        Helium.__init__(self, DummyRESTProtocol(), 
-        {
-            "debug"            : False,
-            "dump_on_lockdown" : True,
-            "max_distance"     : 2.00, 
-            "spread_factor"    : 1.0, 
-            "trade_size"       : 1.0, 
-            "vol_thresh"       : 1.75,
-            "stop_loss"        : 0.30,
-        })
+        Helium.__init__(self, DummyRESTProtocol(), testparams)
 
     def on_place(self, oid, side, price, size, otype):
         Helium.on_place(self, oid, side, price, size, otype)
@@ -124,13 +124,19 @@ class MyTest(unittest.TestCase):
 
     def test_lockdown_stop_loss(self):
         book = DemoBook()
-        strat = DemoHelium()
+        editedparams = testparams.copy()
+        editedparams["stop_loss"] = 0.30
+        strat = Helium(DummyRESTProtocol(), editedparams)
         book.add_client(strat)
 
-        strat.track_pnl = 1.0
-        strat.profit_loss = -15.00
         # Update the book to trigger update().
         book.change("Z4", "sell", 1.0)
+
+        # Lose 1 BTC.
+        strat.btc_position = -1.0
+
+        # Update the book to trigger update().
+        book.change("Z4", "sell", 0.5)
 
         assert strat.enabled == False
         assert strat.lockdown_reason == "stop loss of 0.30 triggered"

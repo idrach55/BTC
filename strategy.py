@@ -2,6 +2,8 @@
 # Description:
 # Class implementations for Strategy, RESTProtocol, and Authorizer.
 
+from twisted.internet import reactor
+from twisted.internet.error import ReactorNotRunning
 from requests.auth import AuthBase
 from book import BookClient, Order
 from pprint import pprint
@@ -94,28 +96,15 @@ class Strategy(BookClient):
         # Subclasses of Strategy should combine these into a params dict.
         self.debug = debug
         self.dump_on_lockdown = False
+        self.stop_loss = None
 
         # Track enabled: has the book been primed, open orders, and BTC position.       
         self.enabled = True
         self.lockdown_reason = None
         self.open_orders = {}
-        self.position = 0.
-        self.first_mark = None
-        self.profit_loss = None
-
-    def compute_pnl(self):
-        if self.first_mark is None:
-            self.first_mark = self.mark_positions()
-            pnl = 0.
-        pnl = self.mark_positions() - self.first_mark
-        if self.debug and (self.profit_loss is None or abs(pnl - self.profit_loss) > 0.001):
-            pprint("pnl update: %0.3f USD" % pnl)
-        self.profit_loss = pnl
-
-    def mark_positions(self):
-        success, usd, btc = self.rest.get_balances()
-        if success:
-            return usd + btc * self.book.get_mid()
+        self.btc_position = 0.
+        self.usd_position = 0.
+        self.initial_marking = None
 
     # Makes strategy wait while book is primed.
     def enable(self):
@@ -138,7 +127,8 @@ class Strategy(BookClient):
             remaining = order.size - size
 
             # Adjust internal BTC position accordingly. 
-            self.position += size if order.side == "buy" else -size
+            self.btc_position += size if side == "buy" else -size
+            self.usd_position += size * price if side == "sell" else -size * price
 
             # Check with some epsilon for complete vs. partial fills.
             if remaining <= 0.00000001:
@@ -162,7 +152,7 @@ class Strategy(BookClient):
             return
 
     def dump_btc(self):
-        self.trade(self.position, "sell", otype="market")
+        self.trade(self.btc_position, "sell", otype="market")
 
     def lockdown(self, reason):
         if self.debug:
@@ -172,6 +162,10 @@ class Strategy(BookClient):
         if self.dump_on_lockdown:
             self.dump_btc()
         self.disable()
+        try:
+        	reactor.stop()
+        except ReactorNotRunning as e:
+        	return
 
     # We assume 100% fill rate on market orders.
     # Since the blob protocol (for now) only handles
@@ -188,7 +182,7 @@ class Strategy(BookClient):
             order = Order(oid, side, price, size)
             self.open_orders[oid] = order
         elif otype == "market":
-            self.position += size if side == "buy" else -size
+            self.btc_position += size if side == "buy" else -size
 
     def on_place_fail(self, reason):
         if self.debug:
@@ -214,6 +208,9 @@ class Strategy(BookClient):
 
     # Submit trade.
     def trade(self, size, side, price=None, otype="limit", product_id="BTC-USD", post_only=True):
+        if not self.enabled:
+            return
+            
         if otype == "limit" and not price:
             self.on_place_fail("price not specified")
 

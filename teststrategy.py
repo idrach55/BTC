@@ -27,34 +27,39 @@ class DummyRESTProtocol:
     def submit_cancel_all(self):
         return True, None
 
+    def get_balances(self):
+        return True, 500.0, 0.0
+
 class DemoStrategy(Strategy):
     def __init__(self):
         Strategy.__init__(self, DummyRESTProtocol())
 
 class MyTest(unittest.TestCase):
-    def test_onPlaceFail(self):
+    def test_on_place_fail(self):
         strat = Strategy(LazyRESTProtcol())
         strat.ask(1.0, 100.00)
         assert strat.open_orders == {}
 
-    def test_onPlace(self):
+    def test_on_place(self):
         strat = DemoStrategy()
         strat.bid(1.0, 100.00)
-        assert strat.open_orders["B1"] == Order("B1", "buy", 100.00, 1.0)
+        assert strat.open_orders == {"B1": Order("B1", "buy", 100.00, 1.0)}
 
-    def test_onCompleteFill(self):
+    def test_on_complete_fill(self):
         strat = DemoStrategy()
         strat.bid(1.0, 100.00)
         strat.match("B1", "buy", 100.00, 1.0)
         assert strat.open_orders == {}
+        assert strat.btc_position == 1.0
 
-    def test_onPartialFill(self):
+    def test_on_partial_fill(self):
         strat = DemoStrategy()
         strat.bid(1.0, 100.00)
         strat.match("B1", "buy", 100.00, 0.5)
-        assert strat.open_orders["B1"] == Order("B1", "buy", 100.00, 0.5)
+        assert strat.open_orders == {"B1": Order("B1", "buy", 100.00, 0.5)}
+        assert strat.btc_position == 0.5
 
-    def test_getOpenSize(self):
+    def test_get_open_size(self):
         strat = DemoStrategy()
         strat.bid(1.0, 100.00)
         assert strat.get_open_size() == (1.0, 0.0)
@@ -69,10 +74,10 @@ class MyTest(unittest.TestCase):
         assert strat.enabled == False
         assert strat.lockdown_reason == "no reason"
 
-    def test_dumpOnLockdown(self):
+    def test_dump_on_lockdown(self):
         strat = DemoStrategy()
         strat.dump_on_lockdown = True
         strat.position = 1.0
         strat.lockdown("no reason")
         assert strat.enabled == False
-        assert strat.position == 0.0
+        assert strat.btc_position == 0.0
