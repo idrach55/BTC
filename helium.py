@@ -12,7 +12,7 @@ import scipy.stats
 
 from blobprotocol import BlobProtocol
 from volmonitor import VolMonitor
-from book import Book
+from book import Book, InsufficientSizeForVWAP
 from strategy import RESTProtocol, Strategy, read_keys
 
 
@@ -20,7 +20,7 @@ class Helium(Strategy):
     def __init__(self, rest, params):
         Strategy.__init__(self, rest, debug=params['debug'])
 
-        self.spread = params['spread']
+        self.spread_factor = params['spread_factor']
         self.trade_size = params['trade_size']
         self.dump_on_lockdown = params['dump_on_lockdown']
         self.vol_thresh = params['vol_thresh']
@@ -28,21 +28,26 @@ class Helium(Strategy):
 
         self.volmonitor = None
         self.previous_mid = None
+        self.spread = None
 
     # Main update loop.
     def update(self):
         if not self.enabled:
             return
 
-        mid = self.book.get_mid()
-        # If no change in midpoint, skip.
-        if self.previous_mid is not None and self.previous_mid == mid:
-            return
+        try:
+            ask_vwap = self.book.get_vwap(self.trade_size)
+            bid_vwap = self.book.get_vwap(-self.trade_size)
+        except InsufficientSizeForVWAP as e:
+            ask_vwap = self.book.get_best_ask()
+            bid_vwap = self.book.get_best_bid()
+        mid = 0.5*(ask_vwap + bid_vwap)
 
         # We want bids + position = trade_size...
         bid_size, ask_size = self.get_open_size()
         if bid_size + self.position < self.trade_size:
-            price = mid - self.spread/2.
+            self.spread = self.spread_factor * 0.5 * (ask_vwap - bid_vwap) 
+            price = mid - self.spread
             self.bid(self.trade_size - bid_size - self.position, price)
 
         # If outstanding asks are too far from mid, lockdown.
