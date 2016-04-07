@@ -32,14 +32,14 @@ class VolMonitor(BookClient):
     def done(self, oid):
         pass
         
-    def generateStamp(self):
+    def generate_stamp(self):
         mid = self.book.getMid()
         self.mids.append(mid)
         if self.debug:
-            pprint('volatility: %0.4f' % self.getHourlyVolatility())
-        reactor.callLater(self.delta, self.generateStamp)
+            pprint('volatility: %0.4f' % self.get_hourly_volatility())
+        reactor.callLater(self.delta, self.generate_stamp)
 
-    def getHourlyVolatility(self):
+    def get_hourly_volatility(self):
         series = pandas.Series(self.mids)
         return math.sqrt(3600. / self.delta)*(series - series.shift(1)).std()
 
@@ -54,5 +54,5 @@ if __name__ == '__main__':
 
     connectWS(factory)
 
-    reactor.callLater(1.0, vm.generateStamp)
+    reactor.callLater(1.0, vm.generate_stamp)
     reactor.run()

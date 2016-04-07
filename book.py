@@ -20,7 +20,7 @@ class InsufficientSizeForVWAP(Exception):
 # It is often useful to consolidate them into
 # an update method.
 class BookClient:
-    def onBookConnected(self, book):
+    def on_book_connected(self, book):
         self.book = book
 
     def add(self, oid, side, price, size):
@@ -35,7 +35,7 @@ class BookClient:
     def done(self, oid):
         raise NotImplementedError
 
-    def onSequenceGap(self):
+    def on_sequence_gap(self):
         raise NotImplementedError
 
 class Book(BlobClient):
@@ -47,16 +47,16 @@ class Book(BlobClient):
         self.clients = []
 
         # Internal data structures for storing orders.
-        self.ordersById = {}
+        self.orders_by_id = {}
         self.bids = FastRBTree()
         self.asks = FastRBTree()
 
-    def addClient(self, client):
+    def add_client(self, client):
         self.clients.append(client)
-        client.onBookConnected(self)
+        client.on_book_connected(self)
 
     # Download orderbook via the REST api and add to trees.
-    def onOpen(self):
+    def on_open(self):
         r = requests.get('https://api.exchange.coinbase.com/products/BTC-USD/book', params={'level': 3})
         book = r.json()
         for bid in book["bids"]:
@@ -65,116 +65,110 @@ class Book(BlobClient):
             self.add(ask[2], "sell", float(ask[0]), float(ask[1]))
         # Track sequence since the BlobProtocol will check this off us to look for gaps.
         self.sequence = book["sequence"]
-
         if self.debug:
             pprint('downloaded (bids: %d, asks: %d)' % (len(self.bids), len(self.asks)))
 
     # Orderbook messages require lots of tree manipulations.
     def add(self, oid, side, price, size):
         order = Order(oid, side, price, size)
-        tree = self._getOrderTree(order.side)
+        tree = self._get_order_tree(order.side)
         try:
             tree[order.price].append(order)
         except KeyError:
             tree[order.price] = [order]
-        self.ordersById[order.oid] = order
-
+        self.orders_by_id[order.oid] = order
         if self.debug:
             pprint('added (%s, %s, $ %0.2f, %0.4f BTC)' % (oid, side, price, size))
         for client in self.clients:
             client.add(oid, side, price, size)
 
     def change(self, oid, side, newsize):
-        order = self._getOrderById(oid)
+        order = self._get_order_by_id(oid)
         if order is None:
             return
-        tree = self._getOrderTree(side)
+        tree = self._get_order_tree(side)
         oidx = tree[order.price].index(order)
-
         tree[order.price][oidx] = Order(oid, side, order.price, newsize)
-        self.ordersById[order.oid] = tree[order.price][oidx]
-
+        self.orders_by_id[order.oid] = tree[order.price][oidx]
         if self.debug:
             pprint('changed (%s, %s, $ %0.2f, %0.2f BTC)' % (oid, side, order.price, newsize))
         for client in self.clients:
             client.change(oid, side, newsize)
 
     def match(self, oid, side, price, size):
-        tree = self._getOrderTree(side)
-        if self._getOrderById(oid) is None or tree[price][0].oid != oid:
+        tree = self._get_order_tree(side)
+        if self._get_order_by_id(oid) is None or tree[price][0].oid != oid:
             return
         tree[price][0] = Order(tree[price][0].oid, tree[price][0].side, tree[price][0].price, tree[price][0].size - size)
-        self.ordersById[oid] = tree[price][0]
+        self.orders_by_id[oid] = tree[price][0]
         if tree[price][0].size <= 0:
             self.done(oid)
-
         if self.debug:
             pprint('matched (%s, %s, $ %0.2f, %0.4f BTC)' % (oid, side, price, size))
         for client in self.clients:
             client.match(oid, side, price, size)
 
     def done(self, oid):
-        order = self._getOrderById(oid)
+        order = self._get_order_by_id(oid)
         if order is None:
             return
-        tree = self._getOrderTree(order.side)
+        tree = self._get_order_tree(order.side)
         if len(tree[order.price]) > 1:
             tree[order.price].remove(order)
         else:
             del tree[order.price]
-        del self.ordersById[oid]
-
+        del self.orders_by_id[oid]
         if self.debug:
             pprint('removed (%s)' % (oid,))
         for client in self.clients:
             client.done(oid)
 
-    def onSequenceGap(self):
+    def on_sequence_gap(self):
         if self.debug:
             pprint('sequence gap')
         for client in self.clients:
-            client.onSequenceGap()
+            client.on_sequence_gap()
 
     # Get functionality, mostly self-explanatory.
-    def getBestBidPrice(self):
+    def get_best_bid(self):
         if len(self.bids) == 0:
             return None
-        return self._getOrderTree("buy").max_item()[0]
+        return self._get_order_tree("buy").max_item()[0]
 
-    def getBestAskPrice(self):
+    def get_best_ask(self):
         if len(self.asks) == 0:
             return None
-        return self._getOrderTree("sell").min_item()[0]
+        return self._get_order_tree("sell").min_item()[0]
 
-    def getBestBidQuote(self):
+    def get_best_bid_quote(self):
         if len(self.bids) == 0:
             return None, None
-        price, orders = self._getOrderTree("buy").max_item()
+        price, orders = self._get_order_tree("buy").max_item()
         size = 0.0
         for order in orders:
             size += order.size
         return price, size
 
-    def getBestAskQuote(self):
+    def get_best_ask_quote(self):
         if len(self.asks) == 0:
             return None
-        price, orders = self._getOrderTree("sell").min_item()
+        price, orders = self._get_order_tree("sell").min_item()
         size = 0.0
         for order in orders:
             size += order.size
         return price, size
 
-    def getMid(self):
+    def get_mid(self):
         if len(self.bids) == 0 or len(self.asks) == 0:
             return None
-        return 0.5 * (self.getBestBidPrice() + self.getBestAskPrice())
+        return 0.5 * (self.get_best_bid() + self.get_best_ask())
 
     # Returns VWAP for a given target size.
     # Positive sizes will sweep up the asks.
     # Negative sizes will sweep down the bids.
-    def getVWAP(self, target):
+    def get_vwap(self, target):
         side = "buy" if target < 0 else "sell"
-        tree = self._getOrderTree(side)
+        tree = self._get_order_tree(side)
         iterator = tree.items(True) if target < 0 else tree.items()
         levels = [(l[0], sum([o.size for o in l[1]])) for l in iterator]
         
@@ -192,12 +186,12 @@ class Book(BlobClient):
         return avgprice / cumsize
 
     # Order operations.
-    def _getOrderById(self, oid):
+    def _get_order_by_id(self, oid):
         try:
-            return self.ordersById[oid]
+            return self.orders_by_id[oid]
         except:
             return None
 
     # Return red-black binary tree by side of book. 
-    def _getOrderTree(self, side):
+    def _get_order_tree(self, side):
         return self.bids if side == "buy" else self.asks

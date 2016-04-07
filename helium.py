@@ -13,7 +13,7 @@ import scipy.stats
 from blobprotocol import BlobProtocol
 from volmonitor import VolMonitor
 from book import Book
-from strategy import RESTProtocol, Strategy, readKeys
+from strategy import RESTProtocol, Strategy, read_keys
 
 
 class Helium(Strategy):
@@ -21,34 +21,34 @@ class Helium(Strategy):
         Strategy.__init__(self, rest, debug=params['debug'])
 
         self.spread = params['spread']
-        self.tradeSize = params['tradeSize']
-        self.dumpOnLockdown = params['dumpOnLockdown']
-        self.volThresh = params['volThresh']
-        self.maxDistance = params['maxDistance']
+        self.trade_size = params['trade_size']
+        self.dump_on_lockdown = params['dump_on_lockdown']
+        self.vol_thresh = params['vol_thresh']
+        self.max_distance = params['max_distance']
 
         self.volmonitor = None
-        self.previousMid = None
+        self.previous_mid = None
 
     # Main update loop.
     def update(self):
         if not self.enabled:
             return
 
-        mid = self.book.getMid()
+        mid = self.book.get_mid()
         # If no change in midpoint, skip.
-        if self.previousMid is not None and self.previousMid == mid:
+        if self.previous_mid is not None and self.previous_mid == mid:
             return
 
-        # We want bids + position = tradeSize...
-        bidSize, askSize = self.getOpenSize()
-        if bidSize + self.position < self.tradeSize:
+        # We want bids + position = trade_size...
+        bid_size, ask_size = self.get_open_size()
+        if bid_size + self.position < self.trade_size:
             price = mid - self.spread/2.
-            self.bid(self.tradeSize - bidSize - self.position, price)
+            self.bid(self.trade_size - bid_size - self.position, price)
 
         # If outstanding asks are too far from mid, lockdown.
-        if askSize > 0.0:
-            price = list(self.openOrders.values())[0].price
-            if price - mid > self.maxDistance:
+        if ask_size > 0.0:
+            price = list(self.open_orders.values())[0].price
+            if price - mid > self.max_distance:
                 self.lockdown("max distance exceeded")
 
         # We leave the vol monitor as optional, skip checks if not found.
@@ -56,29 +56,27 @@ class Helium(Strategy):
             return
 
         # Check for excessive volatility and lockdown if need be.
-        vol = self.volmonitor.getHourlyVolatility()
-        if vol >= self.volThresh:
+        vol = self.volmonitor.get_hourly_volatility()
+        if vol >= self.vol_thresh:
             self.lockdown("excessive volatility")
 
     def lockdown(self, reason):
         Strategy.lockdown(self, reason)
 
-    def onPlace(self, oid, side, price, size, otype):
-        Strategy.onPlace(self, oid, side, price, size, otype)
+    def on_place(self, oid, side, price, size, otype):
+        Strategy.on_place(self, oid, side, price, size, otype)
 
-    def onPlaceFail(self, reason):
-        Strategy.onPlaceFail(self, reason)
+    def on_place_fail(self, reason):
+        Strategy.on_place_fail(self, reason)
 
-    def onPartialFill(self, order, remaining):
-        Strategy.onPartialFill(self, order, remaining)
-
+    def on_partial_fill(self, order, remaining):
+        Strategy.on_partial_fill(self, order, remaining)
         if order.side == "buy":
             price = order.price + self.spread
             self.ask(order.size - remaining, price)
 
-    def onCompleteFill(self, order):
-        Strategy.onCompleteFill(self, order)
-
+    def on_complete_fill(self, order):
+        Strategy.on_complete_fill(self, order)
         if order.side == "buy":
             price = order.price + self.spread
             self.ask(order.size, price)
@@ -90,10 +88,10 @@ if __name__ == '__main__':
     factory.protocol = BlobProtocol
 
     # Setup params from params.py.
-    paramsFile = sys.argv[1]
-    exec(compile(open(paramsFile).read(), paramsFile, 'exec')) 
+    params_file = sys.argv[1]
+    exec(compile(open(params_file).read(), params_file, 'exec')) 
 
-    rest = RESTProtocol(readKeys('keys.txt'), debug=True)
+    rest = RESTProtocol(read_keys('keys.txt'), debug=True)
     hh = Helium(rest, params=params)
     hh.enabled = False
 
@@ -101,11 +99,11 @@ if __name__ == '__main__':
     hh.volmonitor = vm
 
     bb = Book(factory.protocol, debug=False)
-    bb.addClient(hh)
-    bb.addClient(vm)
+    bb.add_client(hh)
+    bb.add_client(vm)
 
     connectWS(factory)
 
-    reactor.callLater(1.0, vm.generateStamp)
+    reactor.callLater(1.0, vm.generate_stamp)
     reactor.callLater(1.0, hh.enable)
     reactor.run()

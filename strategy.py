@@ -17,7 +17,7 @@ import codecs
 
 
 # Read authorization keys from file.
-def readKeys(filename):
+def read_keys(filename):
     with open(filename, "r") as f:
         return f.read().split("\n")
 
@@ -29,7 +29,7 @@ class RESTProtocol:
         self.debug = debug
 
     # Submit a trade.
-    def submitTrade(self, params):
+    def submit_trade(self, params):
         if self.debug:
             pprint('trade: %s' % str(params))
         r = requests.post("https://api.exchange.coinbase.com/orders", json=params, auth=self.auth)
@@ -41,7 +41,7 @@ class RESTProtocol:
     # Submit a cancelAll.
     # TODO: this should be duplicated/modified to create a 
     # method for cancelling single orders.
-    def submitCancelAll(self):
+    def submit_cancel_all(self):
         if self.debug:
             pprint('cancelling all orders')
         r = requests.delete("https://api.exchange.coinbase.com/orders", auth=self.auth)
@@ -80,12 +80,12 @@ class Strategy(BookClient):
         # These are the only parameters.
         # Subclasses of Strategy should combine these into a params dict.
         self.debug = debug
-        self.dumpOnLockdown = False
+        self.dump_on_lockdown = False
 
         # Track enabled: has the book been primed, open orders, and BTC position.       
         self.enabled = True
-        self.lockdownReason = None
-        self.openOrders = {}
+        self.lockdown_reason = None
+        self.open_orders = {}
         self.position = 0.
 
     # Makes strategy wait while book is primed.
@@ -104,7 +104,7 @@ class Strategy(BookClient):
 
     def match(self, oid, side, price, size):
         # Look for our fills here!
-        order = self.openOrders.get(oid)
+        order = self.open_orders.get(oid)
         if order is not None:
             remaining = order.size - size
 
@@ -113,18 +113,18 @@ class Strategy(BookClient):
 
             # Check with some epsilon for complete vs. partial fills.
             if remaining <= 0.00000001:
-                del self.openOrders[oid]
-                self.onCompleteFill(order)
+                del self.open_orders[oid]
+                self.on_complete_fill(order)
             else:
-                self.openOrders[oid] = Order(oid, side, price, remaining)
-                self.onPartialFill(order, remaining)
+                self.open_orders[oid] = Order(oid, side, price, remaining)
+                self.on_partial_fill(order, remaining)
         # Relay!
         self.update()
 
     def done(self, oid):
         self.update()
 
-    def onSequenceGap(self):
+    def on_sequence_gap(self):
         self.lockdown('sequence gap')
 
     # Main update loop.
@@ -132,16 +132,16 @@ class Strategy(BookClient):
         if not self.enabled:
             return
 
-    def dumpBTC(self):
+    def dump_btc(self):
         self.trade(self.position, "sell", otype="market")
 
     def lockdown(self, reason):
         if self.debug:
             pprint("lockdown: %s" % reason)
-        self.lockdownReason = reason
-        success = self.rest.submitCancelAll()
-        if self.dumpOnLockdown:
-            self.dumpBTC()
+        self.lockdown_reason = reason
+        success = self.rest.submit_cancel_all()
+        if self.dump_on_lockdown:
+            self.dump_btc()
         self.disable()
 
     # We assume 100% fill rate on market orders.
@@ -149,44 +149,44 @@ class Strategy(BookClient):
     # maker_order_id on matches we would not see
     # our market orders. Since we don't do it too often
     # this has not been changed.
-    def onPlace(self, oid, side, price, size, otype):
+    def on_place(self, oid, side, price, size, otype):
         if self.debug:
             pprint('onPlace: %s' % oid)
 
-        # If limit order, add to openOrders.
+        # If limit order, add to open_orders.
         # If market order, change BTC position now.
         if otype == "limit":
             order = Order(oid, side, price, size)
-            self.openOrders[oid] = order
+            self.open_orders[oid] = order
         elif otype == "market":
             self.position += size if side == "buy" else -size
 
-    def onPlaceFail(self, reason):
+    def on_place_fail(self, reason):
         if self.debug:
             pprint('onPlaceFail: %s' % reason)
 
-    def onPartialFill(self, order, remaining):
+    def on_partial_fill(self, order, remaining):
         if self.debug:
             pprint('onPartialFill: %s, with %0.4f remaining' % (str(order), remaining))
 
-    def onCompleteFill(self, order):
+    def on_complete_fill(self, order):
         if self.debug:
             pprint('onCompleteFill: %s' % (str(order)))
 
-    def getOpenSize(self):
-        bidSize = 0.0
-        askSize = 0.0
-        for order in self.openOrders.values():
+    def get_open_size(self):
+        bid_size = 0.0
+        ask_size = 0.0
+        for order in self.open_orders.values():
             if order.side == "buy":
-                bidSize += order.size
+                bid_size += order.size
             elif order.side == "sell":
-                askSize += order.size
-        return bidSize, askSize
+                ask_size += order.size
+        return bid_size, ask_size
 
     # Submit trade.
     def trade(self, size, side, price=None, otype="limit", product_id="BTC-USD", post_only=True):
         if otype == "limit" and not price:
-            self.onPlaceFail("price not specified")
+            self.on_place_fail("price not specified")
 
         # Prevent size from being too precise.
         size  = math.floor(1e8 * size) / 1e8
@@ -203,11 +203,11 @@ class Strategy(BookClient):
 
         # Send request. There's no need to trigger onPlace for market orders
         # since they will only occur with lockdown.
-        success, res = self.rest.submitTrade(params)
+        success, res = self.rest.submit_trade(params)
         if success: 
-            self.onPlace(res, side, price, size, otype)
+            self.on_place(res, side, price, size, otype)
         else: 
-            self.onPlaceFail(res)
+            self.on_place_fail(res)
 
     # Prices and sizes cannot be too precise.
     # Therefore, ceiling ask prices and floor bid prices.
