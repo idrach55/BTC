@@ -44,10 +44,13 @@ class RESTProtocol:
     # Submit a cancel.
     def submit_cancel(self, oid=None):
         if self.debug:
-            message = 'cancelling order %s' % oid if oid is not None else 'cancelling all orders'
-            pprint(message)
+            if oid is not None:
+                pprint('cancelling order %s' % oid)
+            else:
+                pprint('cancelling all orders')
         url = 'https://api.exchange.coinbase.com/orders'
-        url += '/%s' % oid if oid is not None else ''
+        if oid is not None:
+            url += '/%s' % oid
         r = requests.delete(url, auth=self.auth)
         if r.status_code == 200:
             return True, None
