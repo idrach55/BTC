@@ -12,9 +12,8 @@ testparams = {
                 "debug"            : False,
                 "dump_on_lockdown" : True,
                 "max_distance"     : 2.00, 
-                "spread_factor"    : 1.0, 
-                "trade_size"       : 1.0, 
-                "vol_thresh"       : 1.75
+                "spread"           : 0.10, 
+                "trade_size"       : 1.0
              }
 
 class DemoHelium(Helium):
@@ -63,7 +62,7 @@ class MyTest(unittest.TestCase):
         book.match("B1", "buy", 100.00, 0.5)
 
         # Check that the ask was placed.
-        assert strat.open_orders == {"A1": Order("A1", "sell", 100.35, 0.5), "B1": Order("B1", "buy", 100.00, 0.5)}
+        assert strat.open_orders == {"A1": Order("A1", "sell", 100.10, 0.5), "B1": Order("B1", "buy", 100.00, 0.5)}
 
     def test_onCompleteFill(self):
         book = DemoBook()
@@ -77,23 +76,7 @@ class MyTest(unittest.TestCase):
         # Hit 2.0 of the bids at $100, 1.0 of the original order and 1.0 of the strategy's bid.
         book.match("Z1", "buy", 100.00, 1.0)
         book.match("B1", "buy", 100.00, 1.0)
-        assert strat.open_orders == {"A1": Order("A1", "sell", 100.60, 1.0)}
-
-    def test_lockdownOnExcessiveVolality(self):
-        class DemoVolMonitor:
-            def get_hourly_volatility(self):
-                return 50.00
-
-        book = DemoBook()
-        strat = DemoHelium()
-        strat.volmonitor = DemoVolMonitor()
-        book.add_client(strat)
-
-        # Update the size of order Z4 to trigger update().
-        # When the strat checks the hourly vol it should lockdown.
-        book.change("Z4", "sell", 1.0)
-        assert strat.enabled == False
-        assert strat.lockdown_reason == "excessive volatility"
+        assert strat.open_orders == {"A1": Order("A1", "sell", 100.10, 1.0)}
 
     def test_lockdown_max_distance(self):
         book = DemoBook()
@@ -107,7 +90,7 @@ class MyTest(unittest.TestCase):
         # Match the bid so the strat places an ask.
         book.match("Z1", "buy", 100.00, 1.0)
         book.match("B1", "buy", 100.00, 1.0)
-        assert strat.open_orders["A1"] == Order("A1", "sell", 100.60, 1.0)
+        assert strat.open_orders["A1"] == Order("A1", "sell", 100.10, 1.0)
 
         # Change midpoint to 20.50. 
         # When the strat checks the distance it should lockdown.

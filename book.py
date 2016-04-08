@@ -129,7 +129,7 @@ class Book(BlobClient):
         for client in self.clients:
             client.on_sequence_gap()
 
-    # Get functionality, mostly self-explanatory.
+    # Get functionality, mostly self explanatory.
     def get_best_bid(self):
         if len(self.bids) == 0:
             return None

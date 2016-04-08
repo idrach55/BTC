@@ -1,6 +1,8 @@
-# Author: Isaac Drachman
-# Description:
-# Class implementations for Strategy, RESTProtocol, and Authorizer.
+'''
+Author: Isaac Drachman
+Description:
+Class implementations for Strategy, RESTProtocol, and Authorizer.
+'''
 
 from twisted.internet import reactor
 from twisted.internet.error import ReactorNotRunning
