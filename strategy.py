@@ -41,15 +41,13 @@ class RESTProtocol:
             return True, r.json()["id"]
         return False, r.json()["message"]
 
-    # Submit a cancelAll.
-    # TODO: this should be duplicated/modified to create a
-    # method for cancelling single orders.
+    # Submit a cancel.
     def submit_cancel(self, oid=None):
         if self.debug:
-            pprint('cancelling all orders')
-        url = "https://api.exchange.coinbase.com/orders"
-        if oid != None
-            url += "/" + oid
+            message = 'cancelling order %s' % oid if oid is not None else 'cancelling all orders'
+            pprint(message)
+        url = 'https://api.exchange.coinbase.com/orders'
+        url += '/%s' % oid if oid is not None else ''
         r = requests.delete(url, auth=self.auth)
         if r.status_code == 200:
             return True, None

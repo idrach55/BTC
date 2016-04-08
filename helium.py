@@ -104,6 +104,5 @@ if __name__ == '__main__':
 
     connectWS(factory)
 
-    reactor.callLater(1.0, vm.generate_stamp)
     reactor.callLater(1.0, hh.enable)
     reactor.run()
