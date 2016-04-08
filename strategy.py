@@ -40,12 +40,15 @@ class RESTProtocol:
         return False, r.json()["message"]
 
     # Submit a cancelAll.
-    # TODO: this should be duplicated/modified to create a 
+    # TODO: this should be duplicated/modified to create a
     # method for cancelling single orders.
-    def submit_cancel_all(self):
+    def submit_cancel(self, oid=None):
         if self.debug:
             pprint('cancelling all orders')
-        r = requests.delete("https://api.exchange.coinbase.com/orders", auth=self.auth)
+        url = "https://api.exchange.coinbase.com/orders"
+        if oid != None
+            url += "/" + oid
+        r = requests.delete(url, auth=self.auth)
         if r.status_code == 200:
             return True, None
         return False, r.json()["message"]
@@ -98,7 +101,7 @@ class Strategy(BookClient):
         self.dump_on_lockdown = False
         self.stop_loss = None
 
-        # Track enabled: has the book been primed, open orders, and BTC position.       
+        # Track enabled: has the book been primed, open orders, and BTC position.
         self.enabled = True
         self.lockdown_reason = None
         self.open_orders = {}
@@ -126,7 +129,7 @@ class Strategy(BookClient):
         if order is not None:
             remaining = order.size - size
 
-            # Adjust internal BTC position accordingly. 
+            # Adjust internal BTC position accordingly.
             self.btc_position += size if side == "buy" else -size
             self.usd_position += size * price if side == "sell" else -size * price
 
@@ -210,7 +213,7 @@ class Strategy(BookClient):
     def trade(self, size, side, price=None, otype="limit", product_id="BTC-USD", post_only=True):
         if not self.enabled:
             return
-            
+
         if otype == "limit" and not price:
             self.on_place_fail("price not specified")
 
@@ -230,9 +233,9 @@ class Strategy(BookClient):
         # Send request. There's no need to trigger onPlace for market orders
         # since they will only occur with lockdown.
         success, res = self.rest.submit_trade(params)
-        if success: 
+        if success:
             self.on_place(res, side, price, size, otype)
-        else: 
+        else:
             self.on_place_fail(res)
 
     # Prices and sizes cannot be too precise.
