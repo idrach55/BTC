@@ -66,6 +66,8 @@ class BlobProtocol(WebSocketClientProtocol):
                 # Forward this on to the client.
                 self.client.on_sequence_gap()
                 return
+            # Otherwise update sequence.
+            self.client.sequence = msg["sequence"]
             # Forward messages internally based on type.
             if msg["type"] == "open":
                 self.add(msg)

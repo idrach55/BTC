@@ -30,7 +30,6 @@ class Helium(Strategy):
 
         self.volmonitor = None
         self.previous_mid = None
-        self.spread = None
 
     # Main update loop.
     def update(self):
@@ -56,8 +55,7 @@ class Helium(Strategy):
         # We want bids + position = trade_size...
         bid_size, ask_size = self.get_open_size()
         if bid_size + self.btc_position < self.trade_size - 0.00000001:
-            self.spread = self.spread_factor * 0.5 * (ask_vwap - bid_vwap) 
-            price = mid - self.spread
+            price = mid - self.spread_factor * 0.5 * (ask_vwap - bid_vwap) 
             self.bid(self.trade_size - bid_size - self.btc_position, price)
 
         # If outstanding asks are too far from mid, lockdown.
@@ -81,6 +79,12 @@ class Helium(Strategy):
         if vol >= self.vol_thresh:
             self.lockdown("excessive volatility")
 
+    def place_spread_ask(self, size, bought_at):
+        ask_vwap = self.book.get_vwap(self.trade_size)
+        bid_vwap = self.book.get_vwap(-self.trade_size)
+        price = bought_at + self.spread_factor * (ask_vwap - bid_vwap) 
+        self.ask(size, price)
+
     def lockdown(self, reason):
         Strategy.lockdown(self, reason)
 
@@ -93,14 +97,12 @@ class Helium(Strategy):
     def on_partial_fill(self, order, remaining):
         Strategy.on_partial_fill(self, order, remaining)
         if order.side == "buy":
-            price = order.price + self.spread
-            self.ask(order.size - remaining, price)
+            self.place_spread_ask(order.size - remaining, order.price)
 
     def on_complete_fill(self, order):
         Strategy.on_complete_fill(self, order)
         if order.side == "buy":
-            price = order.price + self.spread
-            self.ask(order.size, price)
+            self.place_spread_ask(order.size, order.price)
 
 
 if __name__ == '__main__':

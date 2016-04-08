@@ -32,12 +32,12 @@ class DemoBook(Book):
         # Create following book.
         '''
         Z1 1.0 - 100.00 | 100.10 - 1.0 Z3
-        Z2 0.5 -  99.50 | 101.00 - 0.5  Z4
+        Z2 1.0 -  99.50 | 101.00 - 1.0  Z4
         '''
         self.add("Z1", "buy",  100.00, 1.0)
-        self.add("Z2", "buy",   99.50, 0.5)
+        self.add("Z2", "buy",   99.50, 1.0)
         self.add("Z3", "sell", 100.10, 1.0)
-        self.add("Z4", "sell", 101.00, 0.5)
+        self.add("Z4", "sell", 101.00, 1.0)
 
 class MyTest(unittest.TestCase):
     def test_update_bids(self):
@@ -63,7 +63,7 @@ class MyTest(unittest.TestCase):
         book.match("B1", "buy", 100.00, 0.5)
 
         # Check that the ask was placed.
-        assert strat.open_orders == {"A1": Order("A1", "sell", 100.05, 0.5), "B1": Order("B1", "buy", 100.00, 0.5)}
+        assert strat.open_orders == {"A1": Order("A1", "sell", 100.35, 0.5), "B1": Order("B1", "buy", 100.00, 0.5)}
 
     def test_onCompleteFill(self):
         book = DemoBook()
@@ -77,7 +77,7 @@ class MyTest(unittest.TestCase):
         # Hit 2.0 of the bids at $100, 1.0 of the original order and 1.0 of the strategy's bid.
         book.match("Z1", "buy", 100.00, 1.0)
         book.match("B1", "buy", 100.00, 1.0)
-        assert strat.open_orders == {"A1": Order("A1", "sell", 100.05, 1.0)}
+        assert strat.open_orders == {"A1": Order("A1", "sell", 100.60, 1.0)}
 
     def test_lockdownOnExcessiveVolality(self):
         class DemoVolMonitor:
@@ -107,7 +107,7 @@ class MyTest(unittest.TestCase):
         # Match the bid so the strat places an ask.
         book.match("Z1", "buy", 100.00, 1.0)
         book.match("B1", "buy", 100.00, 1.0)
-        assert strat.open_orders["A1"] == Order("A1", "sell", 100.05, 1.0)
+        assert strat.open_orders["A1"] == Order("A1", "sell", 100.60, 1.0)
 
         # Change midpoint to 20.50. 
         # When the strat checks the distance it should lockdown.
