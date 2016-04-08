@@ -1,6 +1,6 @@
-##################################
-#       UNDER CONSTRUCTION       #
-##################################
+'''
+UNDER CONSTRUCTION
+'''
 
 from autobahn.twisted.websocket import WebSocketClientFactory, connectWS
 from twisted.python import log
@@ -21,14 +21,12 @@ class Helium(Strategy):
     def __init__(self, rest, params):
         Strategy.__init__(self, rest, debug=params['debug'])
 
-        self.spread_factor    = params['spread_factor']
+        self.spread           = params['spread']
         self.trade_size       = params['trade_size']
         self.dump_on_lockdown = params['dump_on_lockdown']
-        self.vol_thresh       = params['vol_thresh']
         self.max_distance     = params['max_distance']
         self.stop_loss        = params.get('stop_loss')
 
-        self.volmonitor = None
         self.previous_mid = None
 
     # Main update loop.
@@ -36,13 +34,7 @@ class Helium(Strategy):
         if not self.enabled:
             return
 
-        try:
-            ask_vwap = self.book.get_vwap(self.trade_size)
-            bid_vwap = self.book.get_vwap(-self.trade_size)
-        except InsufficientSizeForVWAP as e:
-            ask_vwap = self.book.get_best_ask()
-            bid_vwap = self.book.get_best_bid()
-        mid = 0.5*(ask_vwap + bid_vwap)
+        mid = self.book.get_mid()
 
         if self.initial_marking is None and self.stop_loss is not None:
             success, usd, btc = self.rest.get_balances()
@@ -55,7 +47,7 @@ class Helium(Strategy):
         # We want bids + position = trade_size...
         bid_size, ask_size = self.get_open_size()
         if bid_size + self.btc_position < self.trade_size - 0.00000001:
-            price = mid - self.spread_factor * 0.5 * (ask_vwap - bid_vwap) 
+            price = mid - 0.5 * self.spread
             self.bid(self.trade_size - bid_size - self.btc_position, price)
 
         # If outstanding asks are too far from mid, lockdown.
@@ -70,19 +62,8 @@ class Helium(Strategy):
             if marked - self.initial_marking <= -self.stop_loss:
                 self.lockdown("stop loss of %0.2f triggered" % self.stop_loss)
 
-        # We leave the vol monitor as optional, skip checks if not found.
-        if self.volmonitor is None:
-            return
-
-        # Check for excessive volatility and lockdown if need be.
-        vol = self.volmonitor.get_hourly_volatility()
-        if vol >= self.vol_thresh:
-            self.lockdown("excessive volatility")
-
     def place_spread_ask(self, size, bought_at):
-        ask_vwap = self.book.get_vwap(self.trade_size)
-        bid_vwap = self.book.get_vwap(-self.trade_size)
-        price = bought_at + self.spread_factor * (ask_vwap - bid_vwap) 
+        price = bought_at + self.spread 
         self.ask(size, price)
 
     def lockdown(self, reason):
@@ -118,12 +99,8 @@ if __name__ == '__main__':
     hh = Helium(rest, params=params)
     hh.enabled = False
 
-    vm = VolMonitor(1.0)
-    hh.volmonitor = vm
-
     bb = Book(factory.protocol, debug=False)
     bb.add_client(hh)
-    bb.add_client(vm)
 
     connectWS(factory)
 
