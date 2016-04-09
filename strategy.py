@@ -43,11 +43,6 @@ class RESTProtocol:
 
     # Submit a cancel.
     def submit_cancel(self, oid=None):
-        if self.debug:
-            if oid is not None:
-                pprint('cancelling order %s' % oid)
-            else:
-                pprint('cancelling all orders')
         url = 'https://api.exchange.coinbase.com/orders'
         if oid is not None:
             url += '/%s' % oid
@@ -202,15 +197,27 @@ class Strategy(BookClient):
         if self.debug:
             pprint('on_complete_fill: %s' % (str(order)))
 
+    def get_open_bids(self):
+        return [order for order in self.open_orders.values() if order.side == "buy"]
+
+    def get_open_asks(self):
+        return [order for order in self.open_orders.values() if order.side == "sell"]
+
     def get_open_size(self):
-        bid_size = 0.0
-        ask_size = 0.0
-        for order in self.open_orders.values():
-            if order.side == "buy":
-                bid_size += order.size
-            elif order.side == "sell":
-                ask_size += order.size
-        return bid_size, ask_size
+        bid_size = sum(map(lambda order: order.size, self.get_open_bids()))
+        ask_size = sum(map(lambda order: order.size, self.get_open_asks()))
+        return bid_size, ask_size 
+
+    def cancel(self, oid=None):
+        success = self.rest.submit_cancel(oid=oid)
+        if success and oid is None:
+            if self.debug:
+                pprint('cancelled all orders')
+            self.open_orders = {}
+        elif success and oid is not None:
+            if self.debug:
+                pprint('cancelled order %s' % oid)
+            del self.open_orders[oid]
 
     # Submit trade.
     def trade(self, size, side, price=None, otype="limit", product_id="BTC-USD", post_only=True):
