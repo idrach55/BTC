@@ -25,8 +25,10 @@ def read_keys(filename):
     with open(filename, "r") as f:
         return f.read().split("\n")
 
-# This is the outlet to the exchange via the REST api.
-# We use this to submit orders, cancel requests, and soon to get account data.
+'''
+This is the outlet to the exchange via the REST api.
+We use this to submit orders, cancel requests, and soon to get account data.
+'''
 class RESTProtocol:
     def __init__(self, keys, debug=False):
         self.auth = Authorizer(keys)
@@ -168,11 +170,13 @@ class Strategy(BookClient):
         except ReactorNotRunning as e:
         	return
 
-    # We assume 100% fill rate on market orders.
-    # Since the blob protocol (for now) only handles
-    # maker_order_id on matches we would not see
-    # our market orders. Since we don't do it too often
-    # this has not been changed.
+    '''
+    We assume 100 percent fill rate on market orders.
+    Since the blob protocol (for now) only handles
+    maker_order_id on matches we would not see
+    our market orders. Since we don't do it too often
+    this has not been changed.
+    '''
     def on_place(self, oid, side, price, size, otype):
         if self.debug:
             pprint('on_place: %s' % oid)
@@ -240,19 +244,23 @@ class Strategy(BookClient):
         if otype == "limit":
             params["post_only"] = True
 
-        # Send request. There's no need to trigger onPlace for market orders
-        # since they will only occur with lockdown.
+        '''
+        Send request. There's no need to trigger onPlace for market orders
+        since they will only occur with lockdown.
+        '''
         success, res = self.rest.submit_trade(params)
         if success:
             self.on_place(res, side, price, size, otype)
         else:
             self.on_place_fail(res)
 
-    # Prices and sizes cannot be too precise.
-    # Therefore, ceiling ask prices and floor bid prices.
-    # TODO: this is not general enough. The above method
-    # should do this on its own in some way. Additionally
-    # only sizes on asks are fixed, but not bids.
+    '''
+    Prices and sizes cannot be too precise.
+    Therefore, ceiling ask prices and floor bid prices.
+    TODO: this is not general enough. The above method
+    should do this on its own in some way. Additionally
+    only sizes on asks are fixed, but not bids.
+    '''
     def ask(self, size, price):
         price = math.ceil(100 * price) / 100.
         self.trade(size, "sell", price=price)

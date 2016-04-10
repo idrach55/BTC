@@ -46,9 +46,10 @@ class Helium(Strategy):
                 if self.debug:
                     pprint("initial positions read %0.2f USD" % usd)
 
-        # We want bids + position = trade_size...
+        # We want bids + position = trade_size.
+        # However, minimum trade size is 0.01 btc.
         bid_size, ask_size = self.get_open_size()
-        if bid_size + self.btc_position < self.trade_size - 0.00000001:
+        if self.trade_size - (bid_size + self.btc_position) >= 0.01:
             self.time_of_last_bid = time()
             price = mid - 0.5 * self.spread
             self.bid(self.trade_size - bid_size - self.btc_position, price)
