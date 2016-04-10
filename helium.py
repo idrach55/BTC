@@ -36,7 +36,10 @@ class Helium(Strategy):
         if not self.enabled:
             return
 
-        mid = self.book.get_mid()
+        ask_vwap = self.book.get_vwap(self.trade_size)
+        bid_vwap = self.book.get_vwap(-self.trade_size)
+        # mid = self.book.get_mid()
+        mid = 0.5 * (bid_vwap + ask_vwap)
 
         if self.initial_marking is None and self.stop_loss is not None:
             success, usd, btc = self.rest.get_balances()
