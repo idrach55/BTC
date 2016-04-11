@@ -161,7 +161,7 @@ class Strategy(BookClient):
         if self.debug:
             pprint("lockdown: %s" % reason)
         self.lockdown_reason = reason
-        success = self.rest.submit_cancel_all()
+        success = self.cancel()
         if self.dump_on_lockdown:
             self.dump_btc()
         self.disable()
@@ -210,7 +210,7 @@ class Strategy(BookClient):
     def get_open_size(self):
         bid_size = sum(map(lambda order: order.size, self.get_open_bids()))
         ask_size = sum(map(lambda order: order.size, self.get_open_asks()))
-        return bid_size, ask_size 
+        return bid_size, ask_size
 
     def cancel(self, oid=None):
         success = self.rest.submit_cancel(oid=oid)

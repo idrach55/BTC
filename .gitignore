@@ -3,3 +3,4 @@ keys.txt
 .cache/*
 paramstight.py
 paramswide.py
+__pycache__/
