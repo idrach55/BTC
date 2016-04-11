@@ -22,10 +22,13 @@ class Helium(Strategy):
     def __init__(self, rest, params):
         Strategy.__init__(self, rest, debug=params['debug'])
 
+        if self.debug:
+            pprint('params: %s' % str(params))
         self.spread            = params['spread']
         self.trade_size        = params['trade_size']
         self.dump_on_lockdown  = params['dump_on_lockdown']
         self.max_distance      = params['max_distance']
+        self.shading           = params['shading']
         self.stop_loss         = params.get('stop_loss')
         self.max_inactive_time = params.get('max_inactive_time')
 
@@ -38,8 +41,8 @@ class Helium(Strategy):
 
         ask_vwap = self.book.get_vwap(self.trade_size)
         bid_vwap = self.book.get_vwap(-self.trade_size)
-        # mid = self.book.get_mid()
         mid = 0.5 * (bid_vwap + ask_vwap)
+        # mid = self.book.get_mid()
 
         if self.initial_marking is None and self.stop_loss is not None:
             success, usd, btc = self.rest.get_balances()
@@ -54,7 +57,7 @@ class Helium(Strategy):
         bid_size, ask_size = self.get_open_size()
         if self.trade_size - (bid_size + self.btc_position) >= 0.01:
             self.time_of_last_bid = time()
-            price = mid - 0.5 * self.spread
+            price = mid - self.shading * self.spread
             self.bid(self.trade_size - bid_size - self.btc_position, price)
 
         # If time since last bid exceeds maximum, re-place bids.
@@ -84,7 +87,7 @@ class Helium(Strategy):
             self.cancel(bid.oid)
 
         mid = self.book.get_mid()
-        self.bid(bid_size, mid - 0.5 * self.spread)
+        self.bid(bid_size, mid - self.shading * self.spread)
 
     def place_spread_ask(self, size, bought_at):
         price = bought_at + self.spread 
