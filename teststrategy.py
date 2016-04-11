@@ -70,8 +70,10 @@ class MyTest(unittest.TestCase):
 
     def test_lockdown(self):
         strat = DemoStrategy()
+        strat.open_orders = {"B1": Order("B1", "buy", 100.00, 0.5)}
         strat.lockdown("no reason")
         assert strat.enabled == False
+        assert strat.open_orders == {}
         assert strat.lockdown_reason == "no reason"
 
     def test_dump_on_lockdown(self):
@@ -79,5 +81,4 @@ class MyTest(unittest.TestCase):
         strat.dump_on_lockdown = True
         strat.position = 1.0
         strat.lockdown("no reason")
-        assert strat.enabled == False
         assert strat.btc_position == 0.0

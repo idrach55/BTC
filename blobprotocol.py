@@ -57,13 +57,9 @@ class BlobProtocol(WebSocketClientProtocol):
     def onMessage(self, payload, isBinary):
         if not isBinary:
             msg = json.loads(payload.decode('utf8'))
-            # Each message has a sequence. We expect the client
-            # to figure out what sequence is proper. For example:
-            # the book will download a level-3 over REST and get
-            # an initial sequence there.
             if msg["sequence"] <= self.client.sequence:
-                # If there's a gap we could have lost vital data.
-                # Forward this on to the client.
+                return
+            if msg["sequence"] > self.client.sequence + 1:
                 self.client.on_sequence_gap()
                 return
             # Otherwise update sequence.
