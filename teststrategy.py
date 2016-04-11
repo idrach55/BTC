@@ -24,7 +24,7 @@ class DummyRESTProtocol:
             oid = "A%d" % self.asks
         return True, oid
 
-    def submit_cancel_all(self):
+    def submit_cancel(self, oid=None):
         return True, None
 
     def get_balances(self):
