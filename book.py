@@ -10,7 +10,7 @@ from pprint import pprint
 import requests
 
 
-# Nifty namedtuples are nifty. 
+# Nifty namedtuples are nifty.
 Order = namedtuple('Order', ['oid', 'side', 'price', 'size'])
 
 class InsufficientSizeForVWAP(Exception):
@@ -45,6 +45,9 @@ class Book(BlobClient):
         self.debug = debug
         # A book can forward messages to multiple BookClients.
         self.clients = []
+
+        # Track sequence number for blob protocol.
+        self.sequence = None
 
         # Internal data structures for storing orders.
         self.orders_by_id = {}
@@ -171,7 +174,7 @@ class Book(BlobClient):
         tree = self._get_order_tree(side)
         iterator = tree.items(True) if target < 0 else tree.items()
         levels = [(l[0], sum([o.size for o in l[1]])) for l in iterator]
-        
+
         avgprice = 0.0
         target = abs(target)
         cumsize = target
@@ -192,6 +195,6 @@ class Book(BlobClient):
         except:
             return None
 
-    # Return red-black binary tree by side of book. 
+    # Return red-black binary tree by side of book.
     def _get_order_tree(self, side):
         return self.bids if side == "buy" else self.asks

@@ -6,6 +6,7 @@ Class implementations for BlobProtocol and its client class BlobClient.
 
 '''I don't claim to have any idea how autobahn works but it's good.'''
 from autobahn.twisted.websocket import WebSocketClientProtocol
+from twisted.internet import reactor
 from pprint import pprint
 
 import json
@@ -14,8 +15,8 @@ import json
 '''
 Client for BlobProtocol. All message types from the exchange websocket, i.e.
 add, change, match, and done are forwarded here in addition to onOpen:
-when the websocket is opened, and onSequenceGap: when the protocol detects 
-it missed a message off the exchange. 
+when the websocket is opened, and onSequenceGap: when the protocol detects
+it missed a message off the exchange.
 '''
 class BlobClient:
     def __init__(self, protocol):
@@ -43,19 +44,23 @@ class BlobClient:
 '''
 BlobProtocol is the inlet for all market data off the Coinbase exchange
 websocket. It inherits from an autobahn/twisted class to get some nice
-qualities to it. It opens, sends a subscribe to the exchange for the 
+qualities to it. It opens, sends a subscribe to the exchange for the
 bitcoin/US dollar pair, then is fed through onMessage.
 '''
 class BlobProtocol(WebSocketClientProtocol):
-    # Once the connection is open, hit the exchange with a subscribe.
+    '''Once the connection is open, hit the exchange with a subscribe.'''
     def onOpen(self):
         msg = json.dumps({'type': 'subscribe', 'product_id': 'BTC-USD'})
         self.sendMessage(msg.encode('utf-8'), isBinary=False)
-        self.client.on_open()
+        reactor.callLater(1.0, self.client.on_open)
 
-    # All exchange websocket methods come through here in json.
+    '''All exchange websocket methods come through here in json.'''
     def onMessage(self, payload, isBinary):
         if not isBinary:
+            # Skip messages until the book has been downloaded over REST.
+            if self.client.sequence is None:
+                return
+
             msg = json.loads(payload.decode('utf8'))
             if msg["sequence"] <= self.client.sequence:
                 return

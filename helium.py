@@ -90,7 +90,7 @@ class Helium(Strategy):
         self.bid(bid_size, mid - self.shading * self.spread)
 
     def place_spread_ask(self, size, bought_at):
-        price = bought_at + self.spread 
+        price = bought_at + self.spread
         self.ask(size, price)
 
     def lockdown(self, reason):
@@ -120,7 +120,7 @@ if __name__ == '__main__':
 
     # Setup params from params.py.
     params_file = sys.argv[1]
-    exec(compile(open(params_file).read(), params_file, 'exec')) 
+    exec(compile(open(params_file).read(), params_file, 'exec'))
 
     rest = RESTProtocol(read_keys('keys.txt'), debug=True)
     hh = Helium(rest, params=params)
@@ -131,5 +131,5 @@ if __name__ == '__main__':
 
     connectWS(factory)
 
-    reactor.callLater(1.0, hh.enable)
+    reactor.callLater(5.0, hh.enable)
     reactor.run()
