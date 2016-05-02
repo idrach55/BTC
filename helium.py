@@ -39,10 +39,10 @@ class Helium(Strategy):
         if not self.enabled:
             return
 
-        ask_vwap = self.book.get_vwap(self.trade_size)
-        bid_vwap = self.book.get_vwap(-self.trade_size)
-        mid = 0.5 * (bid_vwap + ask_vwap)
-        # mid = self.book.get_mid()
+        # ask_vwap = self.book.get_vwap(self.trade_size)
+        # bid_vwap = self.book.get_vwap(-self.trade_size)
+        # mid = 0.5 * (bid_vwap + ask_vwap)
+        mid = self.book.get_mid()
 
         if self.initial_marking is None and self.stop_loss is not None:
             success, usd, btc = self.rest.get_balances()
@@ -121,6 +121,10 @@ if __name__ == '__main__':
     # Setup params from params.py.
     params_file = sys.argv[1]
     exec(compile(open(params_file).read(), params_file, 'exec'))
+
+    if len(sys.argv) > 2:
+        params["spread"] = float(sys.argv[2])
+        params["shading"] = float(sys.argv[3])
 
     rest = RESTProtocol(read_keys('keys.txt'), debug=True)
     hh = Helium(rest, params=params)
