@@ -1,3 +1,5 @@
+package com.mycompany.app;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,22 +15,22 @@ import org.knowm.xchange.coinbase.dto.marketdata.CoinbasePrice;
 import org.knowm.xchange.coinbase.dto.marketdata.CoinbaseSpotPriceHistory;
 import org.knowm.xchange.coinbase.service.polling.CoinbaseMarketDataService;
 import org.knowm.xchange.currency.CurrencyPair;
-import org.knowm.xchange.dto.marketdata.Ticker;
+import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.knowm.xchange.service.polling.marketdata.PollingMarketDataService;
 
-public class CoinbaseMarketDataDemo
+public class App
 {
     public static void main(String[] args) throws IOException {
         Exchange coinbaseExchange = ExchangeFactory.INSTANCE.createExchange(CoinbaseExchange.class.getName());
         PollingMarketDataService marketDataService = coinbaseExchange.getPollingMarketDataService();
 
         generic(marketDataService);
-        raw((CoinbaseMarketDataService) marketDataService);
+        //raw((CoinbaseMarketDataService) marketDataService);
     }
 
     private static void generic(PollingMarketDataService marketDataService) throws IOException {
-        Ticker ticker = marketDataService.getTicker(CurrencyPair.BTC_USD, true);
-        System.out.println(ticker);
+        OrderBook book = marketDataService.getOrderBook(CurrencyPair.BTC_USD, null);
+        System.out.println(book);
     }
 
     private static void raw(CoinbaseMarketDataService marketDataService) throws IOException {
