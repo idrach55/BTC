@@ -23,7 +23,7 @@ import codecs
 # Read authorization keys from file.
 def read_keys(filename):
     with open(filename, "r") as f:
-        return f.read().split("\n")
+        return f.read().split("\n")[:3]
 
 '''
 This is the outlet to the exchange via the REST api.
