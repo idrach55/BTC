@@ -29,33 +29,11 @@ public class App
     }
 
     private static void generic(PollingMarketDataService marketDataService) throws IOException {
-        OrderBook book = marketDataService.getOrderBook(CurrencyPair.BTC_USD, null);
-        System.out.println(book);
-    }
-
-    private static void raw(CoinbaseMarketDataService marketDataService) throws IOException {
-        List<CoinbaseCurrency> currencies = marketDataService.getCoinbaseCurrencies();
-        System.out.println(currencies);
-
-        Map<String, BigDecimal> exchangeRates = marketDataService.getCoinbaseCurrencyExchangeRates();
-        System.out.println("Exchange Rates: " + exchangeRates);
-
-        String amount = "1.57";
-        CoinbasePrice buyPrice = marketDataService.getCoinbaseBuyPrice(new BigDecimal(amount));
-        System.out.println("Buy Price for " + amount + " BTC: " + buyPrice);
+        //OrderBook book = marketDataService.getOrderBook(CurrencyPair.BTC_USD, null);
+        //System.out.println(book);
 
         CoinbasePrice sellPrice = marketDataService.getCoinbaseSellPrice();
-        System.out.println("Sell Price: " + sellPrice);
-
-        CoinbaseMoney spotRate = marketDataService.getCoinbaseSpotRate("EUR");
-        System.out.println("Spot Rate: " + spotRate);
-
-        int page = 2;
-        CoinbaseSpotPriceHistory spotPriceHistory = marketDataService.getCoinbaseHistoricalSpotRates(page);
-        List<CoinbaseHistoricalSpotPrice> spotPriceHistoryList = spotPriceHistory.getSpotPriceHistory();
-        for (CoinbaseHistoricalSpotPrice coinbaseHistoricalSpotPrice : spotPriceHistoryList) {
-            System.out.println(coinbaseHistoricalSpotPrice);
-        }
-        System.out.println("...Retrieved " + spotPriceHistoryList.size() + " historical spot rates.");
+        CoinbasePrice buyPrice = marketDataService.getCoinbaseBuyPrice();
+        System.out.println(buyPrice + " | " + sellPrice);
     }
 }
