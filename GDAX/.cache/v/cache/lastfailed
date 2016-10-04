@@ -1,0 +1,6 @@
+{
+  "testbook.py::MyTest::test_getBestPrices": true,
+  "testbook.py::MyTest::test_getBestQuotes": true,
+  "testbook.py::MyTest::test_getMid": true,
+  "testbook.py::MyTest::test_getVWAP": true
+}
