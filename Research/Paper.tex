@@ -56,8 +56,8 @@
         1 - \alpha - (1 - \alpha)\eta & p \geq b_t \\
     \end{array} 
     \]    
-    We set $a_t,\,b_t = p_t$, i.e. the price at which the trade occurred was on the bid/ask. 
-    These probability distributions then need to be normalized.\\\\
+    We set $a_t,\,b_t = p_t$, i.e. we have that the price at which the trade occurred 
+    was on the bid/ask. These probability distributions then need to be normalized.\\\\
     When coding this model we create the sequence of vectors 
     $\{\mathbf{p}^t\}_{t \in \{0,\,1,\,...,\,T\}}$ such that each $\mathbf{p}^t$ has
     $\floor{800\sigma}$ components with
@@ -68,9 +68,9 @@
     the minimum increment (tick) of one cent. We denote the price $m_0 - 4\sigma + i/100$ 
     as $v_i$ for convenience. The expectation $\hat{\mu}_t$ can then be computed by
     \begin{align*}
-    \hat{\mu}_t & = \mathbb{E}F_t = \int_{-\infty}^{\infty} p\,f_t(p) \,\,\mathrm{d}p
-    \approx \sum_{i=0}^{\floor{800\sigma}} v_i\,p_i^t \\
-    & \approx \sum_{i=0}^{\floor{800\sigma}} (m_0 - 4\sigma + i/100)\,f_t(m_0 - 4\sigma + i/100)
+    \hat{\mu}_t & = \mathbb{E}F_t = \int_{-\infty}^{\infty} p\,f_t(p) \,\,\mathrm{d}p \\
+    & \approx \mathbf{v}\cdot\mathbf{p}^t
+    = \sum_{i=0}^{\floor{800\sigma}} v_i\,f_t(v_i)
     \end{align*}
 
 \end{document}
