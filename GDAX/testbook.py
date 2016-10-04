@@ -144,8 +144,8 @@ class MyTest(unittest.TestCase):
         book.add("C", "sell", 100.10, 0.75)
         book.add("D", "sell", 101.00, 0.5)
 
-        assert book.getBestBidPrice() == 100.00
-        assert book.getBestAskPrice() == 100.10
+        assert book.get_best_bid() == 100.00
+        assert book.get_best_ask() == 100.10
 
     def test_getBestQuotes(self):
         book = Book(DummyBlobProtocol())
@@ -160,8 +160,8 @@ class MyTest(unittest.TestCase):
         book.add("C", "sell", 100.10, 0.75)
         book.add("D", "sell", 101.00, 0.5)
 
-        assert book.getBestBidQuote() == (100.00, 1.0)
-        assert book.getBestAskQuote() == (100.10, 0.75)
+        assert book.get_best_bid_quote() == (100.00, 1.0)
+        assert book.get_best_ask_quote() == (100.10, 0.75)
 
     def test_getMid(self):
         book = Book(DummyBlobProtocol())
@@ -176,7 +176,7 @@ class MyTest(unittest.TestCase):
         book.add("C", "sell", 100.10, 0.75)
         book.add("D", "sell", 101.00, 0.5)
 
-        assert book.getMid() == 100.05
+        assert book.get_mid() == 100.05
 
     def test_getVWAP(self):
         book = Book(DummyBlobProtocol())
@@ -191,5 +191,5 @@ class MyTest(unittest.TestCase):
         book.add("C", "sell", 100.10, 0.75)
         book.add("D", "sell", 101.00, 0.5)
 
-        assert book.getVWAP(1.0) == (100.10 * 0.75 + 101.00 * 0.25)
-        assert book.getVWAP(-1.5) == (100.00 * 1.0 + 99.50 * 0.5) / 1.5
+        assert book.get_vwap(1.0) == (100.10 * 0.75 + 101.00 * 0.25)
+        assert book.get_vwap(-1.5) == (100.00 * 1.0 + 99.50 * 0.5) / 1.5
