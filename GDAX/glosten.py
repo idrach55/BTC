@@ -14,7 +14,7 @@ import scipy.stats as dists
 
 
 # Glosten-Milgrom Model
-class Monitor(Strategy):
+class Glosten(Strategy):
     def __init__(self, rest, params):
         Strategy.__init__(self, rest)
 
@@ -53,31 +53,31 @@ class Monitor(Strategy):
     def match(self, oid, side, price, size):
         if not self.initialized:
             return
-        adjside = 'buy' if side == 'sell' else 'sell'
-        self.traded(adjside, price)
+        side = 'buy' if side == 'sell' else 'sell'
+        self.traded(side, price)
         est = (self.vals*self.prob).sum()
-        pprint('%s of %0.4f at %0.2f, best est. is %0.2f'%(adjside[0], size, price, est))
+        pprint('%s of %0.4f at %0.2f, best est. is %0.2f'%(side[0], size, price, est))
         self.df = self.df.append({'t':int(datetime.today().strftime('%s')),
-                                  'px':price, 'sz':size,
-                                  'd':(1 if adjside == 'buy' else -1), 'e':est}, ignore_index=True)
-        self.df.to_csv(self.fn)
+                                  'px':price, 'sz':size, 'sd':side[0], 'e':est}, ignore_index=True)
+        if self.fn is not None:
+            self.df.to_csv(self.fn)
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
     factory = WebSocketClientFactory('wss://ws-feed.exchange.coinbase.com')
     factory.protocol = BlobProtocol
 
-    params = {'fn'    : 'data/glosten.csv',
+    params = {'fn'    : None,
               'sigma' : float(sys.argv[1]),
               'alpha' : float(sys.argv[2]),
               'eta'   : float(sys.argv[3])}
 
     rest = RESTProtocol(read_keys('keys.txt'), debug=True)
-    mon = Monitor(rest, params=params)
-    mon.enabled = False
+    gm = Glosten(rest, params=params)
+    gm.enabled = False
 
     bb = Book(factory.protocol, debug=False)
-    bb.add_client(mon)
+    bb.add_client(gm)
 
     connectWS(factory)
 
