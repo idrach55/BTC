@@ -31,10 +31,10 @@ class Monitor(Strategy):
         moddn = (1 - self.alpha) - (1 - self.alpha)*self.eta
 
         idx = int(100*price + 400*self.sigma - self.v0)
-        if side == 'sell':
+        if side == 'buy':
             self.prob[idx+1:] *= modup
             self.prob[:idx+1] *= moddn
-        elif side == 'buy':
+        elif side == 'sell':
             self.prob[:idx] *= modup
             self.prob[idx:] *= moddn
         self.prob /= self.prob.sum()
@@ -53,12 +53,13 @@ class Monitor(Strategy):
     def match(self, oid, side, price, size):
         if not self.initialized:
             return
-        self.traded(side, price)
+        adjside = 'buy' if side == 'sell' else 'sell'
+        self.traded(adjside, price)
         est = (self.vals*self.prob).sum()
-        pprint('%s of %0.4f at %0.2f, best est. is %0.2f'%(side[0], size, price, est))
+        pprint('%s of %0.4f at %0.2f, best est. is %0.2f'%(adjside[0], size, price, est))
         self.df = self.df.append({'t':int(datetime.today().strftime('%s')),
                                   'px':price, 'sz':size,
-                                  'd':(1 if side == 'buy' else -1), 'e':est}, ignore_index=True)
+                                  'd':(1 if adjside == 'buy' else -1), 'e':est}, ignore_index=True)
         self.df.to_csv(self.fn)
 
 if __name__ == '__main__':
