@@ -1,5 +1,6 @@
 /GDAX/keys.txt
 /GDAX/data
+.cache/*
 /GDAX/.cache/*
 /GDAX/paramstight.py
 /GDAX/paramswide.py
