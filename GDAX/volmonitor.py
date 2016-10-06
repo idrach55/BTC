@@ -12,7 +12,7 @@ import time
 import pandas
 
 
-# This records the std. deviation of the midpoint change every delta seconds.  
+# This records the std. deviation of the midpoint change every delta seconds.
 # Namely, if dS = (sigma)dW, then this estimates sigma.
 class VolMonitor(BookClient):
     def __init__(self, delta, debug=False):
@@ -31,7 +31,7 @@ class VolMonitor(BookClient):
 
     def done(self, oid):
         pass
-        
+
     def generate_stamp(self):
         mid = self.book.get_mid()
         self.mids.append(mid)
@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
     vm = VolMonitor(1.0, debug=True)
     bb = Book(factory.protocol, debug=False)
-    bb.addClient(vm)
+    bb.add_client(vm)
 
     connectWS(factory)
 
