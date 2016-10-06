@@ -1,4 +1,4 @@
-#!/Users/isaacdrachman/Documents/GitHub/BTCX/GDAX/env/bin/python
+#!/Users/isaacdrachman/Documents/GitHub/BTC/GDAX/env/bin/python
 
 import sys
 import getopt
