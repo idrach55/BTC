@@ -22,7 +22,7 @@ class Glosten(Strategy):
         self.alpha = params['alpha']
         self.eta   = params['eta']
         self.save  = params['save']
-        self.fname = datetime.now().strftime("data/trd-%Y-%m-%d")
+        self.fname = datetime.now().strftime("data/%Y-%m-%d.trades.csv")
 
         self.df = pd.DataFrame(columns=['t','px','sz','sd','m','e'])
         self.initialized = False
