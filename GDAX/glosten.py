@@ -14,6 +14,7 @@ import scipy.stats as dists
 
 
 # Glosten-Milgrom Model
+# Only monitors, no trading yet
 class Glosten(Strategy):
     def __init__(self, rest, params):
         Strategy.__init__(self, rest)
