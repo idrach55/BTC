@@ -33,7 +33,8 @@ class Monitor(BookClient):
         pass
 
     def loop(self):
-        info = input('> ').split(' ')
+        info = input('').split(' ')
+        pprint(info)
         self.waiting_on.append(Order(None, info[0], float(info[1]), None))
         reactor.callLater(1.0, self.loop)
 
