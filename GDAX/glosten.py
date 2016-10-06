@@ -24,7 +24,7 @@ class Glosten(Strategy):
         self.save  = params['save']
         self.fname = datetime.now().strftime("data/trd-%Y-%m-%d")
 
-        self.df = pd.DataFrame(columns=['t','px','sz','d','e'])
+        self.df = pd.DataFrame(columns=['t','px','sz','sd','m','e'])
         self.initialized = False
 
     def traded(self, side, price):
@@ -61,7 +61,8 @@ class Glosten(Strategy):
         fmtsize = "-%0.4f"%size if side == "sell" else "+%0.4f"%size
         pprint('%s (%0.2f), %0.2f/%0.2f'%(fmtsize, price, mid, est))
         self.df = self.df.append({'t':int(datetime.today().strftime('%s')),
-                                  'px':price, 'sz':size, 'sd':side[0], 'e':est}, ignore_index=True)
+                                  'px':price, 'sz':size, 'sd':side[0],
+                                  'm':mid, 'e':est}, ignore_index=True)
         if self.save:
             self.df.to_csv(self.fname)
 
