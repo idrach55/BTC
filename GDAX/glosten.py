@@ -21,7 +21,8 @@ class Glosten(Strategy):
         self.sigma = params['sigma']
         self.alpha = params['alpha']
         self.eta   = params['eta']
-        self.fn    = params['fn']
+        self.save  = params['save']
+        self.fname = datetime.now().strftime("data/trd-%Y-%m-%d")
 
         self.df = pd.DataFrame(columns=['t','px','sz','d','e'])
         self.initialized = False
@@ -56,18 +57,20 @@ class Glosten(Strategy):
         side = 'buy' if side == 'sell' else 'sell'
         self.traded(side, price)
         est = (self.vals*self.prob).sum()
-        pprint('%s of %0.4f at %0.2f, best est. is %0.2f'%(side[0], size, price, est))
+        mid = self.book.get_mid()
+        fmtsize = "-%0.4f"%size if side == "sell" else "+%0.4f"%size
+        pprint('%s (%0.2f), %0.2f/%0.2f'%(fmtsize, price, mid, est))
         self.df = self.df.append({'t':int(datetime.today().strftime('%s')),
                                   'px':price, 'sz':size, 'sd':side[0], 'e':est}, ignore_index=True)
-        if self.fn is not None:
-            self.df.to_csv(self.fn)
+        if self.save:
+            self.df.to_csv(self.fname)
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
     factory = WebSocketClientFactory('wss://ws-feed.exchange.coinbase.com')
     factory.protocol = BlobProtocol
 
-    params = {'fn'    : None,
+    params = {'save'  : True,
               'sigma' : float(sys.argv[1]),
               'alpha' : float(sys.argv[2]),
               'eta'   : float(sys.argv[3])}
@@ -81,5 +84,5 @@ if __name__ == '__main__':
 
     connectWS(factory)
 
-    reactor.callLater(5.0, mon.enable)
+    reactor.callLater(5.0, gm.enable)
     reactor.run()

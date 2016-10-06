@@ -8,13 +8,12 @@ from testbook import DummyBlobProtocol
 from teststrategy import DummyRESTProtocol
 
 
-testparams = {
-                "debug"            : False,
-                "dump_on_lockdown" : True,
-                "max_distance"     : 2.00, 
-                "spread"           : 0.10, 
-                "trade_size"       : 1.0
-             }
+testparams = {"debug"            : False,
+              "dump_on_lockdown" : True,
+              "max_distance"     : 2.00,
+              "spread"           : 0.10,
+              "trade_size"       : 1.0,
+              "shading"          : 0.5}
 
 class DemoHelium(Helium):
     def __init__(self):
@@ -48,7 +47,7 @@ class MyTest(unittest.TestCase):
         book.change("Z4", "sell", 1.0)
         assert strat.open_orders == {"B1": Order("B1", "buy", 100.00, 1.0)}
 
-    def test_onPartialFill(self):
+    def test_on_partial_fill(self):
         book = DemoBook()
         strat = DemoHelium()
         book.add_client(strat)
@@ -64,7 +63,7 @@ class MyTest(unittest.TestCase):
         # Check that the ask was placed.
         assert strat.open_orders == {"A1": Order("A1", "sell", 100.10, 0.5), "B1": Order("B1", "buy", 100.00, 0.5)}
 
-    def test_onCompleteFill(self):
+    def test_on_complete_fill(self):
         book = DemoBook()
         strat = DemoHelium()
         book.add_client(strat)
@@ -92,7 +91,7 @@ class MyTest(unittest.TestCase):
         book.match("B1", "buy", 100.00, 1.0)
         assert strat.open_orders["A1"] == Order("A1", "sell", 100.10, 1.0)
 
-        # Change midpoint to 20.50. 
+        # Change midpoint to 20.50.
         # When the strat checks the distance it should lockdown.
         '''
         Z5 1.0 - 20.00 | 21.00 - 1.0 Z6
@@ -101,7 +100,7 @@ class MyTest(unittest.TestCase):
         book.add("Z6", "sell", 21.0, 1.0)
         book.done("Z2")
         book.done("Z3")
-        book.done("Z4") 
+        book.done("Z4")
         assert strat.enabled == False
         assert strat.lockdown_reason == "max distance exceeded"
 
