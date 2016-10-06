@@ -24,7 +24,7 @@ class Glosten(Strategy):
         self.save  = params['save']
         self.fname = datetime.now().strftime("data/%Y-%m-%d.trades.csv")
 
-        self.df = pd.DataFrame(columns=['t','px','sz','sd','m','e'])
+        self.df = pd.DataFrame(columns=['t','px','sz','sd','mid','est'])
         self.initialized = False
 
     def traded(self, side, price):
