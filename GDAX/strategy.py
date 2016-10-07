@@ -77,9 +77,10 @@ class Authorizer(AuthBase):
     # This method is called by the requests when authentication is needed.
     def __call__(self, request):
         timestamp = str(time.time())
-        message = timestamp + request.method + request.path_url + (request.body or "")
+        body = request.body.decode('utf-8') if request.body is not None else ''
+        message = timestamp + request.method + request.path_url + body
         hmac_key = base64.b64decode(self.secret_key)
-        signature = hmac.new(hmac_key, str(message).encode('utf-8'), hashlib.sha256)
+        signature = hmac.new(hmac_key, message.encode('utf-8'), hashlib.sha256)
         signature_b64 = base64.b64encode(signature.digest())
 
         request.headers.update({
@@ -87,6 +88,7 @@ class Authorizer(AuthBase):
             "CB-ACCESS-TIMESTAMP": timestamp,
             "CB-ACCESS-KEY": self.api_key,
             "CB-ACCESS-PASSPHRASE": self.passphrase,
+            'Content-Type': 'application/json'
         })
         return request
 

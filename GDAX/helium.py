@@ -13,7 +13,6 @@ import math
 import scipy.stats
 
 from blobprotocol import BlobProtocol
-from volmonitor import VolMonitor
 from book import Book, InsufficientSizeForVWAP
 from strategy import RESTProtocol, Strategy, read_keys
 

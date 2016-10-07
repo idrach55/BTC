@@ -27,7 +27,7 @@ class Monitor(BookClient):
         if (self.order.side == 'buy' and price <= self.order.price) or \
            (self.order.side == 'sell' and price >= self.order.price):
             os.system('say %s at %0.2f' % ('bought' if self.order.side == 'buy' else 'sold', self.order.price))
-            reactor.stop()
+            quit()
 
     def done(self, oid):
         pass
