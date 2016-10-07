@@ -17,14 +17,15 @@ class Dock(Strategy):
         Strategy.__init__(self, rest)
 
         self.initial_marking = 0.
+        self.initialized = False
 
     # Main update loop.
     def update(self):
         pass
 
     def loop(self):
-        if not self.enabled:
-            self.enabled = True
+        if not self.initialized:
+            self.initialized = True
             success, usd, btc = self.rest.get_balances()
             if success:
                 self.initial_marking = usd + btc*self.book.get_mid()
@@ -32,7 +33,8 @@ class Dock(Strategy):
         if success:
             m2m = usd + btc*self.book.get_mid()
             pnl = m2m - self.initial_marking
-            pprint("profit/loss: $ %0.4f" % pnl)
+            fmtpnl = '%0.4f'%pnl if pnl < 0 else '+%0.4f'%pnl
+            pprint('profit/loss: %s' % fmtpnl)
         reactor.callLater(5.0, self.loop)
 
 if __name__ == '__main__':
@@ -42,11 +44,10 @@ if __name__ == '__main__':
 
     rest = RESTProtocol(read_keys('keys.txt'), debug=True)
     dock = Dock(rest)
-    dock.enabled = False
 
     bb = Book(factory.protocol, debug=False)
     bb.add_client(dock)
 
     connectWS(factory)
-    reactor.callLater(5.0, dock.loop)
+    reactor.callLater(15.0, dock.loop)
     reactor.run()

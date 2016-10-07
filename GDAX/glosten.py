@@ -3,8 +3,7 @@ from twisted.python import log
 from twisted.internet import reactor
 from blobprotocol import BlobProtocol
 from pprint import pprint
-from strategy import RESTProtocol, Strategy, read_keys
-from book import Book
+from book import Book, BookClient
 from datetime import datetime
 
 import pandas as pd
@@ -14,11 +13,9 @@ import scipy.stats as dists
 
 
 # Glosten-Milgrom Model
-# Only monitors, no trading yet
-class Glosten(Strategy):
-    def __init__(self, rest, params):
-        Strategy.__init__(self, rest)
-
+# This is not a strategy.
+class Glosten(BookClient):
+    def __init__(self, params):
         self.sigma = params['sigma']
         self.alpha = params['alpha']
         self.eta   = params['eta']
@@ -46,14 +43,17 @@ class Glosten(Strategy):
         self.vals = (self.v0 - 4*100*self.sigma + np.arange(int(8*100*self.sigma) + 1))/100.
         self.prob = dists.norm.pdf(100*self.vals, loc=self.v0, scale=100*self.sigma)
 
-    # Main update loop.
-    def update(self):
+    def add(self, oid, side, price, size):
+        pass
+
+    def change(self, oid, side, newsize):
+        pass
+
+    def match(self, oid, side, price, size):
         if not self.initialized and self.book.get_mid() is not None:
             self.initialized = True
             self.setup_model(self.book.get_mid())
-
-    def match(self, oid, side, price, size):
-        if not self.initialized:
+        elif not self.initialized:
             return
         side = 'buy' if side == 'sell' else 'sell'
         self.traded(side, price)
@@ -67,6 +67,10 @@ class Glosten(Strategy):
         if self.save:
             self.df.to_csv(self.fname)
 
+    def done(self, oid):
+        pass
+
+
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
     factory = WebSocketClientFactory('wss://ws-feed.exchange.coinbase.com')
@@ -77,14 +81,9 @@ if __name__ == '__main__':
               'alpha' : float(sys.argv[2]),
               'eta'   : float(sys.argv[3])}
 
-    rest = RESTProtocol(read_keys('keys.txt'), debug=True)
-    gm = Glosten(rest, params=params)
-    gm.enabled = False
-
+    gm = Glosten(params=params)
     bb = Book(factory.protocol, debug=False)
     bb.add_client(gm)
 
     connectWS(factory)
-
-    reactor.callLater(5.0, gm.enable)
     reactor.run()

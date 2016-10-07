@@ -24,10 +24,11 @@ class Monitor(BookClient):
         pass
 
     def match(self, oid, side, price, size):
-        if (self.order.side == 'buy' and price <= self.order.price) or \
-           (self.order.side == 'sell' and price >= self.order.price):
+        if self.order is None:
+            return
+        if (self.order.side == 'buy' and price <= self.order.price) or (self.order.side == 'sell' and price >= self.order.price):
             os.system('say %s at %0.2f' % ('bought' if self.order.side == 'buy' else 'sold', self.order.price))
-            quit()
+            self.order = None
 
     def done(self, oid):
         pass
@@ -43,5 +44,4 @@ if __name__ == '__main__':
     bb.add_client(mon)
 
     connectWS(factory)
-
     reactor.run()
