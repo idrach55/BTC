@@ -63,7 +63,7 @@ class Glosten(Strategy):
         pprint('%s (%0.2f), %0.2f/%0.2f'%(fmtsize, price, mid, est))
         self.df = self.df.append({'t':int(datetime.today().strftime('%s')),
                                   'px':price, 'sz':size, 'sd':side[0],
-                                  'm':mid, 'e':est}, ignore_index=True)
+                                  'mid':mid, 'est':est}, ignore_index=True)
         if self.save:
             self.df.to_csv(self.fname)
 

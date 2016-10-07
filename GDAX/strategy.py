@@ -241,8 +241,7 @@ class Strategy(BookClient):
                   "side":       side,
                   "price":      price,
                   "size":       size,
-                  "product_id": product_id,
-                  "stp":        "dc"}
+                  "product_id": product_id}
         if otype == "limit":
             params["post_only"] = True
 

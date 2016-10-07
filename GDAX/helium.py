@@ -9,6 +9,7 @@ from pprint import pprint
 from time import time
 
 import sys
+import os
 import math
 import scipy.stats
 
@@ -30,6 +31,7 @@ class Helium(Strategy):
         self.shading           = params['shading']
         self.stop_loss         = params.get('stop_loss')
         self.max_inactive_time = params.get('max_inactive_time')
+        self.speak             = params.get('speak')
 
         self.time_of_last_bid = 0.
 
@@ -105,11 +107,15 @@ class Helium(Strategy):
         Strategy.on_partial_fill(self, order, remaining)
         if order.side == "buy":
             self.place_spread_ask(order.size - remaining, order.price)
+        if self.speak:
+            os.system('say %s %0.2f at %0.2f' % ('bought' if order.side == 'buy' else 'sold', order.size, order.price))
 
     def on_complete_fill(self, order):
         Strategy.on_complete_fill(self, order)
         if order.side == "buy":
             self.place_spread_ask(order.size, order.price)
+        if self.speak:
+            os.system('say %s %0.2f at %0.2f' % ('bought' if order.side == 'buy' else 'sold', order.size, order.price))
 
 
 if __name__ == '__main__':
