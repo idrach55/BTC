@@ -14,8 +14,8 @@ import pandas
 
 
 class Monitor(BookClient):
-    def __init__(self):
-        self.waiting_on = []
+    def __init__(self, side, price):
+        self.order = Order(None, side, price, None)
 
     def add(self, oid, side, price, size):
         pass
@@ -24,19 +24,13 @@ class Monitor(BookClient):
         pass
 
     def match(self, oid, side, price, size):
-        for order in self.waiting_on:
-            if order.price == price:
-                os.system('say %s at %0.2f' % ('bought' if order.side == 'buy' else 'sold', order.price))
-                self.waiting_on.remove(order)
+        if (self.order.side == 'buy' and price <= self.order.price) or \
+           (self.order.side == 'sell' and price >= self.order.price):
+            os.system('say %s at %0.2f' % ('bought' if self.order.side == 'buy' else 'sold', self.order.price))
+            reactor.stop()
 
     def done(self, oid):
         pass
-
-    def loop(self):
-        info = input('').split(' ')
-        pprint(info)
-        self.waiting_on.append(Order(None, info[0], float(info[1]), None))
-        reactor.callLater(1.0, self.loop)
 
 
 if __name__ == '__main__':
@@ -44,11 +38,10 @@ if __name__ == '__main__':
     factory = WebSocketClientFactory('wss://ws-feed.exchange.coinbase.com')
     factory.protocol = BlobProtocol
 
-    mon = Monitor()
+    mon = Monitor(sys.argv[1], float(sys.argv[2]))
     bb = Book(factory.protocol, debug=False)
     bb.add_client(mon)
 
     connectWS(factory)
 
-    reactor.callLater(1.0, mon.loop)
     reactor.run()
