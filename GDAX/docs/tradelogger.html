@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module tradelogger</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>tradelogger</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/isaacdrachman/Documents/GitHub/BTC/GDAX/tradelogger.py">/Users/isaacdrachman/Documents/GitHub/BTC/GDAX/tradelogger.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="scipy.stats.html">scipy.stats</a><br>
+<a href="twisted.python.log.html">twisted.python.log</a><br>
+</td><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+<a href="pandas.html">pandas</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="book.html#BookClient">book.BookClient</a>(<a href="builtins.html#object">builtins.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="tradelogger.html#TradeLogger">TradeLogger</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="tradelogger.html#Model">Model</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="tradelogger.html#Glosten">Glosten</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Glosten">class <strong>Glosten</strong></a>(<a href="tradelogger.html#Model">Model</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="tradelogger.html#Glosten">Glosten</a></dd>
+<dd><a href="tradelogger.html#Model">Model</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Glosten-__init__"><strong>__init__</strong></a>(self, xk)</dt><dd><tt>Constructs&nbsp;a&nbsp;<a href="#Glosten">Glosten</a>&nbsp;Milgrom&nbsp;model.<br>
+&nbsp;<br>
+:param&nbsp;xk:&nbsp;tuple&nbsp;of&nbsp;parameters&nbsp;(sigma,&nbsp;alpha,&nbsp;eta)</tt></dd></dl>
+
+<dl><dt><a name="Glosten-out"><strong>out</strong></a>(self, side, price, size)</dt><dd><tt>Product&nbsp;model&nbsp;output&nbsp;given&nbsp;trade&nbsp;data.<br>
+&nbsp;<br>
+:param&nbsp;side:&nbsp;trade&nbsp;was&nbsp;market&nbsp;buy/sell<br>
+:param&nbsp;price:&nbsp;price&nbsp;trade&nbsp;was&nbsp;executed&nbsp;at<br>
+:param&nbsp;size:&nbsp;size&nbsp;of&nbsp;trade<br>
+:return:&nbsp;model&nbsp;output</tt></dd></dl>
+
+<dl><dt><a name="Glosten-setup"><strong>setup</strong></a>(self, mid)</dt><dd><tt>Initializes&nbsp;true&nbsp;value&nbsp;distribution.<br>
+&nbsp;<br>
+:param&nbsp;mid:&nbsp;midpoint&nbsp;before&nbsp;first&nbsp;recorded&nbsp;tick<br>
+:return:&nbsp;void</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="tradelogger.html#Model">Model</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Model">class <strong>Model</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Model-__init__"><strong>__init__</strong></a>(self, name)</dt><dd><tt>Constructs&nbsp;an&nbsp;abstract&nbsp;model.<br>
+&nbsp;<br>
+:param&nbsp;name:&nbsp;name&nbsp;of&nbsp;model</tt></dd></dl>
+
+<dl><dt><a name="Model-out"><strong>out</strong></a>(self, side, price, size)</dt><dd><tt>Product&nbsp;model&nbsp;output&nbsp;given&nbsp;trade&nbsp;data.<br>
+&nbsp;<br>
+:param&nbsp;side:&nbsp;trade&nbsp;was&nbsp;market&nbsp;buy/sell<br>
+:param&nbsp;price:&nbsp;price&nbsp;trade&nbsp;was&nbsp;executed&nbsp;at<br>
+:param&nbsp;size:&nbsp;size&nbsp;of&nbsp;trade<br>
+:return:&nbsp;model&nbsp;output</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TradeLogger">class <strong>TradeLogger</strong></a>(<a href="book.html#BookClient">book.BookClient</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="tradelogger.html#TradeLogger">TradeLogger</a></dd>
+<dd><a href="book.html#BookClient">book.BookClient</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="TradeLogger-__init__"><strong>__init__</strong></a>(self, model=None)</dt><dd><tt>Constructs&nbsp;new&nbsp;trade&nbsp;logger.<br>
+&nbsp;<br>
+:param&nbsp;model:&nbsp;(optional)&nbsp;model&nbsp;to&nbsp;recieve&nbsp;trade&nbsp;data</tt></dd></dl>
+
+<dl><dt><a name="TradeLogger-add"><strong>add</strong></a>(self, oid, side, price, size)</dt></dl>
+
+<dl><dt><a name="TradeLogger-change"><strong>change</strong></a>(self, oid, side, newsize)</dt></dl>
+
+<dl><dt><a name="TradeLogger-done"><strong>done</strong></a>(self, oid)</dt></dl>
+
+<dl><dt><a name="TradeLogger-match"><strong>match</strong></a>(self, oid, side, price, size)</dt></dl>
+
+<hr>
+Methods inherited from <a href="book.html#BookClient">book.BookClient</a>:<br>
+<dl><dt><a name="TradeLogger-on_book_connected"><strong>on_book_connected</strong></a>(self, book)</dt></dl>
+
+<dl><dt><a name="TradeLogger-on_sequence_gap"><strong>on_sequence_gap</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="book.html#BookClient">book.BookClient</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>reactor</strong> = &lt;twisted.internet.selectreactor.SelectReactor object&gt;</td></tr></table>
+</body></html>

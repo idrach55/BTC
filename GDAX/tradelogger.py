@@ -11,13 +11,43 @@ import sys
 import numpy as np
 import scipy.stats as dists
 
+class Model():
+    def __init__(self, name):
+        '''
+        Constructs an abstract model.
 
-class Glosten():
+        :param name: name of model
+        '''
+        self.name = name
+
+    def out(self, side, price, size):
+        '''
+        Product model output given trade data.
+
+        :param side: trade was market buy/sell
+        :param price: price trade was executed at
+        :param size: size of trade
+        :return: model output
+        '''
+        pass
+
+class Glosten(Model):
     def __init__(self, xk):
-        self.name = 'glosten'
+        '''
+        Constructs a Glosten Milgrom model.
+
+        :param xk: tuple of parameters (sigma, alpha, eta)
+        '''
+        Model.__init__(self, 'glosten')
         self.sigma, self.alpha, self.eta = xk
 
     def setup(self, mid):
+        '''
+        Initializes true value distribution.
+
+        :param mid: midpoint before first recorded tick
+        :return: void
+        '''
         self.v0 = 100*mid
         self.vals = (self.v0 - 4*100*self.sigma + np.arange(int(8*100*self.sigma) + 1))/100.
         self.prob = dists.norm.pdf(100*self.vals, loc=self.v0, scale=100*self.sigma)
@@ -40,6 +70,11 @@ class Glosten():
 
 class TradeLogger(BookClient):
     def __init__(self, model=None):
+        '''
+        Constructs new trade logger.
+
+        :param model: (optional) model to recieve trade data
+        '''
         self.fname = 'data/'+datetime.now().strftime('%Y-%m-%d')+'.'
         self.model = model
         self.fname += 'trades.csv' if self.model is None else '%s.csv'%self.model.name

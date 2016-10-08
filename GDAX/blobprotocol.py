@@ -4,7 +4,6 @@ Description:
 Class implementations for BlobProtocol and its client class BlobClient.
 '''
 
-'''I don't claim to have any idea how autobahn works but it's good.'''
 from autobahn.twisted.websocket import WebSocketClientProtocol
 from twisted.internet import reactor
 from pprint import pprint
@@ -12,50 +11,77 @@ from pprint import pprint
 import json
 
 
-'''
-Client for BlobProtocol. All message types from the exchange websocket, i.e.
-add, change, match, and done are forwarded here in addition to onOpen:
-when the websocket is opened, and onSequenceGap: when the protocol detects
-it missed a message off the exchange.
-'''
 class BlobClient:
     def __init__(self, protocol):
+        '''
+        Constructs a blob client to which all add, change, match, and
+        done messages which are forwarded from the web socket.
+
+        :param protocol: blob protocol to which this will be a client
+        '''
         protocol.client = self
         self.sequence = 0
 
     def on_open(self):
+        '''
+        The web socket was opened.
+        '''
         raise NotImplementedError
 
     def add(self, oid, side, price, size):
+        '''
+        An order was added to the book.
+        '''
         raise NotImplementedError
 
     def change(self, oid, side, newsize):
+        '''
+        An order was changed on the book.
+        '''
         raise NotImplementedError
 
     def match(self, oid, side, price, size):
+        '''
+        An order was matched.
+        '''
         raise NotImplementedError
 
     def done(self, oid):
+        '''
+        An order was dropped from the book.
+        '''
         raise NotImplementedError
 
     def on_sequence_gap(self):
+        '''
+        A gap in web socket messages was detected.
+        '''
         raise NotImplementedError
 
-'''
-BlobProtocol is the inlet for all market data off the Coinbase exchange
-websocket. It inherits from an autobahn/twisted class to get some nice
-qualities to it. It opens, sends a subscribe to the exchange for the
-bitcoin/US dollar pair, then is fed through onMessage.
-'''
 class BlobProtocol(WebSocketClientProtocol):
-    '''Once the connection is open, hit the exchange with a subscribe.'''
+    '''
+    BlobProtocol is the inlet for all market data off the GDAX
+    websocket. It inherits from an autobahn/twisted class to get some nice
+    qualities to it. It opens, sends a subscribe to the exchange for the
+    bitcoin/US dollar pair, then is fed through onMessage.
+    '''
+
     def onOpen(self):
+        '''
+        Once the connection is open, hit the exchange with a subscribe.
+        '''
         msg = json.dumps({'type': 'subscribe', 'product_id': 'BTC-USD'})
         self.sendMessage(msg.encode('utf-8'), isBinary=False)
         reactor.callLater(1.0, self.client.on_open)
 
-    '''All exchange websocket methods come through here in json.'''
     def onMessage(self, payload, isBinary):
+        '''
+        All exchange websocket messages come through here in json.
+
+        :param payload: message data
+        :param isBinary: is the message in binary
+        :return: void
+        '''
         if not isBinary:
             # Skip messages until the book has been downloaded over REST.
             if self.client.sequence is None:
@@ -79,31 +105,39 @@ class BlobProtocol(WebSocketClientProtocol):
             elif msg["type"] == "done":
                 self.done(msg)
 
-    # Order is added to the book.
     def add(self, msg):
+        '''
+        An order was added to the book.
+        '''
         oid   = self._get_order_id(msg)
         side  = msg["side"]
         price = float(msg["price"])
         size  = self._get_order_size(msg)
         self.client.add(oid, side, price, size)
 
-    # Order is changed on the book.
     def change(self, msg):
+        '''
+        An order was changed on the book.
+        '''
         oid  = msg["order_id"]
         side = msg["side"]
         size = msg["new_size"]
         self.client.change(oid, side, size)
 
-    # Orders (one taker, one maker) are matched.
     def match(self, msg):
+        '''
+        An order was matched.
+        '''
         oid   = msg["maker_order_id"]
         side  = msg["side"]
         price = float(msg["price"])
         size  = float(msg["size"])
         self.client.match(oid, side, price, size)
 
-    # Order is done, ex. cancelled.
     def done(self, msg):
+        '''
+        An order was dropped from the book.
+        '''
         oid = msg["order_id"]
         self.client.done(oid)
 

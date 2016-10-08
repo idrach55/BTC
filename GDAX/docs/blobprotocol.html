@@ -1,0 +1,439 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module blobprotocol</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>blobprotocol</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/isaacdrachman/Documents/GitHub/BTC/GDAX/blobprotocol.py">/Users/isaacdrachman/Documents/GitHub/BTC/GDAX/blobprotocol.py</a></font></td></tr></table>
+    <p><tt>Author:&nbsp;Isaac&nbsp;Drachman<br>
+Description:<br>
+Class&nbsp;implementations&nbsp;for&nbsp;<a href="#BlobProtocol">BlobProtocol</a>&nbsp;and&nbsp;its&nbsp;client&nbsp;class&nbsp;<a href="#BlobClient">BlobClient</a>.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="json.html">json</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="autobahn.twisted.websocket.html#WebSocketClientProtocol">autobahn.twisted.websocket.WebSocketClientProtocol</a>(<a href="autobahn.twisted.websocket.html#WebSocketAdapterProtocol">autobahn.twisted.websocket.WebSocketAdapterProtocol</a>, <a href="autobahn.websocket.protocol.html#WebSocketClientProtocol">autobahn.websocket.protocol.WebSocketClientProtocol</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="blobprotocol.html#BlobProtocol">BlobProtocol</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="blobprotocol.html#BlobClient">BlobClient</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="BlobClient">class <strong>BlobClient</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="BlobClient-__init__"><strong>__init__</strong></a>(self, protocol)</dt><dd><tt>Constructs&nbsp;a&nbsp;blob&nbsp;client&nbsp;to&nbsp;which&nbsp;all&nbsp;add,&nbsp;change,&nbsp;match,&nbsp;and<br>
+done&nbsp;messages&nbsp;which&nbsp;are&nbsp;forwarded&nbsp;from&nbsp;the&nbsp;web&nbsp;socket.<br>
+&nbsp;<br>
+:param&nbsp;protocol:&nbsp;blob&nbsp;protocol&nbsp;to&nbsp;which&nbsp;this&nbsp;will&nbsp;be&nbsp;a&nbsp;client</tt></dd></dl>
+
+<dl><dt><a name="BlobClient-add"><strong>add</strong></a>(self, oid, side, price, size)</dt><dd><tt>An&nbsp;order&nbsp;was&nbsp;added&nbsp;to&nbsp;the&nbsp;book.</tt></dd></dl>
+
+<dl><dt><a name="BlobClient-change"><strong>change</strong></a>(self, oid, side, newsize)</dt><dd><tt>An&nbsp;order&nbsp;was&nbsp;changed&nbsp;on&nbsp;the&nbsp;book.</tt></dd></dl>
+
+<dl><dt><a name="BlobClient-done"><strong>done</strong></a>(self, oid)</dt><dd><tt>An&nbsp;order&nbsp;was&nbsp;dropped&nbsp;from&nbsp;the&nbsp;book.</tt></dd></dl>
+
+<dl><dt><a name="BlobClient-match"><strong>match</strong></a>(self, oid, side, price, size)</dt><dd><tt>An&nbsp;order&nbsp;was&nbsp;matched.</tt></dd></dl>
+
+<dl><dt><a name="BlobClient-on_open"><strong>on_open</strong></a>(self)</dt><dd><tt>The&nbsp;web&nbsp;socket&nbsp;was&nbsp;opened.</tt></dd></dl>
+
+<dl><dt><a name="BlobClient-on_sequence_gap"><strong>on_sequence_gap</strong></a>(self)</dt><dd><tt>A&nbsp;gap&nbsp;in&nbsp;web&nbsp;socket&nbsp;messages&nbsp;was&nbsp;detected.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="BlobProtocol">class <strong>BlobProtocol</strong></a>(<a href="autobahn.twisted.websocket.html#WebSocketClientProtocol">autobahn.twisted.websocket.WebSocketClientProtocol</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#BlobProtocol">BlobProtocol</a>&nbsp;is&nbsp;the&nbsp;inlet&nbsp;for&nbsp;all&nbsp;market&nbsp;data&nbsp;off&nbsp;the&nbsp;GDAX<br>
+websocket.&nbsp;It&nbsp;inherits&nbsp;from&nbsp;an&nbsp;autobahn/twisted&nbsp;class&nbsp;to&nbsp;get&nbsp;some&nbsp;nice<br>
+qualities&nbsp;to&nbsp;it.&nbsp;It&nbsp;opens,&nbsp;sends&nbsp;a&nbsp;subscribe&nbsp;to&nbsp;the&nbsp;exchange&nbsp;for&nbsp;the<br>
+bitcoin/US&nbsp;dollar&nbsp;pair,&nbsp;then&nbsp;is&nbsp;fed&nbsp;through&nbsp;onMessage.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="blobprotocol.html#BlobProtocol">BlobProtocol</a></dd>
+<dd><a href="autobahn.twisted.websocket.html#WebSocketClientProtocol">autobahn.twisted.websocket.WebSocketClientProtocol</a></dd>
+<dd><a href="autobahn.twisted.websocket.html#WebSocketAdapterProtocol">autobahn.twisted.websocket.WebSocketAdapterProtocol</a></dd>
+<dd><a href="twisted.internet.protocol.html#Protocol">twisted.internet.protocol.Protocol</a></dd>
+<dd><a href="twisted.internet.protocol.html#BaseProtocol">twisted.internet.protocol.BaseProtocol</a></dd>
+<dd><a href="autobahn.websocket.protocol.html#WebSocketClientProtocol">autobahn.websocket.protocol.WebSocketClientProtocol</a></dd>
+<dd><a href="autobahn.websocket.protocol.html#WebSocketProtocol">autobahn.websocket.protocol.WebSocketProtocol</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="BlobProtocol-add"><strong>add</strong></a>(self, msg)</dt><dd><tt>An&nbsp;order&nbsp;was&nbsp;added&nbsp;to&nbsp;the&nbsp;book.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-change"><strong>change</strong></a>(self, msg)</dt><dd><tt>An&nbsp;order&nbsp;was&nbsp;changed&nbsp;on&nbsp;the&nbsp;book.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-done"><strong>done</strong></a>(self, msg)</dt><dd><tt>An&nbsp;order&nbsp;was&nbsp;dropped&nbsp;from&nbsp;the&nbsp;book.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-match"><strong>match</strong></a>(self, msg)</dt><dd><tt>An&nbsp;order&nbsp;was&nbsp;matched.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onMessage"><strong>onMessage</strong></a>(self, payload, isBinary)</dt><dd><tt>All&nbsp;exchange&nbsp;websocket&nbsp;messages&nbsp;come&nbsp;through&nbsp;here&nbsp;in&nbsp;json.<br>
+&nbsp;<br>
+:param&nbsp;payload:&nbsp;message&nbsp;data<br>
+:param&nbsp;isBinary:&nbsp;is&nbsp;the&nbsp;message&nbsp;in&nbsp;binary<br>
+:return:&nbsp;void</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onOpen"><strong>onOpen</strong></a>(self)</dt><dd><tt>Once&nbsp;the&nbsp;connection&nbsp;is&nbsp;open,&nbsp;hit&nbsp;the&nbsp;exchange&nbsp;with&nbsp;a&nbsp;subscribe.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="autobahn.twisted.websocket.html#WebSocketClientProtocol">autobahn.twisted.websocket.WebSocketClientProtocol</a>:<br>
+<dl><dt><a name="BlobProtocol-get_channel_id"><strong>get_channel_id</strong></a>(self, channel_id_type='tls-unique')</dt><dd><tt>Implements&nbsp;:func:`autobahn.wamp.interfaces.ITransport.get_channel_id`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-startTLS"><strong>startTLS</strong></a>(self)</dt></dl>
+
+<hr>
+Methods inherited from <a href="autobahn.twisted.websocket.html#WebSocketAdapterProtocol">autobahn.twisted.websocket.WebSocketAdapterProtocol</a>:<br>
+<dl><dt><a name="BlobProtocol-connectionLost"><strong>connectionLost</strong></a>(self, reason)</dt><dd><tt>Called&nbsp;when&nbsp;the&nbsp;connection&nbsp;is&nbsp;shut&nbsp;down.<br>
+&nbsp;<br>
+Clear&nbsp;any&nbsp;circular&nbsp;references&nbsp;here,&nbsp;and&nbsp;any&nbsp;external&nbsp;references<br>
+to&nbsp;this&nbsp;Protocol.&nbsp;&nbsp;The&nbsp;connection&nbsp;has&nbsp;been&nbsp;closed.<br>
+&nbsp;<br>
+@type&nbsp;reason:&nbsp;L{twisted.python.failure.Failure}</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-connectionMade"><strong>connectionMade</strong></a>(self)</dt><dd><tt>Called&nbsp;when&nbsp;a&nbsp;connection&nbsp;is&nbsp;made.<br>
+&nbsp;<br>
+This&nbsp;may&nbsp;be&nbsp;considered&nbsp;the&nbsp;initializer&nbsp;of&nbsp;the&nbsp;protocol,&nbsp;because<br>
+it&nbsp;is&nbsp;called&nbsp;when&nbsp;the&nbsp;connection&nbsp;is&nbsp;completed.&nbsp;&nbsp;For&nbsp;clients,<br>
+this&nbsp;is&nbsp;called&nbsp;once&nbsp;the&nbsp;connection&nbsp;to&nbsp;the&nbsp;server&nbsp;has&nbsp;been<br>
+established;&nbsp;for&nbsp;servers,&nbsp;this&nbsp;is&nbsp;called&nbsp;after&nbsp;an&nbsp;accept()&nbsp;call<br>
+stops&nbsp;blocking&nbsp;and&nbsp;a&nbsp;socket&nbsp;has&nbsp;been&nbsp;received.&nbsp;&nbsp;If&nbsp;you&nbsp;need&nbsp;to<br>
+send&nbsp;any&nbsp;greeting&nbsp;or&nbsp;initial&nbsp;message,&nbsp;do&nbsp;it&nbsp;here.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-dataReceived"><strong>dataReceived</strong></a>(self, data)</dt><dd><tt>Called&nbsp;whenever&nbsp;data&nbsp;is&nbsp;received.<br>
+&nbsp;<br>
+Use&nbsp;this&nbsp;method&nbsp;to&nbsp;translate&nbsp;to&nbsp;a&nbsp;higher-level&nbsp;message.&nbsp;&nbsp;Usually,&nbsp;some<br>
+callback&nbsp;will&nbsp;be&nbsp;made&nbsp;upon&nbsp;the&nbsp;receipt&nbsp;of&nbsp;each&nbsp;complete&nbsp;protocol<br>
+message.<br>
+&nbsp;<br>
+@param&nbsp;data:&nbsp;a&nbsp;string&nbsp;of&nbsp;indeterminate&nbsp;length.&nbsp;&nbsp;Please&nbsp;keep&nbsp;in&nbsp;mind<br>
+&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;you&nbsp;will&nbsp;probably&nbsp;need&nbsp;to&nbsp;buffer&nbsp;some&nbsp;data,&nbsp;as&nbsp;partial<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(or&nbsp;multiple)&nbsp;protocol&nbsp;messages&nbsp;may&nbsp;be&nbsp;received!&nbsp;&nbsp;I&nbsp;recommend<br>
+&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;unit&nbsp;tests&nbsp;for&nbsp;protocols&nbsp;call&nbsp;through&nbsp;to&nbsp;this&nbsp;method&nbsp;with<br>
+&nbsp;&nbsp;&nbsp;&nbsp;differing&nbsp;chunk&nbsp;sizes,&nbsp;down&nbsp;to&nbsp;one&nbsp;byte&nbsp;at&nbsp;a&nbsp;time.</tt></dd></dl>
+
+<strong>log</strong> = &lt;txaio.tx.Logger object&gt;
+<dl><dt><a name="BlobProtocol-registerProducer"><strong>registerProducer</strong></a>(self, producer, streaming)</dt><dd><tt>Register&nbsp;a&nbsp;Twisted&nbsp;producer&nbsp;with&nbsp;this&nbsp;protocol.<br>
+&nbsp;<br>
+:param&nbsp;producer:&nbsp;A&nbsp;Twisted&nbsp;push&nbsp;or&nbsp;pull&nbsp;producer.<br>
+:type&nbsp;producer:&nbsp;<a href="builtins.html#object">object</a><br>
+:param&nbsp;streaming:&nbsp;Producer&nbsp;type.<br>
+:type&nbsp;streaming:&nbsp;bool</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="autobahn.twisted.websocket.html#WebSocketAdapterProtocol">autobahn.twisted.websocket.WebSocketAdapterProtocol</a>:<br>
+<dl><dt><strong>peer</strong> = '&lt;never connected&gt;'</dl>
+
+<hr>
+Methods inherited from <a href="twisted.internet.protocol.html#Protocol">twisted.internet.protocol.Protocol</a>:<br>
+<dl><dt><strong>__provides__</strong></dt>
+<dd><tt>Special&nbsp;descriptor&nbsp;for&nbsp;class&nbsp;__provides__<br>
+&nbsp;<br>
+The&nbsp;descriptor&nbsp;caches&nbsp;the&nbsp;implementedBy&nbsp;info,&nbsp;so&nbsp;that<br>
+we&nbsp;can&nbsp;get&nbsp;declarations&nbsp;for&nbsp;objects&nbsp;without&nbsp;instance-specific<br>
+interfaces&nbsp;a&nbsp;bit&nbsp;quicker.</tt></dd>
+</dl>
+
+<dl><dt><a name="BlobProtocol-logPrefix"><strong>logPrefix</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;prefix&nbsp;matching&nbsp;the&nbsp;class&nbsp;name,&nbsp;to&nbsp;identify&nbsp;log&nbsp;messages<br>
+related&nbsp;to&nbsp;this&nbsp;protocol&nbsp;instance.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="twisted.internet.protocol.html#Protocol">twisted.internet.protocol.Protocol</a>:<br>
+<dl><dt><strong>__implemented__</strong> = &lt;implementedBy twisted.internet.protocol.Protocol&gt;</dl>
+
+<hr>
+Methods inherited from <a href="twisted.internet.protocol.html#BaseProtocol">twisted.internet.protocol.BaseProtocol</a>:<br>
+<dl><dt><a name="BlobProtocol-makeConnection"><strong>makeConnection</strong></a>(self, transport)</dt><dd><tt>Make&nbsp;a&nbsp;connection&nbsp;to&nbsp;a&nbsp;transport&nbsp;and&nbsp;a&nbsp;server.<br>
+&nbsp;<br>
+This&nbsp;sets&nbsp;the&nbsp;'transport'&nbsp;attribute&nbsp;of&nbsp;this&nbsp;Protocol,&nbsp;and&nbsp;calls&nbsp;the<br>
+<a href="#BlobProtocol-connectionMade">connectionMade</a>()&nbsp;callback.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="twisted.internet.protocol.html#BaseProtocol">twisted.internet.protocol.BaseProtocol</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="twisted.internet.protocol.html#BaseProtocol">twisted.internet.protocol.BaseProtocol</a>:<br>
+<dl><dt><strong>__providedBy__</strong> = &lt;implementedBy builtins.type&gt;</dl>
+
+<dl><dt><strong>connected</strong> = 0</dl>
+
+<dl><dt><strong>transport</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="autobahn.websocket.protocol.html#WebSocketClientProtocol">autobahn.websocket.protocol.WebSocketClientProtocol</a>:<br>
+<dl><dt><a name="BlobProtocol-failHandshake"><strong>failHandshake</strong></a>(self, reason)</dt><dd><tt>During&nbsp;opening&nbsp;handshake&nbsp;the&nbsp;server&nbsp;response&nbsp;is&nbsp;invalid&nbsp;and&nbsp;we&nbsp;drop&nbsp;the<br>
+connection.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-failProxyConnect"><strong>failProxyConnect</strong></a>(self, reason)</dt><dd><tt>During&nbsp;initial&nbsp;explicit&nbsp;proxy&nbsp;connect,&nbsp;the&nbsp;server&nbsp;response&nbsp;indicates&nbsp;some&nbsp;failure&nbsp;and&nbsp;we&nbsp;drop&nbsp;the<br>
+connection.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onConnect"><strong>onConnect</strong></a>(self, response)</dt><dd><tt>Callback&nbsp;fired&nbsp;directly&nbsp;after&nbsp;WebSocket&nbsp;opening&nbsp;handshake&nbsp;when&nbsp;new&nbsp;WebSocket&nbsp;server<br>
+connection&nbsp;was&nbsp;established.<br>
+&nbsp;<br>
+:param&nbsp;response:&nbsp;WebSocket&nbsp;connection&nbsp;response&nbsp;information.<br>
+:type&nbsp;response:&nbsp;instance&nbsp;of&nbsp;:class:`autobahn.websocket.protocol.ConnectionResponse`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-processHandshake"><strong>processHandshake</strong></a>(self)</dt><dd><tt>Process&nbsp;WebSocket&nbsp;opening&nbsp;handshake&nbsp;response&nbsp;from&nbsp;server.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-processProxyConnect"><strong>processProxyConnect</strong></a>(self)</dt><dd><tt>Process&nbsp;HTTP/CONNECT&nbsp;response&nbsp;from&nbsp;server.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-startHandshake"><strong>startHandshake</strong></a>(self)</dt><dd><tt>Start&nbsp;WebSocket&nbsp;opening&nbsp;handshake.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-startProxyConnect"><strong>startProxyConnect</strong></a>(self)</dt><dd><tt>Connect&nbsp;to&nbsp;explicit&nbsp;proxy.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="autobahn.websocket.protocol.html#WebSocketClientProtocol">autobahn.websocket.protocol.WebSocketClientProtocol</a>:<br>
+<dl><dt><strong>CONFIG_ATTRS</strong> = ['logOctets', 'logFrames', 'trackTimings', 'utf8validateIncoming', 'applyMask', 'maxFramePayloadSize', 'maxMessagePayloadSize', 'autoFragmentSize', 'failByDrop', 'echoCloseCodeReason', 'openHandshakeTimeout', 'closeHandshakeTimeout', 'tcpNoDelay', 'autoPingInterval', 'autoPingTimeout', 'autoPingSize', 'version', 'acceptMaskedServerFrames', 'maskClientFrames', 'serverConnectionDropTimeout', ...]</dl>
+
+<hr>
+Methods inherited from <a href="autobahn.websocket.protocol.html#WebSocketProtocol">autobahn.websocket.protocol.WebSocketProtocol</a>:<br>
+<dl><dt><a name="BlobProtocol-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-beginMessage"><strong>beginMessage</strong></a>(self, isBinary=False, doNotCompress=False)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.beginMessage`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-beginMessageFrame"><strong>beginMessageFrame</strong></a>(self, length)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.beginMessageFrame`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-consumeData"><strong>consumeData</strong></a>(self)</dt><dd><tt>Consume&nbsp;buffered&nbsp;(incoming)&nbsp;data.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-dropConnection"><strong>dropConnection</strong></a>(self, abort=False)</dt><dd><tt>Drop&nbsp;the&nbsp;underlying&nbsp;TCP&nbsp;connection.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-endMessage"><strong>endMessage</strong></a>(self)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.endMessage`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-logRxFrame"><strong>logRxFrame</strong></a>(self, frameHeader, payload)</dt><dd><tt>Hook&nbsp;fired&nbsp;right&nbsp;after&nbsp;WebSocket&nbsp;frame&nbsp;has&nbsp;been&nbsp;received&nbsp;and&nbsp;decoded,<br>
+but&nbsp;only&nbsp;when&nbsp;self.<strong>logFrames</strong>&nbsp;==&nbsp;True.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-logRxOctets"><strong>logRxOctets</strong></a>(self, data)</dt><dd><tt>Hook&nbsp;fired&nbsp;right&nbsp;after&nbsp;raw&nbsp;octets&nbsp;have&nbsp;been&nbsp;received,&nbsp;but&nbsp;only&nbsp;when<br>
+self.<strong>logOctets</strong>&nbsp;==&nbsp;True.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-logTxFrame"><strong>logTxFrame</strong></a>(self, frameHeader, payload, repeatLength, chopsize, sync)</dt><dd><tt>Hook&nbsp;fired&nbsp;right&nbsp;after&nbsp;WebSocket&nbsp;frame&nbsp;has&nbsp;been&nbsp;encoded&nbsp;and&nbsp;sent,&nbsp;but<br>
+only&nbsp;when&nbsp;self.<strong>logFrames</strong>&nbsp;==&nbsp;True.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-logTxOctets"><strong>logTxOctets</strong></a>(self, data, sync)</dt><dd><tt>Hook&nbsp;fired&nbsp;right&nbsp;after&nbsp;raw&nbsp;octets&nbsp;have&nbsp;been&nbsp;sent,&nbsp;but&nbsp;only&nbsp;when<br>
+self.<strong>logOctets</strong>&nbsp;==&nbsp;True.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onAutoPingTimeout"><strong>onAutoPingTimeout</strong></a>(self)</dt><dd><tt>When&nbsp;doing&nbsp;automatic&nbsp;ping/pongs&nbsp;to&nbsp;detect&nbsp;broken&nbsp;connection,&nbsp;the&nbsp;peer<br>
+did&nbsp;not&nbsp;reply&nbsp;in&nbsp;time&nbsp;to&nbsp;our&nbsp;ping.&nbsp;We&nbsp;drop&nbsp;the&nbsp;connection.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onClose"><strong>onClose</strong></a>(self, wasClean, code, reason)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.onClose`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onCloseFrame"><strong>onCloseFrame</strong></a>(self, code, reasonRaw)</dt><dd><tt>Callback&nbsp;when&nbsp;a&nbsp;Close&nbsp;frame&nbsp;was&nbsp;received.&nbsp;The&nbsp;default&nbsp;implementation&nbsp;answers&nbsp;by<br>
+sending&nbsp;a&nbsp;Close&nbsp;when&nbsp;no&nbsp;Close&nbsp;was&nbsp;sent&nbsp;before.&nbsp;Otherwise&nbsp;it&nbsp;drops<br>
+the&nbsp;TCP&nbsp;connection&nbsp;either&nbsp;immediately&nbsp;(when&nbsp;we&nbsp;are&nbsp;a&nbsp;server)&nbsp;or&nbsp;after&nbsp;a&nbsp;timeout<br>
+(when&nbsp;we&nbsp;are&nbsp;a&nbsp;client&nbsp;and&nbsp;expect&nbsp;the&nbsp;server&nbsp;to&nbsp;drop&nbsp;the&nbsp;TCP).<br>
+&nbsp;<br>
+:param&nbsp;code:&nbsp;Close&nbsp;status&nbsp;code,&nbsp;if&nbsp;there&nbsp;was&nbsp;one&nbsp;(:class:`WebSocketProtocol`.CLOSE_STATUS_CODE_*).<br>
+:type&nbsp;code:&nbsp;int<br>
+:param&nbsp;reasonRaw:&nbsp;Close&nbsp;reason&nbsp;(when&nbsp;present,&nbsp;a&nbsp;status&nbsp;code&nbsp;MUST&nbsp;have&nbsp;been&nbsp;also&nbsp;be&nbsp;present).<br>
+:type&nbsp;reasonRaw:&nbsp;bytes</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onCloseHandshakeTimeout"><strong>onCloseHandshakeTimeout</strong></a>(self)</dt><dd><tt>We&nbsp;expected&nbsp;the&nbsp;peer&nbsp;to&nbsp;respond&nbsp;to&nbsp;us&nbsp;initiating&nbsp;a&nbsp;close&nbsp;handshake.&nbsp;It&nbsp;didn't<br>
+respond&nbsp;(in&nbsp;time&nbsp;self.<strong>closeHandshakeTimeout</strong>)&nbsp;with&nbsp;a&nbsp;close&nbsp;response&nbsp;frame&nbsp;though.<br>
+So&nbsp;we&nbsp;drop&nbsp;the&nbsp;connection,&nbsp;but&nbsp;set&nbsp;self.<strong>wasClean</strong>&nbsp;=&nbsp;False.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onFrameBegin"><strong>onFrameBegin</strong></a>(self)</dt><dd><tt>Begin&nbsp;of&nbsp;receive&nbsp;new&nbsp;frame.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onFrameData"><strong>onFrameData</strong></a>(self, payload)</dt><dd><tt>New&nbsp;data&nbsp;received&nbsp;within&nbsp;frame.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onFrameEnd"><strong>onFrameEnd</strong></a>(self)</dt><dd><tt>End&nbsp;of&nbsp;frame&nbsp;received.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onMessageBegin"><strong>onMessageBegin</strong></a>(self, isBinary)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.onMessageBegin`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onMessageEnd"><strong>onMessageEnd</strong></a>(self)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.onMessageEnd`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onMessageFrame"><strong>onMessageFrame</strong></a>(self, payload)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.onMessageFrame`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onMessageFrameBegin"><strong>onMessageFrameBegin</strong></a>(self, length)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.onMessageFrameBegin`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onMessageFrameData"><strong>onMessageFrameData</strong></a>(self, payload)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.onMessageFrameData`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onMessageFrameEnd"><strong>onMessageFrameEnd</strong></a>(self)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.onMessageFrameEnd`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onOpenHandshakeTimeout"><strong>onOpenHandshakeTimeout</strong></a>(self)</dt><dd><tt>We&nbsp;expected&nbsp;the&nbsp;peer&nbsp;to&nbsp;complete&nbsp;the&nbsp;opening&nbsp;handshake&nbsp;with&nbsp;to&nbsp;us.<br>
+It&nbsp;didn't&nbsp;do&nbsp;so&nbsp;(in&nbsp;time&nbsp;self.<strong>openHandshakeTimeout</strong>).<br>
+So&nbsp;we&nbsp;drop&nbsp;the&nbsp;connection,&nbsp;but&nbsp;set&nbsp;self.<strong>wasClean</strong>&nbsp;=&nbsp;False.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onPing"><strong>onPing</strong></a>(self, payload)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.onPing`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onPong"><strong>onPong</strong></a>(self, payload)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.onPong`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-onServerConnectionDropTimeout"><strong>onServerConnectionDropTimeout</strong></a>(self)</dt><dd><tt>We&nbsp;(a&nbsp;client)&nbsp;expected&nbsp;the&nbsp;peer&nbsp;(a&nbsp;server)&nbsp;to&nbsp;drop&nbsp;the&nbsp;connection,<br>
+but&nbsp;it&nbsp;didn't&nbsp;(in&nbsp;time&nbsp;self.<strong>serverConnectionDropTimeout</strong>).<br>
+So&nbsp;we&nbsp;drop&nbsp;the&nbsp;connection,&nbsp;but&nbsp;set&nbsp;self.<strong>wasClean</strong>&nbsp;=&nbsp;False.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-processControlFrame"><strong>processControlFrame</strong></a>(self)</dt><dd><tt>Process&nbsp;a&nbsp;completely&nbsp;received&nbsp;control&nbsp;frame.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-processData"><strong>processData</strong></a>(self)</dt><dd><tt>After&nbsp;WebSocket&nbsp;handshake&nbsp;has&nbsp;been&nbsp;completed,&nbsp;this&nbsp;procedure&nbsp;will&nbsp;do<br>
+all&nbsp;subsequent&nbsp;processing&nbsp;of&nbsp;incoming&nbsp;bytes.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-sendClose"><strong>sendClose</strong></a>(self, code=None, reason=None)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.sendClose`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-sendCloseFrame"><strong>sendCloseFrame</strong></a>(self, code=None, reasonUtf8=None, isReply=False)</dt><dd><tt>Send&nbsp;a&nbsp;close&nbsp;frame&nbsp;and&nbsp;update&nbsp;protocol&nbsp;state.&nbsp;Note,&nbsp;that&nbsp;this&nbsp;is<br>
+an&nbsp;internal&nbsp;method&nbsp;which&nbsp;deliberately&nbsp;allows&nbsp;not&nbsp;send&nbsp;close<br>
+frame&nbsp;with&nbsp;invalid&nbsp;payload.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-sendData"><strong>sendData</strong></a>(self, data, sync=False, chopsize=None)</dt><dd><tt>Wrapper&nbsp;for&nbsp;self.<strong>transport</strong>.write&nbsp;which&nbsp;allows&nbsp;to&nbsp;give&nbsp;a&nbsp;chopsize.<br>
+When&nbsp;asked&nbsp;to&nbsp;chop&nbsp;up&nbsp;writing&nbsp;to&nbsp;TCP&nbsp;stream,&nbsp;we&nbsp;write&nbsp;only&nbsp;chopsize<br>
+octets&nbsp;and&nbsp;then&nbsp;give&nbsp;up&nbsp;control&nbsp;to&nbsp;select()&nbsp;in&nbsp;underlying&nbsp;reactor&nbsp;so<br>
+that&nbsp;bytes&nbsp;get&nbsp;onto&nbsp;wire&nbsp;immediately.&nbsp;Note&nbsp;that&nbsp;this&nbsp;is&nbsp;different&nbsp;from<br>
+and&nbsp;unrelated&nbsp;to&nbsp;WebSocket&nbsp;data&nbsp;message&nbsp;fragmentation.&nbsp;Note&nbsp;that&nbsp;this<br>
+is&nbsp;also&nbsp;different&nbsp;from&nbsp;the&nbsp;TcpNoDelay&nbsp;option&nbsp;which&nbsp;can&nbsp;be&nbsp;set&nbsp;on&nbsp;the<br>
+socket.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-sendFrame"><strong>sendFrame</strong></a>(self, opcode, payload=b'', fin=True, rsv=0, mask=None, payload_len=None, chopsize=None, sync=False)</dt><dd><tt>Send&nbsp;out&nbsp;frame.&nbsp;Normally&nbsp;only&nbsp;used&nbsp;internally&nbsp;via&nbsp;<a href="#BlobProtocol-sendMessage">sendMessage</a>(),<br>
+<a href="#BlobProtocol-sendPing">sendPing</a>(),&nbsp;<a href="#BlobProtocol-sendPong">sendPong</a>()&nbsp;and&nbsp;<a href="#BlobProtocol-sendClose">sendClose</a>().<br>
+&nbsp;<br>
+This&nbsp;method&nbsp;deliberately&nbsp;allows&nbsp;to&nbsp;send&nbsp;invalid&nbsp;frames&nbsp;(that&nbsp;is&nbsp;frames<br>
+invalid&nbsp;per-se,&nbsp;or&nbsp;frames&nbsp;invalid&nbsp;because&nbsp;of&nbsp;protocol&nbsp;state).&nbsp;Other<br>
+than&nbsp;in&nbsp;fuzzing&nbsp;servers,&nbsp;calling&nbsp;methods&nbsp;will&nbsp;ensure&nbsp;that&nbsp;no&nbsp;invalid<br>
+frames&nbsp;are&nbsp;sent.<br>
+&nbsp;<br>
+In&nbsp;addition,&nbsp;this&nbsp;method&nbsp;supports&nbsp;explicit&nbsp;specification&nbsp;of&nbsp;payload<br>
+length.&nbsp;When&nbsp;payload_len&nbsp;is&nbsp;given,&nbsp;it&nbsp;will&nbsp;always&nbsp;write&nbsp;that&nbsp;many<br>
+octets&nbsp;to&nbsp;the&nbsp;stream.&nbsp;It'll&nbsp;wrap&nbsp;within&nbsp;payload,&nbsp;resending&nbsp;parts&nbsp;of<br>
+that&nbsp;when&nbsp;more&nbsp;octets&nbsp;were&nbsp;requested&nbsp;The&nbsp;use&nbsp;case&nbsp;is&nbsp;again&nbsp;for&nbsp;fuzzing<br>
+server&nbsp;which&nbsp;want&nbsp;to&nbsp;sent&nbsp;increasing&nbsp;amounts&nbsp;of&nbsp;payload&nbsp;data&nbsp;to&nbsp;peers<br>
+without&nbsp;having&nbsp;to&nbsp;construct&nbsp;potentially&nbsp;large&nbsp;messages&nbsp;themselves.</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-sendMessage"><strong>sendMessage</strong></a>(self, payload, isBinary=False, fragmentSize=None, sync=False, doNotCompress=False)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.sendMessage`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-sendMessageFrame"><strong>sendMessageFrame</strong></a>(self, payload, sync=False)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.sendMessageFrame`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-sendMessageFrameData"><strong>sendMessageFrameData</strong></a>(self, payload, sync=False)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.sendMessageFrameData`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-sendPing"><strong>sendPing</strong></a>(self, payload=None)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.sendPing`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-sendPong"><strong>sendPong</strong></a>(self, payload=None)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.sendPong`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-sendPreparedMessage"><strong>sendPreparedMessage</strong></a>(self, preparedMsg)</dt><dd><tt>Implements&nbsp;:func:`autobahn.websocket.interfaces.IWebSocketChannel.sendPreparedMessage`</tt></dd></dl>
+
+<dl><dt><a name="BlobProtocol-setTrackTimings"><strong>setTrackTimings</strong></a>(self, enable)</dt><dd><tt>Enable/disable&nbsp;tracking&nbsp;of&nbsp;detailed&nbsp;timings.<br>
+&nbsp;<br>
+:param&nbsp;enable:&nbsp;Turn&nbsp;time&nbsp;tracking&nbsp;on/off.<br>
+:type&nbsp;enable:&nbsp;bool</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="autobahn.websocket.protocol.html#WebSocketProtocol">autobahn.websocket.protocol.WebSocketProtocol</a>:<br>
+<dl><dt><strong>CLOSE_STATUS_CODES_ALLOWED</strong> = [1000, 1001, 1002, 1003, 1007, 1008, 1009, 1010, 1011, 1012, 1013]</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_ABNORMAL_CLOSE</strong> = 1006</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_GOING_AWAY</strong> = 1001</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_INTERNAL_ERROR</strong> = 1011</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_INVALID_PAYLOAD</strong> = 1007</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_MANDATORY_EXTENSION</strong> = 1010</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_MESSAGE_TOO_BIG</strong> = 1009</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_NORMAL</strong> = 1000</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_NULL</strong> = 1005</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_POLICY_VIOLATION</strong> = 1008</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_PROTOCOL_ERROR</strong> = 1002</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_RESERVED1</strong> = 1004</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_SERVICE_RESTART</strong> = 1012</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_TLS_HANDSHAKE_FAILED</strong> = 1015</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_TRY_AGAIN_LATER</strong> = 1013</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_UNASSIGNED1</strong> = 1014</dl>
+
+<dl><dt><strong>CLOSE_STATUS_CODE_UNSUPPORTED_DATA</strong> = 1003</dl>
+
+<dl><dt><strong>CONFIG_ATTRS_CLIENT</strong> = ['version', 'acceptMaskedServerFrames', 'maskClientFrames', 'serverConnectionDropTimeout', 'perMessageCompressionOffers', 'perMessageCompressionAccept']</dl>
+
+<dl><dt><strong>CONFIG_ATTRS_COMMON</strong> = ['logOctets', 'logFrames', 'trackTimings', 'utf8validateIncoming', 'applyMask', 'maxFramePayloadSize', 'maxMessagePayloadSize', 'autoFragmentSize', 'failByDrop', 'echoCloseCodeReason', 'openHandshakeTimeout', 'closeHandshakeTimeout', 'tcpNoDelay', 'autoPingInterval', 'autoPingTimeout', 'autoPingSize']</dl>
+
+<dl><dt><strong>CONFIG_ATTRS_SERVER</strong> = ['versions', 'webStatus', 'requireMaskedClientFrames', 'maskServerFrames', 'perMessageCompressionAccept', 'serveFlashSocketPolicy', 'flashSocketPolicy', 'allowedOrigins', 'allowedOriginsPatterns', 'allowNullOrigin', 'maxConnections']</dl>
+
+<dl><dt><strong>DEFAULT_SPEC_VERSION</strong> = 18</dl>
+
+<dl><dt><strong>MESSAGE_TYPE_BINARY</strong> = 2</dl>
+
+<dl><dt><strong>MESSAGE_TYPE_TEXT</strong> = 1</dl>
+
+<dl><dt><strong>PROTOCOL_TO_SPEC_VERSION</strong> = {8: 12, 13: 18}</dl>
+
+<dl><dt><strong>SEND_STATE_GROUND</strong> = 0</dl>
+
+<dl><dt><strong>SEND_STATE_INSIDE_MESSAGE</strong> = 2</dl>
+
+<dl><dt><strong>SEND_STATE_INSIDE_MESSAGE_FRAME</strong> = 3</dl>
+
+<dl><dt><strong>SEND_STATE_MESSAGE_BEGIN</strong> = 1</dl>
+
+<dl><dt><strong>SPEC_TO_PROTOCOL_VERSION</strong> = {10: 8, 11: 8, 12: 8, 13: 13, 14: 13, 15: 13, 16: 13, 17: 13, 18: 13}</dl>
+
+<dl><dt><strong>STATE_CLOSED</strong> = 0</dl>
+
+<dl><dt><strong>STATE_CLOSING</strong> = 2</dl>
+
+<dl><dt><strong>STATE_CONNECTING</strong> = 1</dl>
+
+<dl><dt><strong>STATE_OPEN</strong> = 3</dl>
+
+<dl><dt><strong>STATE_PROXY_CONNECTING</strong> = 4</dl>
+
+<dl><dt><strong>SUPPORTED_PROTOCOL_VERSIONS</strong> = [8, 13]</dl>
+
+<dl><dt><strong>SUPPORTED_SPEC_VERSIONS</strong> = [10, 11, 12, 13, 14, 15, 16, 17, 18]</dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>reactor</strong> = &lt;twisted.internet.selectreactor.SelectReactor object&gt;</td></tr></table>
+</body></html>
