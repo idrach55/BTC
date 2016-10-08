@@ -1,6 +1,8 @@
-# Author: Isaac Drachman
-# Description:
-# Class implementations for Book and its client, BookClient.
+'''
+Author: Isaac Drachman
+Description:
+Implementations for Book and its client BookClient.
+'''
 
 from bintrees import FastRBTree
 from collections import namedtuple
@@ -16,10 +18,11 @@ Order = namedtuple('Order', ['oid', 'side', 'price', 'size'])
 class InsufficientSizeForVWAP(Exception):
     pass
 
-# This is fed all messages off the book.
-# It is often useful to consolidate them into
-# an update method.
+
 class BookClient:
+    '''
+    BookClient is fed all messages which hit the book.
+    '''
     def on_book_connected(self, book):
         self.book = book
 
@@ -40,6 +43,13 @@ class BookClient:
 
 class Book(BlobClient):
     def __init__(self, protocol, debug=False):
+        '''
+        Constructs an order book which will be a client to
+        the given blob protocol.
+
+        :param protocol: blob protocol to which this will be a client
+        :param debug: flag to print debug message
+        '''
         BlobClient.__init__(self, protocol)
 
         self.debug = debug
@@ -55,10 +65,14 @@ class Book(BlobClient):
         self.asks = FastRBTree()
 
     def add_client(self, client):
+        '''
+        Add client to this book to be forwarded messages.
+
+        :param client: book client
+        '''
         self.clients.append(client)
         client.on_book_connected(self)
 
-    # Download orderbook via the REST api and add to trees.
     def on_open(self):
         r = requests.get('https://api.exchange.coinbase.com/products/BTC-USD/book', params={'level': 3})
         book = r.json()
@@ -71,7 +85,6 @@ class Book(BlobClient):
         if self.debug:
             pprint('downloaded (bids: %d, asks: %d)' % (len(self.bids), len(self.asks)))
 
-    # Orderbook messages require lots of tree manipulations.
     def add(self, oid, side, price, size):
         order = Order(oid, side, price, size)
         tree = self._get_order_tree(order.side)
@@ -132,18 +145,30 @@ class Book(BlobClient):
         for client in self.clients:
             client.on_sequence_gap()
 
-    # Get functionality, mostly self explanatory.
     def get_best_bid(self):
+        '''
+        Return the price of the highest bid.
+
+        :return: float for price or None if no bids
+        '''
         if len(self.bids) == 0:
             return None
         return self._get_order_tree("buy").max_item()[0]
 
     def get_best_ask(self):
+        '''
+        Return the price of the lowest ask.
+
+        :return: float for price or None if no asks
+        '''
         if len(self.asks) == 0:
             return None
         return self._get_order_tree("sell").min_item()[0]
 
     def get_best_bid_quote(self):
+        '''
+        Return price and size of highest bid.
+        '''
         if len(self.bids) == 0:
             return None, None
         price, orders = self._get_order_tree("buy").max_item()
@@ -153,6 +178,9 @@ class Book(BlobClient):
         return price, size
 
     def get_best_ask_quote(self):
+        '''
+        Return price and size of lowest ask.
+        '''
         if len(self.asks) == 0:
             return None
         price, orders = self._get_order_tree("sell").min_item()
@@ -162,14 +190,22 @@ class Book(BlobClient):
         return price, size
 
     def get_mid(self):
+        '''
+        Return mid between best bid/ask.
+        '''
         if len(self.bids) == 0 or len(self.asks) == 0:
             return None
         return 0.5 * (self.get_best_bid() + self.get_best_ask())
 
-    # Returns VWAP for a given target size.
-    # Positive sizes will sweep up the asks.
-    # Negative sizes will sweep down the bids.
     def get_vwap(self, target):
+        '''
+        Returns VWAP for a given target size.
+        Positive sizes will sweep up the asks.
+        Negative sizes will sweep down the bids.
+
+        :param target: size to sweep (pos is buy, neg is sell)
+        :return: vwap for target size
+        '''
         side = "buy" if target < 0 else "sell"
         tree = self._get_order_tree(side)
         iterator = tree.items(True) if target < 0 else tree.items()

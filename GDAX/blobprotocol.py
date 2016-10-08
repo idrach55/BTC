@@ -1,7 +1,7 @@
 '''
 Author: Isaac Drachman
 Description:
-Class implementations for BlobProtocol and its client class BlobClient.
+Implementations for BlobProtocol and its client BlobClient.
 '''
 
 from autobahn.twisted.websocket import WebSocketClientProtocol

@@ -1,0 +1,302 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module book</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>book</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/isaacdrachman/Documents/GitHub/BTC/GDAX/book.py">/Users/isaacdrachman/Documents/GitHub/BTC/GDAX/book.py</a></font></td></tr></table>
+    <p><tt>Author:&nbsp;Isaac&nbsp;Drachman<br>
+Description:<br>
+Implementations&nbsp;for&nbsp;<a href="#Book">Book</a>&nbsp;and&nbsp;its&nbsp;client&nbsp;<a href="#BookClient">BookClient</a>.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="requests.html">requests</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="blobprotocol.html#BlobClient">blobprotocol.BlobClient</a>(<a href="builtins.html#object">builtins.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="book.html#Book">Book</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="builtins.html#Exception">builtins.Exception</a>(<a href="builtins.html#BaseException">builtins.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="book.html#InsufficientSizeForVWAP">InsufficientSizeForVWAP</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="book.html#BookClient">BookClient</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="builtins.html#tuple">builtins.tuple</a>(<a href="builtins.html#object">builtins.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="book.html#Order">Order</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Book">class <strong>Book</strong></a>(<a href="blobprotocol.html#BlobClient">blobprotocol.BlobClient</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="book.html#Book">Book</a></dd>
+<dd><a href="blobprotocol.html#BlobClient">blobprotocol.BlobClient</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Book-__init__"><strong>__init__</strong></a>(self, protocol, debug=False)</dt><dd><tt>Constructs&nbsp;an&nbsp;order&nbsp;book&nbsp;which&nbsp;will&nbsp;be&nbsp;a&nbsp;client&nbsp;to<br>
+the&nbsp;given&nbsp;blob&nbsp;protocol.<br>
+&nbsp;<br>
+:param&nbsp;protocol:&nbsp;blob&nbsp;protocol&nbsp;to&nbsp;which&nbsp;this&nbsp;will&nbsp;be&nbsp;a&nbsp;client<br>
+:param&nbsp;debug:&nbsp;flag&nbsp;to&nbsp;print&nbsp;debug&nbsp;message</tt></dd></dl>
+
+<dl><dt><a name="Book-add"><strong>add</strong></a>(self, oid, side, price, size)</dt><dd><tt>An&nbsp;order&nbsp;was&nbsp;added&nbsp;to&nbsp;the&nbsp;book.</tt></dd></dl>
+
+<dl><dt><a name="Book-add_client"><strong>add_client</strong></a>(self, client)</dt><dd><tt>Add&nbsp;client&nbsp;to&nbsp;this&nbsp;book&nbsp;to&nbsp;be&nbsp;forwarded&nbsp;messages.<br>
+&nbsp;<br>
+:param&nbsp;client:&nbsp;book&nbsp;client</tt></dd></dl>
+
+<dl><dt><a name="Book-change"><strong>change</strong></a>(self, oid, side, newsize)</dt><dd><tt>An&nbsp;order&nbsp;was&nbsp;changed&nbsp;on&nbsp;the&nbsp;book.</tt></dd></dl>
+
+<dl><dt><a name="Book-done"><strong>done</strong></a>(self, oid)</dt><dd><tt>An&nbsp;order&nbsp;was&nbsp;dropped&nbsp;from&nbsp;the&nbsp;book.</tt></dd></dl>
+
+<dl><dt><a name="Book-get_best_ask"><strong>get_best_ask</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;price&nbsp;of&nbsp;the&nbsp;lowest&nbsp;ask.<br>
+&nbsp;<br>
+:return:&nbsp;float&nbsp;for&nbsp;price&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;asks</tt></dd></dl>
+
+<dl><dt><a name="Book-get_best_ask_quote"><strong>get_best_ask_quote</strong></a>(self)</dt><dd><tt>Return&nbsp;price&nbsp;and&nbsp;size&nbsp;of&nbsp;lowest&nbsp;ask.</tt></dd></dl>
+
+<dl><dt><a name="Book-get_best_bid"><strong>get_best_bid</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;price&nbsp;of&nbsp;the&nbsp;highest&nbsp;bid.<br>
+&nbsp;<br>
+:return:&nbsp;float&nbsp;for&nbsp;price&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;bids</tt></dd></dl>
+
+<dl><dt><a name="Book-get_best_bid_quote"><strong>get_best_bid_quote</strong></a>(self)</dt><dd><tt>Return&nbsp;price&nbsp;and&nbsp;size&nbsp;of&nbsp;highest&nbsp;bid.</tt></dd></dl>
+
+<dl><dt><a name="Book-get_mid"><strong>get_mid</strong></a>(self)</dt><dd><tt>Return&nbsp;mid&nbsp;between&nbsp;best&nbsp;bid/ask.</tt></dd></dl>
+
+<dl><dt><a name="Book-get_vwap"><strong>get_vwap</strong></a>(self, target)</dt><dd><tt>Returns&nbsp;VWAP&nbsp;for&nbsp;a&nbsp;given&nbsp;target&nbsp;size.<br>
+Positive&nbsp;sizes&nbsp;will&nbsp;sweep&nbsp;up&nbsp;the&nbsp;asks.<br>
+Negative&nbsp;sizes&nbsp;will&nbsp;sweep&nbsp;down&nbsp;the&nbsp;bids.<br>
+&nbsp;<br>
+:param&nbsp;target:&nbsp;size&nbsp;to&nbsp;sweep&nbsp;(pos&nbsp;is&nbsp;buy,&nbsp;neg&nbsp;is&nbsp;sell)<br>
+:return:&nbsp;vwap&nbsp;for&nbsp;target&nbsp;size</tt></dd></dl>
+
+<dl><dt><a name="Book-match"><strong>match</strong></a>(self, oid, side, price, size)</dt><dd><tt>An&nbsp;order&nbsp;was&nbsp;matched.</tt></dd></dl>
+
+<dl><dt><a name="Book-on_open"><strong>on_open</strong></a>(self)</dt><dd><tt>The&nbsp;web&nbsp;socket&nbsp;was&nbsp;opened.</tt></dd></dl>
+
+<dl><dt><a name="Book-on_sequence_gap"><strong>on_sequence_gap</strong></a>(self)</dt><dd><tt>A&nbsp;gap&nbsp;in&nbsp;web&nbsp;socket&nbsp;messages&nbsp;was&nbsp;detected.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="blobprotocol.html#BlobClient">blobprotocol.BlobClient</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="BookClient">class <strong>BookClient</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#BookClient">BookClient</a>&nbsp;is&nbsp;fed&nbsp;all&nbsp;messages&nbsp;which&nbsp;hit&nbsp;the&nbsp;book.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="BookClient-add"><strong>add</strong></a>(self, oid, side, price, size)</dt></dl>
+
+<dl><dt><a name="BookClient-change"><strong>change</strong></a>(self, oid, side, newsize)</dt></dl>
+
+<dl><dt><a name="BookClient-done"><strong>done</strong></a>(self, oid)</dt></dl>
+
+<dl><dt><a name="BookClient-match"><strong>match</strong></a>(self, oid, side, price, size)</dt></dl>
+
+<dl><dt><a name="BookClient-on_book_connected"><strong>on_book_connected</strong></a>(self, book)</dt></dl>
+
+<dl><dt><a name="BookClient-on_sequence_gap"><strong>on_sequence_gap</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="InsufficientSizeForVWAP">class <strong>InsufficientSizeForVWAP</strong></a>(<a href="builtins.html#Exception">builtins.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Common&nbsp;base&nbsp;class&nbsp;for&nbsp;all&nbsp;non-exit&nbsp;exceptions.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="book.html#InsufficientSizeForVWAP">InsufficientSizeForVWAP</a></dd>
+<dd><a href="builtins.html#Exception">builtins.Exception</a></dd>
+<dd><a href="builtins.html#BaseException">builtins.BaseException</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="builtins.html#Exception">builtins.Exception</a>:<br>
+<dl><dt><a name="InsufficientSizeForVWAP-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="InsufficientSizeForVWAP-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;<a href="builtins.html#object">object</a>.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="builtins.html#BaseException">builtins.BaseException</a>:<br>
+<dl><dt><a name="InsufficientSizeForVWAP-__delattr__"><strong>__delattr__</strong></a>(self, name, /)</dt><dd><tt>Implement&nbsp;delattr(self,&nbsp;name).</tt></dd></dl>
+
+<dl><dt><a name="InsufficientSizeForVWAP-__getattribute__"><strong>__getattribute__</strong></a>(self, name, /)</dt><dd><tt>Return&nbsp;getattr(self,&nbsp;name).</tt></dd></dl>
+
+<dl><dt><a name="InsufficientSizeForVWAP-__reduce__"><strong>__reduce__</strong></a>(...)</dt><dd><tt>helper&nbsp;for&nbsp;pickle</tt></dd></dl>
+
+<dl><dt><a name="InsufficientSizeForVWAP-__repr__"><strong>__repr__</strong></a>(self, /)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
+<dl><dt><a name="InsufficientSizeForVWAP-__setattr__"><strong>__setattr__</strong></a>(self, name, value, /)</dt><dd><tt>Implement&nbsp;setattr(self,&nbsp;name,&nbsp;value).</tt></dd></dl>
+
+<dl><dt><a name="InsufficientSizeForVWAP-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="InsufficientSizeForVWAP-__str__"><strong>__str__</strong></a>(self, /)</dt><dd><tt>Return&nbsp;str(self).</tt></dd></dl>
+
+<dl><dt><a name="InsufficientSizeForVWAP-with_traceback"><strong>with_traceback</strong></a>(...)</dt><dd><tt><a href="builtins.html#Exception">Exception</a>.<a href="#InsufficientSizeForVWAP-with_traceback">with_traceback</a>(tb)&nbsp;--<br>
+set&nbsp;self.<strong>__traceback__</strong>&nbsp;to&nbsp;tb&nbsp;and&nbsp;return&nbsp;self.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="builtins.html#BaseException">builtins.BaseException</a>:<br>
+<dl><dt><strong>__cause__</strong></dt>
+<dd><tt>exception&nbsp;cause</tt></dd>
+</dl>
+<dl><dt><strong>__context__</strong></dt>
+<dd><tt>exception&nbsp;context</tt></dd>
+</dl>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>__suppress_context__</strong></dt>
+</dl>
+<dl><dt><strong>__traceback__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Order">class <strong>Order</strong></a>(<a href="builtins.html#tuple">builtins.tuple</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Order">Order</a>(oid,&nbsp;side,&nbsp;price,&nbsp;size)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="book.html#Order">Order</a></dd>
+<dd><a href="builtins.html#tuple">builtins.tuple</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Order-__getnewargs__"><strong>__getnewargs__</strong></a>(self)</dt><dd><tt>Return&nbsp;self&nbsp;as&nbsp;a&nbsp;plain&nbsp;<a href="builtins.html#tuple">tuple</a>.&nbsp;&nbsp;Used&nbsp;by&nbsp;copy&nbsp;and&nbsp;pickle.</tt></dd></dl>
+
+<dl><dt><a name="Order-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;nicely&nbsp;formatted&nbsp;representation&nbsp;string</tt></dd></dl>
+
+<dl><dt><a name="Order-_asdict"><strong>_asdict</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;new&nbsp;OrderedDict&nbsp;which&nbsp;maps&nbsp;field&nbsp;names&nbsp;to&nbsp;their&nbsp;values.</tt></dd></dl>
+
+<dl><dt><a name="Order-_replace"><strong>_replace</strong></a>(_self, **kwds)</dt><dd><tt>Return&nbsp;a&nbsp;new&nbsp;<a href="#Order">Order</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;replacing&nbsp;specified&nbsp;fields&nbsp;with&nbsp;new&nbsp;values</tt></dd></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="Order-_make"><strong>_make</strong></a>(iterable, new=&lt;built-in method __new__ of type object at 0x10022b4c0&gt;, len=&lt;built-in function len&gt;)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Make&nbsp;a&nbsp;new&nbsp;<a href="#Order">Order</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;a&nbsp;sequence&nbsp;or&nbsp;iterable</tt></dd></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="Order-__new__"><strong>__new__</strong></a>(_cls, oid, side, price, size)</dt><dd><tt>Create&nbsp;new&nbsp;instance&nbsp;of&nbsp;<a href="#Order">Order</a>(oid,&nbsp;side,&nbsp;price,&nbsp;size)</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>oid</strong></dt>
+<dd><tt>Alias&nbsp;for&nbsp;field&nbsp;number&nbsp;0</tt></dd>
+</dl>
+<dl><dt><strong>price</strong></dt>
+<dd><tt>Alias&nbsp;for&nbsp;field&nbsp;number&nbsp;2</tt></dd>
+</dl>
+<dl><dt><strong>side</strong></dt>
+<dd><tt>Alias&nbsp;for&nbsp;field&nbsp;number&nbsp;1</tt></dd>
+</dl>
+<dl><dt><strong>size</strong></dt>
+<dd><tt>Alias&nbsp;for&nbsp;field&nbsp;number&nbsp;3</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>_fields</strong> = ('oid', 'side', 'price', 'size')</dl>
+
+<dl><dt><strong>_source</strong> = "from builtins import property as _property, tupl..._itemgetter(3), doc='Alias for field number 3')<font color="#c040c0">\n\n</font>"</dl>
+
+<hr>
+Methods inherited from <a href="builtins.html#tuple">builtins.tuple</a>:<br>
+<dl><dt><a name="Order-__add__"><strong>__add__</strong></a>(self, value, /)</dt><dd><tt>Return&nbsp;self+value.</tt></dd></dl>
+
+<dl><dt><a name="Order-__contains__"><strong>__contains__</strong></a>(self, key, /)</dt><dd><tt>Return&nbsp;key&nbsp;in&nbsp;self.</tt></dd></dl>
+
+<dl><dt><a name="Order-__eq__"><strong>__eq__</strong></a>(self, value, /)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+
+<dl><dt><a name="Order-__ge__"><strong>__ge__</strong></a>(self, value, /)</dt><dd><tt>Return&nbsp;self&gt;=value.</tt></dd></dl>
+
+<dl><dt><a name="Order-__getattribute__"><strong>__getattribute__</strong></a>(self, name, /)</dt><dd><tt>Return&nbsp;getattr(self,&nbsp;name).</tt></dd></dl>
+
+<dl><dt><a name="Order-__getitem__"><strong>__getitem__</strong></a>(self, key, /)</dt><dd><tt>Return&nbsp;self[key].</tt></dd></dl>
+
+<dl><dt><a name="Order-__gt__"><strong>__gt__</strong></a>(self, value, /)</dt><dd><tt>Return&nbsp;self&gt;value.</tt></dd></dl>
+
+<dl><dt><a name="Order-__hash__"><strong>__hash__</strong></a>(self, /)</dt><dd><tt>Return&nbsp;hash(self).</tt></dd></dl>
+
+<dl><dt><a name="Order-__iter__"><strong>__iter__</strong></a>(self, /)</dt><dd><tt>Implement&nbsp;iter(self).</tt></dd></dl>
+
+<dl><dt><a name="Order-__le__"><strong>__le__</strong></a>(self, value, /)</dt><dd><tt>Return&nbsp;self&lt;=value.</tt></dd></dl>
+
+<dl><dt><a name="Order-__len__"><strong>__len__</strong></a>(self, /)</dt><dd><tt>Return&nbsp;len(self).</tt></dd></dl>
+
+<dl><dt><a name="Order-__lt__"><strong>__lt__</strong></a>(self, value, /)</dt><dd><tt>Return&nbsp;self&lt;value.</tt></dd></dl>
+
+<dl><dt><a name="Order-__mul__"><strong>__mul__</strong></a>(self, value, /)</dt><dd><tt>Return&nbsp;self*value.n</tt></dd></dl>
+
+<dl><dt><a name="Order-__ne__"><strong>__ne__</strong></a>(self, value, /)</dt><dd><tt>Return&nbsp;self!=value.</tt></dd></dl>
+
+<dl><dt><a name="Order-__rmul__"><strong>__rmul__</strong></a>(self, value, /)</dt><dd><tt>Return&nbsp;self*value.</tt></dd></dl>
+
+<dl><dt><a name="Order-count"><strong>count</strong></a>(...)</dt><dd><tt>T.<a href="#Order-count">count</a>(value)&nbsp;-&gt;&nbsp;integer&nbsp;--&nbsp;return&nbsp;number&nbsp;of&nbsp;occurrences&nbsp;of&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="Order-index"><strong>index</strong></a>(...)</dt><dd><tt>T.<a href="#Order-index">index</a>(value,&nbsp;[start,&nbsp;[stop]])&nbsp;-&gt;&nbsp;integer&nbsp;--&nbsp;return&nbsp;first&nbsp;index&nbsp;of&nbsp;value.<br>
+Raises&nbsp;ValueError&nbsp;if&nbsp;the&nbsp;value&nbsp;is&nbsp;not&nbsp;present.</tt></dd></dl>
+
+</td></tr></table></td></tr></table>
+</body></html>

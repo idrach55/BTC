@@ -1,3 +1,9 @@
+'''
+Author: Isaac Drachman
+Description:
+Implementations for TradeLogger and relevant models including Glosten Milgrom.
+'''
+
 from autobahn.twisted.websocket import WebSocketClientFactory, connectWS
 from twisted.python import log
 from twisted.internet import reactor
