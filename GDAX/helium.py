@@ -1,5 +1,7 @@
 '''
-UNDER CONSTRUCTION
+Author: Isaac Drachman
+Description:
+Implementation of the simple Helium strategy.
 '''
 
 from autobahn.twisted.websocket import WebSocketClientFactory, connectWS
@@ -131,14 +133,15 @@ if __name__ == '__main__':
         'spread'            : 0.30,
         'trade_size'        : 0.10,
         'stop_loss'         : 0.30,
-        'max_inactive_time' : 600,
+        'max_inactive_time' : 30,
         "shading"           : 0.95,
         'speak'             : True
     }
 
     if len(sys.argv) > 2:
-        params["spread"] = float(sys.argv[2])
-        params["shading"] = float(sys.argv[3])
+        params['trade_size'] = float(sys.argv[2])
+        params['spread']     = float(sys.argv[3])
+        params['shading']    = float(sys.argv[4])
 
     rest = RESTProtocol(read_keys('keys.txt'), debug=True)
     hh = Helium(rest, params=params)

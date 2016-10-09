@@ -100,7 +100,7 @@ class TradeLogger(BookClient):
         if not self.initialized:
             if self.book.get_mid() is not None:
                 self.initialized = True
-                self.model.setup(self.book.get_mid())
+                if self.model is not None: self.model.setup(self.book.get_mid())
             else: return
 
         side = 'buy' if side == 'sell' else 'sell'
