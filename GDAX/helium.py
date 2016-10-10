@@ -139,9 +139,9 @@ if __name__ == '__main__':
     }
 
     if len(sys.argv) > 2:
-        params['trade_size'] = float(sys.argv[2])
-        params['spread']     = float(sys.argv[3])
-        params['shading']    = float(sys.argv[4])
+        params['trade_size'] = float(sys.argv[1])
+        params['spread']     = float(sys.argv[2])
+        params['shading']    = float(sys.argv[3])
 
     rest = RESTProtocol(read_keys('keys.txt'), debug=True)
     hh = Helium(rest, params=params)
