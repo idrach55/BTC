@@ -35,7 +35,7 @@ class Dock(Strategy):
             pnl = m2m - self.initial_marking
             fmtpnl = '%0.4f'%pnl if pnl < 0 else '+%0.4f'%pnl
             pprint('profit/loss: %s' % fmtpnl)
-        reactor.callLater(5.0, self.loop)
+        reactor.callLater(10.0, self.loop)
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
@@ -49,5 +49,5 @@ if __name__ == '__main__':
     bb.add_client(dock)
 
     connectWS(factory)
-    reactor.callLater(15.0, dock.loop)
+    reactor.callLater(10.0, dock.loop)
     reactor.run()

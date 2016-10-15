@@ -133,7 +133,7 @@ if __name__ == '__main__':
         'spread'            : 0.30,
         'trade_size'        : 0.10,
         'stop_loss'         : 0.30,
-        'max_inactive_time' : 30,
+        'max_inactive_time' : 10,
         "shading"           : 0.95,
         'speak'             : True
     }
