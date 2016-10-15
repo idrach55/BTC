@@ -18,10 +18,34 @@ class Manager:
     def get_all_for_tenor(self, tenor):
         return [inst for inst in self.options.values() if inst.inst[4:11] == tenor]
 
+    def compute_reversal_longs(self, tenor):
+        prices = self.get_prices(tenor)
+        strikes = []
+        for ticker in prices.keys():
+            if float(ticker[-5:-2]) not in strikes:
+                strikes.append(float(ticker[-5:-2]))
+        return {strike: strike + self.pr.get_index()*(prices['BTC-%s-%0.0f-C'%(tenor, strike)][1] - \
+                        prices['BTC-%s-%0.0f-P'%(tenor, strike)][0]) for strike in strikes}
+
+    def compute_reversal_shorts(self, tenor):
+        prices = self.get_prices(tenor)
+        strikes = []
+        for ticker in prices.keys():
+            if float(ticker[-5:-2]) not in strikes:
+                strikes.append(float(ticker[-5:-2]))
+        return {strike: strike - self.pr.get_index()*(prices['BTC-%s-%0.0f-P'%(tenor, strike)][1] - \
+                        prices['BTC-%s-%0.0f-C'%(tenor, strike)][0]) for strike in strikes}
+
     def get_mids(self, tenor):
         instruments = self.get_all_for_tenor(tenor)
         mids = {opt.inst: self.pr.get_orderbook(opt.inst).get_mid() for opt in instruments}
         return mids
+
+    def get_prices(self, tenor):
+        instruments = self.get_all_for_tenor(tenor)
+        prices = {opt.inst: (self.pr.get_orderbook(opt.inst).get_best_bid(),
+                             self.pr.get_orderbook(opt.inst).get_best_ask()) for opt in instruments}
+        return prices
 
     def get_implieds(self, tenor):
         instruments = self.get_all_for_tenor(tenor)
