@@ -3,6 +3,7 @@ import requests
 from scipy.stats import norm
 from collections import namedtuple
 from datetime import datetime
+from scipy.optimize import brentq
 
 
 class Manager:
@@ -16,6 +17,18 @@ class Manager:
 
     def get_all_for_tenor(self, tenor):
         return [inst for inst in self.options.values() if inst.inst[4:11] == tenor]
+
+    def get_mids(self, tenor):
+        instruments = self.get_all_for_tenor(tenor)
+        mids = {opt.inst: self.pr.get_orderbook(opt.inst).get_mid() for opt in instruments}
+        return mids
+
+    def get_implieds(self, tenor):
+        instruments = self.get_all_for_tenor(tenor)
+        spot = self.pr.get_index()
+        fwrd = self.pr.get_orderbook('BTC-%s'%tenor).get_mid()
+        implieds = {opt.inst: opt.implied(fwrd, 0.00, spot*self.pr.get_orderbook(opt.inst).get_mid()) for opt in instruments}
+        return implieds
 
 
 class Book:
@@ -75,13 +88,17 @@ class Option:
         a = self.K*self.T*np.exp(-r*self.T)
         return a*norm.cdf(d2)/100. if self.inst[-1] == 'C' else -a*norm.cdf(-d2)/100.
 
+    def implied(self, S, r, price):
+        return brentq(lambda sigma: price - self.value(S, sigma, r), 0.01, 1.50)
+
 
 class Protocol:
-    def __init__(self):
-        self.public = 'https://deribit.com/api/v1/public'
+    def __init__(self, keys=(None,None)):
+        self.api_key, self.secret_key = keys
+        self.url = 'https://deribit.com/api/v1'
 
     def get_instruments(self, kind='all'):
-        r = requests.get(self.public + '/getinstruments')
+        r = requests.get(self.url + '/public/getinstruments')
         results = r.json()['result']
         if kind == 'all':
             return results
@@ -89,9 +106,43 @@ class Protocol:
             return [res['instrumentName'] for res in results if res['kind'] == kind]
 
     def get_index(self):
-        r = requests.get(self.public + '/index')
+        r = requests.get(self.url + '/public/index')
         return r.json()['result']['btc']
 
     def get_orderbook(self, inst):
-        r = requests.get(self.public + '/getorderbook?instrument=%s' % inst)
+        r = requests.get(self.url + '/public/getorderbook?instrument=%s' % inst)
         return Book(r.json()['result']['bids'], r.json()['result']['asks'])
+
+    def buy(self, inst, size, price):
+        params = {'instrument': inst,
+                  'quantity':   size,
+                  'price':      price}
+        r = requests.post(self.url + '/private/buy', json=params)
+        return r
+
+'''
+class Authorizer(AuthBase):
+    # Initialize authorizer with keys and passphrase.
+    def __init__(self, keys):
+        self.api_key, self.secret_key = keys
+
+    # This method is called by the requests when authentication is needed.
+    def __call__(self, request):
+        timestamp = str(time.time())
+        message = '_=%s&_ackey=%s&_acsec=%s&_action=%s&instrument=%s&price=%s&quantity=%s'
+
+        hmac_key = base64.b64encode(self.secret_key)
+        signature = hmac.new(hmac_key, message.encode('utf-8'), hashlib.sha256)
+        signature_b64 = base64.b64encode(signature.digest())
+
+        request.headers.update({
+            'x-deribit-sig': signature_b64,
+            'Content-Type': 'application/json'
+        })
+        return request
+
+
+def read_keys(filename):
+    with open(filename, "r") as f:
+        return f.read().split("\n")[:2]
+'''
