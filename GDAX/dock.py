@@ -45,6 +45,10 @@ if __name__ == '__main__':
     rest = RESTProtocol(read_keys('keys.txt'), debug=True)
     dock = Dock(rest)
 
+    if len(sys.argv) >= 2:
+        dock.initial_marking = float(sys.argv[1])
+        dock.initialized = True 
+
     bb = Book(factory.protocol, debug=False)
     bb.add_client(dock)
 
