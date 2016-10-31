@@ -43,8 +43,12 @@ class Manager:
 
     def get_prices(self, tenor):
         instruments = self.get_all_for_tenor(tenor)
-        prices = {opt.inst: (self.pr.get_orderbook(opt.inst).get_best_bid(),
-                             self.pr.get_orderbook(opt.inst).get_best_ask()) for opt in instruments}
+        prices = {}
+        for opt in instruments:
+            bid = self.pr.get_orderbook(opt.inst).get_best_bid()
+            ask = self.pr.get_orderbook(opt.inst).get_best_ask()
+            if bid is not None and ask is not None:
+                prices[opt.inst] = (bid,ask)
         return prices
 
     def get_implieds(self, tenor):
@@ -61,10 +65,10 @@ class Book:
         self.asks = asks
 
     def get_best_bid(self):
-        return self.bids[0]['price']
+        return self.bids[0]['price'] if len(self.bids) > 0 else None
 
     def get_best_ask(self):
-        return self.asks[0]['price']
+        return self.asks[0]['price'] if len(self.asks) > 0 else None
 
     def get_best_bid_quote(self):
         return self.bids[0]['price'], self.bids[0]['quantity']
@@ -79,8 +83,9 @@ class Book:
 class Option:
     def __init__(self, inst):
         self.inst = inst
-        self.K = float(inst[-5:-2])
-        self.T = (datetime.strptime(inst[4:11],'%d%b%y') - datetime.now()).days/360.
+        self.K = float(inst[inst[inst.find('-')+1:].find('-')+inst.find('-')+2:-1])
+        date = inst[inst.find('-')+1:inst[inst.find('-')+1:].find('-')+inst.find('-')+1]
+        self.T = (datetime.strptime(date,'%d%b%y') - datetime.now()).days/360.
 
     def bs_d1(self, S, sigma, r):
         return (np.log(S/self.K) + (r + sigma**2/2)*(self.T)) / (sigma*np.sqrt(self.T))
