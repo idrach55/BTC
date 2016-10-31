@@ -83,7 +83,7 @@ class Book:
 class Option:
     def __init__(self, inst):
         self.inst = inst
-        self.K = float(inst[inst[inst.find('-')+1:].find('-')+inst.find('-')+2:-1])
+        self.K = float(inst[inst[inst.find('-')+1:].find('-')+inst.find('-')+2:-2])
         date = inst[inst.find('-')+1:inst[inst.find('-')+1:].find('-')+inst.find('-')+1]
         self.T = (datetime.strptime(date,'%d%b%y') - datetime.now()).days/360.
 
@@ -118,7 +118,7 @@ class Option:
         return a*norm.cdf(d2)/100. if self.inst[-1] == 'C' else -a*norm.cdf(-d2)/100.
 
     def implied(self, S, r, price):
-        return brentq(lambda sigma: price - self.value(S, sigma, r), 0.01, 1.50)
+        return brentq(lambda sigma: price - self.value(S, sigma, r), -5., 5.)
 
 
 class Protocol:
