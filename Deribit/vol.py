@@ -101,7 +101,7 @@ class Option:
         self.inst = inst
         self.K = float(inst[inst[inst.find('-')+1:].find('-')+inst.find('-')+2:-2])
         date = inst[inst.find('-')+1:inst[inst.find('-')+1:].find('-')+inst.find('-')+1]
-        self.T = (datetime.strptime(date+':9','%d%b%y:%H') - datetime.now()).total_seconds()/(60.*60*24*365)
+        self.T = (datetime.strptime(date+':11','%d%b%y:%H') - datetime.now()).total_seconds()/(60.*60*24*365)
 
     def bs_d1(self, S, sigma, r):
         return (np.log(S/self.K) + (r + sigma**2/2)*(self.T)) / (sigma*np.sqrt(self.T))
