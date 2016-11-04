@@ -18,7 +18,7 @@ def loop():
             spt = pr.get_index()
             vol = float(comm[2])
         if comm[0] == 'val':
-            print('$ %0.2f (%0.4f delta)' % (opt.value(spt, vol, 0), opt.delta(spt, vol, 0)))
+            print('$ %0.2f ( %0.4f )' % (opt.value(spt, vol, 0), opt.delta(spt, vol, 0)))
         elif comm[0] == 'imp':
             print('%0.2f%%' % (100*opt.implied(spt, 0, vol)))
 
