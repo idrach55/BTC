@@ -6,6 +6,22 @@ from datetime import datetime
 from scipy.optimize import brentq
 
 
+def loop():
+    pr = Protocol()
+    while True:
+        comm = input('> ').split(' ')
+        opt = Option(comm[1])
+        if len(comm) == 4:
+            spt = float(comm[2])
+            vol = float(comm[3])
+        else:
+            spt = pr.get_index()
+            vol = float(comm[2])
+        if comm[0] == 'val':
+            print('$ %0.2f (%0.4f delta)' % (opt.value(spt, vol, 0), opt.delta(spt, vol, 0)))
+        elif comm[0] == 'imp':
+            print('%0.2f%%' % (100*opt.implied(spt, 0, vol)))
+
 class Manager:
     def __init__(self):
         self.pr = Protocol()
@@ -85,7 +101,7 @@ class Option:
         self.inst = inst
         self.K = float(inst[inst[inst.find('-')+1:].find('-')+inst.find('-')+2:-2])
         date = inst[inst.find('-')+1:inst[inst.find('-')+1:].find('-')+inst.find('-')+1]
-        self.T = (datetime.strptime(date,'%d%b%y') - datetime.now()).days/360.
+        self.T = (datetime.strptime(date+':9','%d%b%y:%H') - datetime.now()).total_seconds()/(60.*60*24*365)
 
     def bs_d1(self, S, sigma, r):
         return (np.log(S/self.K) + (r + sigma**2/2)*(self.T)) / (sigma*np.sqrt(self.T))
@@ -118,7 +134,7 @@ class Option:
         return a*norm.cdf(d2)/100. if self.inst[-1] == 'C' else -a*norm.cdf(-d2)/100.
 
     def implied(self, S, r, price):
-        return brentq(lambda sigma: price - self.value(S, sigma, r), -5., 5.)
+        return brentq(lambda sigma: price - self.value(S, sigma, r), -1e-9, 2.)
 
 
 class Protocol:
