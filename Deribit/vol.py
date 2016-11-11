@@ -18,9 +18,13 @@ def loop():
             spt = pr.get_index()
             vol = float(comm[2])
         if comm[0] == 'val':
-            print('$ %0.2f ( %0.4f )' % (opt.value(spt, vol, 0), opt.delta(spt, vol, 0)))
+            delta = opt.delta(spt, vol, 0)
+            gamma = opt.gamma(spt, vol, 0)
+            theta = opt.theta(spt, vol, 0)
+            vega  = opt.vega(spt, vol, 0)
+            print('$ %0.2f ( %0.4f %0.4f %0.4f %0.4f)' % (opt.value(spt, vol, 0), delta, gamma, theta, vega))
         elif comm[0] == 'imp':
-            print('%0.2f%%' % (100*opt.implied(spt, 0, vol)))
+            print('%% %0.2f' % (100*opt.implied(spt, 0, vol)))
 
 class Manager:
     def __init__(self):
@@ -101,7 +105,7 @@ class Option:
         self.inst = inst
         self.K = float(inst[inst[inst.find('-')+1:].find('-')+inst.find('-')+2:-2])
         date = inst[inst.find('-')+1:inst[inst.find('-')+1:].find('-')+inst.find('-')+1]
-        self.T = (datetime.strptime(date+':11','%d%b%y:%H') - datetime.now()).total_seconds()/(60.*60*24*365)
+        self.T = (datetime.strptime(date+':3','%d%b%y:%H') - datetime.now()).total_seconds()/(60.*60*24*365)
 
     def bs_d1(self, S, sigma, r):
         return (np.log(S/self.K) + (r + sigma**2/2)*(self.T)) / (sigma*np.sqrt(self.T))
