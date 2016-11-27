@@ -1,7 +1,12 @@
 var BitfinexWS = require ('bitfinex-api-node').WS;
 var client = new BitfinexWS();
 
-var books = {'BTCUSD': {}, 'LTCUSD': {}, 'LTCBTC': {}};
+let pairs = ['BTCUSD', 'LTCUSD', 'LTCBTC', 'BFXUSD', 'BFXBTC', 'ETHUSD', 'ETHBTC'];
+
+var books = {};
+for (i = 0; i < pairs.length; i++) {
+    books[pairs[i]] = {};
+}
 
 function getBestQuote(book, type) {
     var levels = Object.keys(book).sort();
@@ -19,18 +24,45 @@ function getBestQuote(book, type) {
     return quote;
 }
 
+function getBidAskPrices(book) {
+    let bidQuote = getBestQuote(book, 'bid');
+    let askQuote = getBestQuote(book, 'ask');
+    return {'bid': bidQuote['price'], 'ask': askQuote['price']};
+}
+
+function searchTriangleArbs(books) {
+    var arbs = {};
+
+    let btcusd = getBidAskPrices(books.BTCUSD);
+    let inters = ['LTC', 'ETH', 'BFX'];
+    for (i = 0; i < inters.length; i++) {
+        let inter = inters[i];
+        let interusd = getBidAskPrices(books[inter+'USD']);
+        let interbtc = getBidAskPrices(books[inter+'BTC']);
+
+        let cross_btcinter = (1/btcusd.ask)/interbtc.ask * interusd.bid;
+        let cross_interbtc = (1/interusd.ask)*interbtc.bid * btcusd.bid;
+        arbs['BTC'+inter] = cross_btcinter;
+        arbs[inter+'BTC'] = cross_interbtc;
+    }
+    return arbs;
+}
+
 client.on('open', function () {
-    client.subscribeOrderBook('BTCUSD');
-    client.subscribeOrderBook('LTCUSD');
-    client.subscribeOrderBook('LTCBTC');
+    for (i = 0; i < pairs.length; i++) {
+        client.subscribeOrderBook(pairs[i]);
+    }
 });
 
+var count = 0;
 client.on('orderbook', function (pair, level) {
     //console.log('Order book:', level);
-    books[pair][level['price']] = level['amount'];
-    bestBid = getBestQuote(books[pair], 'bid');
-    bestAsk = getBestQuote(books[pair], 'ask');
-    console.log(pair+': '+bestBid['price']+' | '+bestAsk['price']);
+    // Alter the book for this pair off this update.
+    count++;
+    books[pair][level.price] = level.amount;
+    if (count > 500) {
+        console.log(searchTriangleArbs(books));
+    }
 });
 
 client.on('subscribed', function (data) {
@@ -38,4 +70,3 @@ client.on('subscribed', function (data) {
 });
 
 client.on('error', console.error);
-
