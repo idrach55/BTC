@@ -1,7 +1,13 @@
 var BitfinexWS = require ('bitfinex-api-node').WS;
 var client = new BitfinexWS();
 
-let pairs = ['BTCUSD', 'LTCUSD', 'LTCBTC', 'BFXUSD', 'BFXBTC', 'ETHUSD', 'ETHBTC'];
+let pairs = ['BTCUSD', 'BFXUSD', 'BFXBTC'];
+/*
+             'LTCUSD', 'LTCBTC',
+             'ETHUSD', 'ETHBTC',
+             'ETCUSD', 'ETCBTC',
+             'RRTUSD', 'RRTBTC'];
+*/
 
 var books = {};
 for (i = 0; i < pairs.length; i++) {
@@ -30,21 +36,30 @@ function getBidAskPrices(book) {
     return {'bid': bidQuote['price'], 'ask': askQuote['price']};
 }
 
-function searchTriangleArbs(books) {
-    var arbs = {};
-
+function checkTriangle(books, arbs, inter) {
     let btcusd = getBidAskPrices(books.BTCUSD);
-    let inters = ['LTC', 'ETH', 'BFX'];
-    for (i = 0; i < inters.length; i++) {
-        let inter = inters[i];
-        let interusd = getBidAskPrices(books[inter+'USD']);
-        let interbtc = getBidAskPrices(books[inter+'BTC']);
+    var interusd = getBidAskPrices(books[inter+'USD']);
+    var interbtc = getBidAskPrices(books[inter+'BTC']);
+    var cross_btcinter = (1/btcusd.ask)/interbtc.ask * interusd.bid;
+    var cross_interbtc = (1/interusd.ask)*interbtc.bid * btcusd.bid;
+    arbs['BTC'+inter] = cross_btcinter;
+    arbs[inter+'BTC'] = cross_interbtc;
+    return arbs;
+}
 
-        let cross_btcinter = (1/btcusd.ask)/interbtc.ask * interusd.bid;
-        let cross_interbtc = (1/interusd.ask)*interbtc.bid * btcusd.bid;
-        arbs['BTC'+inter] = cross_btcinter;
-        arbs[inter+'BTC'] = cross_interbtc;
-    }
+function searchTriangleArbs(books) {
+    var inter = 'BFX';
+    var arbs = checkTriangle(books, {}, inter);
+    /*
+    inter = 'LTC';
+    arbs = checkTriangle(books, arbs, inter);
+    inter = 'ETH';
+    arbs = checkTriangle(books, arbs, inter);
+    inter = 'ETC';
+    arbs = checkTriangle(books, arbs, inter);
+    inter = 'RRT';
+    arbs = checkTriangle(books, arbs, inter);
+    */
     return arbs;
 }
 
@@ -58,10 +73,15 @@ var count = 0;
 client.on('orderbook', function (pair, level) {
     //console.log('Order book:', level);
     // Alter the book for this pair off this update.
-    count++;
     books[pair][level.price] = level.amount;
+
+    count++;
     if (count > 500) {
-        console.log(searchTriangleArbs(books));
+        let arbs = searchTriangleArbs(books);
+        let keys = Object.keys(arbs);
+        for (i = 0; i < keys.length; i++) {
+            if (arbs[keys[i]] > 1) console.log(keys[i],':',arbs[keys[i]]);
+        }
     }
 });
 
