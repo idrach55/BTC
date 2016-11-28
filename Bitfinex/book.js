@@ -1,13 +1,12 @@
-var BitfinexWS = require ('bitfinex-api-node').WS;
+var BitfinexWS = require ('bitfinex-api-node/ws');
 var client = new BitfinexWS();
 
-let pairs = ['BTCUSD', 'BFXUSD', 'BFXBTC'];
-/*
+let pairs = ['BTCUSD',
+             'BFXUSD', 'BFXBTC',
              'LTCUSD', 'LTCBTC',
              'ETHUSD', 'ETHBTC',
              'ETCUSD', 'ETCBTC',
              'RRTUSD', 'RRTBTC'];
-*/
 
 var books = {};
 for (i = 0; i < pairs.length; i++) {
@@ -48,10 +47,9 @@ function checkTriangle(books, arbs, inter) {
 }
 
 function searchTriangleArbs(books) {
-    var inter = 'BFX';
+    var inter = 'LTC';
     var arbs = checkTriangle(books, {}, inter);
-    /*
-    inter = 'LTC';
+    inter = 'BFX';
     arbs = checkTriangle(books, arbs, inter);
     inter = 'ETH';
     arbs = checkTriangle(books, arbs, inter);
@@ -59,7 +57,6 @@ function searchTriangleArbs(books) {
     arbs = checkTriangle(books, arbs, inter);
     inter = 'RRT';
     arbs = checkTriangle(books, arbs, inter);
-    */
     return arbs;
 }
 
@@ -78,10 +75,13 @@ client.on('orderbook', function (pair, level) {
     count++;
     if (count > 500) {
         let arbs = searchTriangleArbs(books);
+        console.log(arbs);
+        /*
         let keys = Object.keys(arbs);
         for (i = 0; i < keys.length; i++) {
             if (arbs[keys[i]] > 1) console.log(keys[i],':',arbs[keys[i]]);
         }
+        */
     }
 });
 
