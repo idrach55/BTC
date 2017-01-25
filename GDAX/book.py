@@ -74,7 +74,7 @@ class Book(BlobClient):
         client.on_book_connected(self)
 
     def on_open(self):
-        r = requests.get('https://api.exchange.coinbase.com/products/BTC-USD/book', params={'level': 3})
+        r = requests.get('https://api.gdax.com/products/BTC-USD/book', params={'level': 3})
         book = r.json()
         for bid in book["bids"]:
             self.add(bid[2], "buy", float(bid[0]), float(bid[1]))

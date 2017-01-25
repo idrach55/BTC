@@ -122,7 +122,7 @@ class Helium(Strategy):
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
-    factory = WebSocketClientFactory('wss://ws-feed.exchange.coinbase.com')
+    factory = WebSocketClientFactory('wss://ws-feed.gdax.com')
     factory.protocol = BlobProtocol
 
     # Setup params.
