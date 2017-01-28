@@ -1,7 +1,7 @@
 import unittest
 import pytest
 
-from deribit import Book, Arber, Order
+from deribit import Book, Arber, Entry, Order
 
 class TestBook(Book):
     def __init__(self):
@@ -25,8 +25,8 @@ class TestCase(unittest.TestCase):
     def test_get_top(self):
         book = TestBook()
         bid, ask = book.get_top()
-        assert bid == Order(920.50, 100)
-        assert ask == Order(920.70, 50)
+        assert bid == Entry(920.50, 100)
+        assert ask == Entry(920.70, 50)
 
     def test_get_spread(self):
         book = TestBook()
@@ -35,5 +35,5 @@ class TestCase(unittest.TestCase):
     def test_market(self):
         arber = TestArber()
         bid, ask = arber.market()
-        assert bid == Order(920.51, 100)
-        assert ask == Order(920.69, 100)
+        assert bid == Entry(920.51, 100)
+        assert ask == Entry(920.69, 100)
