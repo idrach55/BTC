@@ -7,7 +7,7 @@ import base64
 from hashlib import sha256
 from collections import namedtuple
 
-public = 'https://www.deribit.com/api/v1/public'
+public = 'https://deribit.com/api/v1/public'
 private = 'https://deribit.com/api/v1/private'
 
 Order = namedtuple('Order', ['price', 'size'])
@@ -18,20 +18,15 @@ class RESTProtocol():
 
     def buy(self, size, price):
         instrument = 'BTC-31MAR17'
-        tstamp = str(int(time.time()*1e3))
+        tstamp = int(time.time() * 1000)
 
         params = (tstamp, self.keys[0], self.keys[1], instrument, price, size)
         data = '_=%s&_ackey=%s&_acsec=%s&_action=/api/v1/private/buy&instrument=%s&post_only=true&price=%0.2f&quantity=%d' % params
         hashed = base64.b64encode(sha256(data.encode()).digest())
-        signature = '%s.%s.%s' % (self.keys[0], tstamp, hashed.decode('ascii'))
+        signature = '%s.%s.%s' % (self.keys[0], tstamp, hashed.decode())
         print(signature)
-        return requests.post(private+'/buy', data={'instrument': instrument,
-                                                   'post_only':  True,
-                                                   'price':      '%0.2f'%price,
-                                                   'quantity':   size},
-                                            headers={'x-deribit-sig': signature,
-                                                     'Accept':        'application/json, text/javascript, */*; q=0.01',
-                                                     'Content-Type':  'application/x-www-form-urlencoded; charset=UTF-8'})
+        return requests.get(private+'/buy', json={'instrument': instrument, 'post_only': True, 'price': '%0.2f'%price,'quantity': size},
+                                            headers={'x-deribit-sig': signature})
 
 class Book(object):
     def __init__(self):
