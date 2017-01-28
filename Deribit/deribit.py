@@ -2,21 +2,36 @@ import requests
 import threading
 import time
 import math
+import base64
 
+from hashlib import sha256
 from collections import namedtuple
 
-url = 'https://deribit.com/api/v1/public'
+public = 'https://www.deribit.com/api/v1/public'
+private = 'https://deribit.com/api/v1/private'
 
 Order = namedtuple('Order', ['price', 'size'])
 
 class RESTProtocol():
     def __init__(self):
-        self.keys = open('keys.txt').split('\n')
+        self.keys = open('keys.txt').read().split('\n')
 
-    def auth(self):
-        tstamp = int(time.time()*1e3)
-        data = ’_=%d&_ackey=29mtdvvqV56&_acsec=BP2FEOFJLFENIYFBJI7PYWGFNPZOTRCE&_action=/api/v1/private/buy&instrument=BTC-15JAN16&price=500&quantity=1’
-        signature = ’29mtdvvqV56.1452237485895.0nkPWTDunuuc220vojSTirSj8/2eGT8Wv30YeLj+i4c=’
+    def buy(self, size, price):
+        instrument = 'BTC-31MAR17'
+        tstamp = str(int(time.time()*1e3))
+
+        params = (tstamp, self.keys[0], self.keys[1], instrument, price, size)
+        data = '_=%s&_ackey=%s&_acsec=%s&_action=/api/v1/private/buy&instrument=%s&post_only=true&price=%0.2f&quantity=%d' % params
+        hashed = base64.b64encode(sha256(data.encode()).digest())
+        signature = '%s.%s.%s' % (self.keys[0], tstamp, hashed.decode('ascii'))
+        print(signature)
+        return requests.post(private+'/buy', data={'instrument': instrument,
+                                                   'post_only':  True,
+                                                   'price':      '%0.2f'%price,
+                                                   'quantity':   size},
+                                            headers={'x-deribit-sig': signature,
+                                                     'Accept':        'application/json, text/javascript, */*; q=0.01',
+                                                     'Content-Type':  'application/x-www-form-urlencoded; charset=UTF-8'})
 
 class Book(object):
     def __init__(self):
@@ -29,7 +44,7 @@ class Book(object):
 
     def run(self):
         while True:
-            r = requests.get(url+'/getorderbook', params={'instrument': 'BTC-3FEB17'})
+            r = requests.get(public+'/getorderbook', params={'instrument': 'BTC-31MAR17'})
             book = r.json()['result']
             self.bids = book['bids']
             self.asks = book['asks']
@@ -42,7 +57,7 @@ class Book(object):
 
     def get_spread(self):
         bid, ask = self.get_top()
-        return ask.price - bid.price
+        return round(ask.price - bid.price, 2)
 
 class Arber:
     def __init__(self):

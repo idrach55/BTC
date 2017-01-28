@@ -4,6 +4,7 @@
 /GDAX/data
 .cache/*
 /GDAX/.cache/*
+/Deribit/.cache/*
 /GDAX/paramstight.py
 /GDAX/paramswide.py
 __pycache__/
