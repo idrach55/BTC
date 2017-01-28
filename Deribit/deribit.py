@@ -28,11 +28,11 @@ class RESTProtocol():
                 data += '&' + key + '=' + str(params[key])
         hashed = base64.b64encode(sha256(data.encode()).digest())
         signature = '%s.%s.%s' % (self.keys[0], nonce, hashed.decode())
-        return requests.get('https://www.deribit.com'+action, params=params, headers={'x-deribit-sig': signature})
+        return requests.get('https://www.deribit.com'+action, params=params, headers={'x-deribit-sig': signature}).json()
 
     def buy(self, instrument, size, price):
         params = {'instrument': instrument, 'price': price, 'quantity': size, 'post_only': 'true'}
-        resp = self._call('/api/v1/private/buy', params).json()
+        resp = self._call('/api/v1/private/buy', params)
         if resp['success']:
             result = resp['result']['order']
             return Order(result['orderId'], result['direction'], result['price'], result['quantity'])
@@ -41,7 +41,7 @@ class RESTProtocol():
 
     def sell(self, instrument, size, price):
         params = {'instrument': instrument, 'price': price, 'quantity': size, 'post_only': 'true'}
-        resp = self._call('/api/v1/private/sell', params).json()
+        resp = self._call('/api/v1/private/sell', params)
         if resp['success']:
             result = resp['result']['order']
             return Order(result['orderId'], result['direction'], result['price'], result['quantity'])
@@ -50,18 +50,15 @@ class RESTProtocol():
 
     def cancel(self, oid):
         params = {'orderId': oid}
-        resp = self._call('/api/v1/private/cancel', params).json()
+        resp = self._call('/api/v1/private/cancel', params)
         if resp['success']:
-            if resp.get('order') is not None:
-                return True
-            else:
-                return False
+            return resp.get('order') is not None:
         else:
             raise RESTError()
 
     def cancelall(self, asset='futures'):
         params = {'type': asset}
-        resp = self._call('/api/v1/private/cancelall', params).json()
+        resp = self._call('/api/v1/private/cancelall', params)
         if resp['success']:
             return True
         else:

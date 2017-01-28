@@ -3,6 +3,13 @@ import pytest
 
 from deribit import Book, Arber, Entry, Order
 
+
+class TestRESTProtocol(RESTProtocol):
+    # TODO: Write this function and consider tests where fails are needed.
+    def _call(self, action, params):
+        if action == '/api/v1/private/buy' or action == '/api/v1/private/sell':
+            pass
+
 class TestBook(Book):
     def __init__(self):
         """
@@ -15,11 +22,13 @@ class TestBook(Book):
         self.asks = [{'price': 920.70, 'quantity': 50},
                      {'price': 921.20, 'quantity': 150}]
 
+
 class TestArber(Arber):
     def __init__(self):
         self.book = TestBook()
         self.params = {'spread': 0.85,
                        'size':   100}
+
 
 class TestCase(unittest.TestCase):
     def test_get_top(self):
