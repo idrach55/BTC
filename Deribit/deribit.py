@@ -52,7 +52,7 @@ class RESTProtocol():
         params = {'orderId': oid}
         resp = self._call('/api/v1/private/cancel', params)
         if resp['success']:
-            return resp.get('order') is not None:
+            return resp.get('order') is not None
         else:
             raise RESTError()
 
@@ -98,22 +98,29 @@ class Arber:
         self.instrument = instrument
         self.book = Book(self.instrument)
         self.protocol = RESTProtocol()
-        self.params = {'spread': 0.85,
+        self.params = {'spread': 0.90,
                        'size':   100}
 
         self.open_orders = []
 
     def buy(self, size, price):
         try:
-            order = self.protocol.buy(self.instrument, size, price).json()
+            order = self.protocol.buy(self.instrument, size, price)
             self.open_orders.append(order)
         except RESTError as e:
             pass
 
     def sell(self, size, price):
         try:
-            order = self.protocol.sell(self.instrument, size, price).json()
+            order = self.protocol.sell(self.instrument, size, price)
             self.open_orders.append(order)
+        except RESTError as e:
+            pass
+
+    def cancelall(self):
+        try:
+            self.protocol.cancelall()
+            print('cancelled all futures orders')
         except RESTError as e:
             pass
 
@@ -121,7 +128,7 @@ class Arber:
         bid, ask = self.book.get_top()
         print('(%d) %0.2f | %0.2f (%d)' % (bid.size, bid.price, ask.price, ask.size))
 
-    def market(self):
+    def quote(self):
         bid, ask = self.book.get_top()
         mid = 0.5 * (bid.price + ask.price)
         spread = self.params['spread'] * (ask.price - bid.price)
@@ -129,6 +136,11 @@ class Arber:
         my_bid = math.floor(100*(mid - spread/2))/100
         my_ask = math.ceil(100*(mid + spread/2))/100
 
-        my_bid = Order(my_bid, self.params['size'])
-        my_ask = Order(my_ask, self.params['size'])
+        my_bid = Entry(my_bid, self.params['size'])
+        my_ask = Entry(my_ask, self.params['size'])
         return my_bid, my_ask
+
+    def make_market(self):
+        bid, ask = self.quote()
+        self.buy(bid.size, bid.price)
+        self.sell(ask.size, ask.price)

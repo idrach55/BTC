@@ -4,10 +4,10 @@ Description:
 Implementations for TradeLogger and relevant models including Glosten Milgrom.
 '''
 
-from autobahn.twisted.websocket import WebSocketClientFactory, connectWS
+from autobahn.twisted.websocket import connectWS
 from twisted.python import log
 from twisted.internet import reactor
-from blobprotocol import BlobProtocol
+from blobprotocol import BlobProtocol, BlobProtocolFactory
 from pprint import pprint
 from book import Book, BookClient
 from datetime import datetime
@@ -90,13 +90,13 @@ class TradeLogger(BookClient):
         self.df = pd.DataFrame(columns=columns)
         self.initialized = False
 
-    def add(self, oid, side, price, size):
+    def add(self, oid, side, price, size, product_id):
         pass
 
-    def change(self, oid, side, newsize):
+    def change(self, oid, side, newsize, product_id):
         pass
 
-    def match(self, oid, side, price, size):
+    def match(self, oid, side, price, size, product_id):
         if not self.initialized:
             if self.book.get_mid() is not None:
                 self.initialized = True
@@ -122,13 +122,13 @@ class TradeLogger(BookClient):
         self.df = self.df.append(entry, ignore_index=True)
         self.df.to_csv(self.fname)
 
-    def done(self, oid):
+    def done(self, oid, product_id):
         pass
 
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
-    factory = WebSocketClientFactory('wss://ws-feed.gdax.com')
+    factory = BlobProtocolFactory('wss://ws-feed.gdax.com')
     factory.protocol = BlobProtocol
 
     model = None

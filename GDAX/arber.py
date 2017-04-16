@@ -1,7 +1,7 @@
-from autobahn.twisted.websocket import WebSocketClientFactory, connectWS
+from autobahn.twisted.websocket import connectWS
 from twisted.python import log
 from twisted.internet import reactor
-from blobprotocol import BlobProtocol
+from blobprotocol import BlobProtocol, BlobProtocolFactory
 from pprint import pprint
 from book import Book, BookClient
 from datetime import datetime
@@ -14,50 +14,63 @@ import scipy.stats as dists
 
 class Arber(BookClient):
     def __init__(self):
-        self.fname = 'data/'+datetime.now().strftime('%Y-%m-%d')+'.'
-
-        columns = ['t','px','sz','sd','bid','mid','ask']
-        self.df = pd.DataFrame(columns=columns)
         self.initialized = False
+        self.books = {}
 
-    def add(self, oid, side, price, size):
+    def add(self, oid, side, price, size, product_id):
+        self.update()
+
+    def change(self, oid, side, newsize, product_id):
+        self.update()
+
+    def match(self, oid, side, price, size, product_id):
+        self.update()
+
+    def done(self, oid, product_id):
+        self.update()
+
+    def on_sequence_gap(self):
         pass
 
-    def change(self, oid, side, newsize):
-        pass
-
-    def match(self, oid, side, price, size):
+    def update(self):
         if not self.initialized:
-            if self.book.get_mid() is not None:
+            valid = True
+            for key, book in self.books.items():
+                mid = book.get_mid()
+                if mid is None:
+                    valid = False
+
+            if valid:
                 self.initialized = True
-            else: return
 
-        side = 'buy' if side == 'sell' else 'sell'
-        bid = self.book.get_best_bid()
-        ask = self.book.get_best_ask()
-        mid = self.book.get_mid()
+        if not self.initialized:
+            return
 
-        entry = {'t':int(datetime.today().strftime('%s')),
-                 'px':price, 'sz':size, 'sd':side[0],
-                 'bid':bid, 'mid':mid, 'ask':ask}
+        btc_usd_bid = self.books['BTC-USD'].get_best_bid()
+        btc_usd_ask = self.books['BTC-USD'].get_best_ask()
+        eth_btc_bid = self.books['ETH-BTC'].get_best_bid()
+        eth_btc_ask = self.books['ETH-BTC'].get_best_ask()
+        eth_usd_bid = self.books['ETH-USD'].get_best_bid()
+        eth_usd_ask = self.books['ETH-USD'].get_best_ask()
 
-        fmtsize = "-%0.4f"%size if side == "sell" else "+%0.4f"%size
-        pprint('%s (%0.2f), %0.2f/%0.2f/%0.2f'%(fmtsize, price, bid, mid, ask))
-        self.df = self.df.append(entry, ignore_index=True)
-        self.df.to_csv(self.fname)
-
-    def done(self, oid):
-        pass
-
+        btc_eth = (1. / btc_usd_ask) / (eth_btc_ask) * (eth_usd_bid)
+        eth_btc = (1. / eth_usd_ask) * (eth_btc_bid) * (btc_usd_bid)
+        if btc_eth > 1.0:
+            pprint('BTC-ETH: %0.4f' % btc_eth)
+        if eth_btc > 1.0:
+            pprint('ETH-BTC: %0.4f' % eth_btc)
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
-    factory = WebSocketClientFactory('wss://ws-feed.gdax.com')
-    factory.protocol = BlobProtocol
 
     ar = Arber()
-    bb = Book(factory.protocol, debug=False)
-    bb.add_client(ar)
+    product_ids = ['BTC-USD', 'ETH-BTC', 'ETH-USD']
+    factory = BlobProtocolFactory('wss://ws-feed.gdax.com', product_ids=product_ids)
+    factory.protocol = BlobProtocol
+    for product_id in product_ids:
+        bb = Book(factory.protocol, product_id, debug=False)
+        bb.add_client(ar)
+        ar.books[product_id] = bb
 
     connectWS(factory)
     reactor.run()

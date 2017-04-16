@@ -26,23 +26,23 @@ class BookClient:
     def on_book_connected(self, book):
         self.book = book
 
-    def add(self, oid, side, price, size):
+    def add(self, oid, side, price, size, product_id='BTC-USD'):
         raise NotImplementedError
 
-    def change(self, oid, side, newsize):
+    def change(self, oid, side, newsize, product_id='BTC-USD'):
         raise NotImplementedError
 
-    def match(self, oid, side, price, size):
+    def match(self, oid, side, price, size, product_id='BTC-USD'):
         raise NotImplementedError
 
-    def done(self, oid):
+    def done(self, oid, product_id='BTC-USD'):
         raise NotImplementedError
 
     def on_sequence_gap(self):
         raise NotImplementedError
 
 class Book(BlobClient):
-    def __init__(self, protocol, debug=False):
+    def __init__(self, protocol, product_id='BTC-USD', debug=False):
         '''
         Constructs an order book which will be a client to
         the given blob protocol.
@@ -52,6 +52,7 @@ class Book(BlobClient):
         '''
         BlobClient.__init__(self, protocol)
 
+        self.product_id = product_id
         self.debug = debug
         # A book can forward messages to multiple BookClients.
         self.clients = []
@@ -74,18 +75,20 @@ class Book(BlobClient):
         client.on_book_connected(self)
 
     def on_open(self):
-        r = requests.get('https://api.gdax.com/products/BTC-USD/book', params={'level': 3})
+        r = requests.get('https://api.gdax.com/products/%s/book' % self.product_id, params={'level': 3})
         book = r.json()
         for bid in book["bids"]:
-            self.add(bid[2], "buy", float(bid[0]), float(bid[1]))
+            self.add(bid[2], "buy", float(bid[0]), float(bid[1]), self.product_id)
         for ask in book["asks"]:
-            self.add(ask[2], "sell", float(ask[0]), float(ask[1]))
+            self.add(ask[2], "sell", float(ask[0]), float(ask[1]), self.product_id)
         # Track sequence since the BlobProtocol will check this off us to look for gaps.
         self.sequence = book["sequence"]
         if self.debug:
             pprint('downloaded (bids: %d, asks: %d)' % (len(self.bids), len(self.asks)))
 
-    def add(self, oid, side, price, size):
+    def add(self, oid, side, price, size, product_id):
+        if product_id != self.product_id:
+            return
         order = Order(oid, side, price, size)
         tree = self._get_order_tree(order.side)
         try:
@@ -96,9 +99,11 @@ class Book(BlobClient):
         if self.debug:
             pprint('added (%s, %s, $ %0.2f, %0.4f BTC)' % (oid, side, price, size))
         for client in self.clients:
-            client.add(oid, side, price, size)
+            client.add(oid, side, price, size, product_id=self.product_id)
 
-    def change(self, oid, side, newsize):
+    def change(self, oid, side, newsize, product_id):
+        if product_id != self.product_id:
+            return
         order = self._get_order_by_id(oid)
         if order is None:
             return
@@ -109,22 +114,26 @@ class Book(BlobClient):
         if self.debug:
             pprint('changed (%s, %s, $ %0.2f, %0.2f BTC)' % (oid, side, order.price, newsize))
         for client in self.clients:
-            client.change(oid, side, newsize)
+            client.change(oid, side, newsize, product_id=self.product_id)
 
-    def match(self, oid, side, price, size):
+    def match(self, oid, side, price, size, product_id):
+        if product_id != self.product_id:
+            return
         tree = self._get_order_tree(side)
         if self._get_order_by_id(oid) is None or tree[price][0].oid != oid:
             return
         tree[price][0] = Order(tree[price][0].oid, tree[price][0].side, tree[price][0].price, tree[price][0].size - size)
         self.orders_by_id[oid] = tree[price][0]
         if tree[price][0].size <= 0:
-            self.done(oid)
+            self.done(oid, self.product_id)
         if self.debug:
             pprint('matched (%s, %s, $ %0.2f, %0.4f BTC)' % (oid, side, price, size))
         for client in self.clients:
-            client.match(oid, side, price, size)
+            client.match(oid, side, price, size, product_id=self.product_id)
 
-    def done(self, oid):
+    def done(self, oid, product_id):
+        if product_id != self.product_id:
+            return
         order = self._get_order_by_id(oid)
         if order is None:
             return
@@ -137,9 +146,11 @@ class Book(BlobClient):
         if self.debug:
             pprint('removed (%s)' % (oid,))
         for client in self.clients:
-            client.done(oid)
+            client.done(oid, product_id=self.product_id)
 
-    def on_sequence_gap(self):
+    def on_sequence_gap(self, product_id):
+        if product_id != self.product_id:
+            return
         if self.debug:
             pprint('sequence gap')
         for client in self.clients:

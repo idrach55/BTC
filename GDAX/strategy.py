@@ -38,14 +38,14 @@ class RESTProtocol:
     def submit_trade(self, params):
         if self.debug:
             pprint('trade: %s' % str(params))
-        r = requests.post("https://api.exchange.coinbase.com/orders", json=params, auth=self.auth)
+        r = requests.post("https://api.gdax.com/orders", json=params, auth=self.auth)
         if r.status_code == 200:
             return True, r.json()["id"]
         return False, r.json()["message"]
 
     # Submit a cancel.
     def submit_cancel(self, oid=None):
-        url = 'https://api.exchange.coinbase.com/orders'
+        url = 'https://api.gdax.com/orders'
         if oid is not None:
             url += '/%s' % oid
         r = requests.delete(url, auth=self.auth)
@@ -54,7 +54,7 @@ class RESTProtocol:
         return False, r.json()["message"]
 
     def get_balances(self):
-        r = requests.get("https://api.exchange.coinbase.com/accounts", auth=self.auth)
+        r = requests.get("https://api.gdax.com/accounts", auth=self.auth)
         if r.status_code == 200:
             accounts = r.json()
             btc = 0.0

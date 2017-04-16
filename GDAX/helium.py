@@ -130,7 +130,7 @@ if __name__ == '__main__':
         'debug'             : True,
         'dump_on_lockdown'  : False,
         'max_distance'      : 0.75,
-        'spread'            : 0.30,
+        'spread'            : 1.00,
         'trade_size'        : 0.10,
         'stop_loss'         : 0.30,
         'max_inactive_time' : 10,
