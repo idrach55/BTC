@@ -4,7 +4,7 @@ Description:
 Implementation of the simple Helium strategy.
 '''
 
-from autobahn.twisted.websocket import WebSocketClientFactory, connectWS
+from autobahn.twisted.websocket import connectWS
 from twisted.python import log
 from twisted.internet import reactor
 from pprint import pprint
@@ -15,14 +15,15 @@ import os
 import math
 import scipy.stats
 
-from blobprotocol import BlobProtocol
+from blobprotocol import BlobProtocol, BlobProtocolFactory
 from book import Book, InsufficientSizeForVWAP
 from strategy import RESTProtocol, Strategy, read_keys
 
 
 class Helium(Strategy):
-    def __init__(self, rest, params):
-        Strategy.__init__(self, rest, debug=params['debug'])
+    def __init__(self, rest, params, product='BTC-USD'):
+        self.product = product
+        Strategy.__init__(self, rest, debug=params['debug'], product=self.product)
 
         if self.debug:
             pprint('params: %s' % str(params))
@@ -48,7 +49,7 @@ class Helium(Strategy):
         mid = self.book.get_mid()
 
         if self.initial_marking is None and self.stop_loss is not None:
-            success, usd, btc = self.rest.get_balances()
+            success, usd, btc = self.rest.get_balances(other=self.product)
             if success:
                 self.usd_position = usd
                 self.initial_marking = self.usd_position
@@ -122,19 +123,19 @@ class Helium(Strategy):
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
-    factory = WebSocketClientFactory('wss://ws-feed.gdax.com')
+    factory = BlobProtocolFactory('wss://ws-feed.gdax.com', product_ids=['ETH-USD'])
     factory.protocol = BlobProtocol
 
     # Setup params.
     params = {
         'debug'             : True,
         'dump_on_lockdown'  : False,
-        'max_distance'      : 0.75,
-        'spread'            : 1.00,
-        'trade_size'        : 0.10,
-        'stop_loss'         : 0.30,
+        'max_distance'      : 2.00,
+        'spread'            : 0.50,
+        'trade_size'        : 0.50,
+        'stop_loss'         : 3.00,
         'max_inactive_time' : 10,
-        "shading"           : 0.95,
+        "shading"           : 0.60,
         'speak'             : True
     }
 
@@ -144,10 +145,10 @@ if __name__ == '__main__':
         params['shading']    = float(sys.argv[3])
 
     rest = RESTProtocol(read_keys('keys.txt'), debug=True)
-    hh = Helium(rest, params=params)
+    hh = Helium(rest, params=params, product='ETH-USD')
     hh.enabled = False
 
-    bb = Book(factory.protocol, debug=False)
+    bb = Book(factory.protocol, 'ETH-USD', debug=False)
     bb.add_client(hh)
 
     connectWS(factory)

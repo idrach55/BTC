@@ -53,6 +53,11 @@ class Arber(BookClient):
         eth_usd_bid = self.books['ETH-USD'].get_best_bid()
         eth_usd_ask = self.books['ETH-USD'].get_best_ask()
 
+        ltc_btc_bid = self.books['LTC-BTC'].get_best_bid()
+        ltc_btc_ask = self.books['LTC-BTC'].get_best_ask()
+        ltc_usd_bid = self.books['LTC-USD'].get_best_bid()
+        ltc_usd_ask = self.books['LTC-USD'].get_best_ask()
+
         btc_eth = (1. / btc_usd_ask) / (eth_btc_ask) * (eth_usd_bid)
         eth_btc = (1. / eth_usd_ask) * (eth_btc_bid) * (btc_usd_bid)
         if btc_eth > 1.0:
@@ -60,11 +65,18 @@ class Arber(BookClient):
         if eth_btc > 1.0:
             pprint('ETH-BTC: %0.4f' % eth_btc)
 
+        btc_ltc = (1. / btc_usd_ask) / (ltc_btc_ask) * (ltc_usd_bid)
+        ltc_btc = (1. / ltc_usd_ask) * (ltc_btc_bid) * (btc_usd_bid)
+        if btc_ltc > 1.0:
+            pprint('BTC-LTC: %0.4f' % btc_ltc)
+        if ltc_btc > 1.0:
+            pprint('LTC-BTC: %0.4f' % ltc_btc)
+
 if __name__ == '__main__':
     log.startLogging(sys.stdout)
 
     ar = Arber()
-    product_ids = ['BTC-USD', 'ETH-BTC', 'ETH-USD']
+    product_ids = ['BTC-USD', 'ETH-BTC', 'ETH-USD', 'LTC-USD', 'LTC-BTC']
     factory = BlobProtocolFactory('wss://ws-feed.gdax.com', product_ids=product_ids)
     factory.protocol = BlobProtocol
     for product_id in product_ids:

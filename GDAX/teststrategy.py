@@ -48,14 +48,14 @@ class MyTest(unittest.TestCase):
     def test_on_complete_fill(self):
         strat = DemoStrategy()
         strat.bid(1.0, 100.00)
-        strat.match("B1", "buy", 100.00, 1.0)
+        strat.match("B1", "buy", 100.00, 1.0, 'BTC-USD')
         assert strat.open_orders == {}
         assert strat.btc_position == 1.0
 
     def test_on_partial_fill(self):
         strat = DemoStrategy()
         strat.bid(1.0, 100.00)
-        strat.match("B1", "buy", 100.00, 0.5)
+        strat.match("B1", "buy", 100.00, 0.5, 'BTC-USD')
         assert strat.open_orders == {"B1": Order("B1", "buy", 100.00, 0.5)}
         assert strat.btc_position == 0.5
 

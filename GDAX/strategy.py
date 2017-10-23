@@ -53,7 +53,7 @@ class RESTProtocol:
             return True, None
         return False, r.json()["message"]
 
-    def get_balances(self):
+    def get_balances(self, other='BTC'):
         r = requests.get("https://api.gdax.com/accounts", auth=self.auth)
         if r.status_code == 200:
             accounts = r.json()
@@ -62,7 +62,7 @@ class RESTProtocol:
             if accounts[0]["currency"] == "USD":
                 usd = float(accounts[0]["balance"])
                 btc = float(accounts[1]["balance"])
-            elif accounts[0]["currency"] == "BTC":
+            elif accounts[0]["currency"] == other:
                 btc = float(accounts[0]["balance"])
                 usd = float(accounts[1]["balance"])
             return True, usd, btc
@@ -94,7 +94,7 @@ class Authorizer(AuthBase):
 
 # A strategy is book client attached to a REST protocol.
 class Strategy(BookClient):
-    def __init__(self, rest, debug=False):
+    def __init__(self, rest, debug=False, product='BTC'):
         self.rest = rest
 
         # These are the only parameters.
@@ -119,13 +119,13 @@ class Strategy(BookClient):
         self.enabled = False
 
     # BookClient methods.
-    def add(self, oid, side, price, size):
+    def add(self, oid, side, price, size, product_id):
         self.update()
 
-    def change(self, oid, side, newsize):
+    def change(self, oid, side, newsize, product_id):
         self.update()
 
-    def match(self, oid, side, price, size):
+    def match(self, oid, side, price, size, product_id):
         # Look for our fills here!
         order = self.open_orders.get(oid)
         if order is not None:
@@ -145,7 +145,7 @@ class Strategy(BookClient):
         # Relay!
         self.update()
 
-    def done(self, oid):
+    def done(self, oid, product_id):
         self.update()
 
     def on_sequence_gap(self):
@@ -226,9 +226,11 @@ class Strategy(BookClient):
             del self.open_orders[oid]
 
     # Submit trade.
-    def trade(self, size, side, price=None, otype="limit", product_id="BTC-USD", post_only=True):
+    def trade(self, size, side, price=None, otype="limit", post_only=True):
         if not self.enabled:
             return
+
+        product_id = self.product
 
         if otype == "limit" and not price:
             self.on_place_fail("price not specified")

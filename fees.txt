@@ -1,0 +1,3 @@
+        GDAX    Bitfinex
+taker   25      20
+maker   0       10
