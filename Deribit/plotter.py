@@ -1,26 +1,39 @@
-import requests
 import matplotlib.pyplot as plt
+import strategy
+import deribit_api as api
+import time
+import pickle
 
-from datetime import datetime
-
+tableau = pickle.load(open('../Research/tableau.colors', 'rb'))
 
 plt.ion()
 
-def get(ts, idx, fut):
-    resp = requests.get('https://www.deribit.com/api/v1/public/getsummary?instrument=BTC-10FEB17').json()
-    ts.append(datetime.fromtimestamp(resp['msOut']/1e3))
-    idx.append(resp['result']['estDelPrice'])
-    fut.append(0.5*(resp['result']['askPrice'] + resp['result']['bidPrice']))
-    return ts, idx, fut
+keys = strategy.read_keys()
+client = api.RestClient(keys[0], keys[1])
+book = strategy.Book('BTC-24NOV17', client)
+
+def get(ts, bid, ask, vwap_mid):
+    ts.append(book.stamp)
+    #idx.append(book.get_index())
+    top = book.get_top()
+    bid.append(top[0])
+    ask.append(top[1])
+    vwap_mid.append(0.5*(book.get_vwap(1000) + book.get_vwap(-1000)))
+    return ts, bid, ask, vwap_mid
 
 def plot():
     ts  = []
     idx = []
+    bid = []
+    ask = []
+    vwap_mid = []
     fut = []
     while True:
-        ts, idx, fut = get(ts, idx, fut)
-        plt.plot(ts, idx, c='b')
-        plt.plot(ts, fut, c='r')
+        ts, bid, ask, vwap_mid = get(ts, bid, ask, vwap_mid)
+        #plt.plot(ts, idx, c=tableau[0], lw=2)
+        plt.plot(ts, bid, c=tableau[3], lw=2)
+        plt.plot(ts, ask, c=tableau[3], lw=2)
+        plt.plot(ts, vwap_mid, c=tableau[1], lw=2)
 
         # Styles...
         plt.grid(True)
@@ -30,4 +43,5 @@ def plot():
         plt.pause(0.1)
 
 if __name__ == "__main__":
+    time.sleep(1.0)
     plot()

@@ -5,6 +5,8 @@
 .cache/*
 /GDAX/.cache/*
 /Deribit/.cache/*
+/Deribit/.ipynb_checkpoints/*
+/Deribit/keys.txt
 /GDAX/paramstight.py
 /GDAX/paramswide.py
 __pycache__/
