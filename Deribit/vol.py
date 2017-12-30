@@ -3,6 +3,15 @@ import scipy.stats as stats
 import datetime
 import pandas as pd
 import scipy.optimize as opt
+import pickle
+
+########################
+
+def save_surface(surface):
+    file = open('surface-%s.obj'%datetime.datetime.today().strftime('%Y-%m-%d'),'wb')
+    pickle.dump(surface, file)
+def load_surface(date):
+    return pickle.load(open('surface-%s.obj'%date,'rb'))
 
 ########################
 
@@ -50,13 +59,12 @@ Sigma = lambda lK,surface: Sigma_explicit(lK,surface[0],surface[1],surface[2])
 
 def PV(option, surface, overrides={}):
     expiry = expiry_codes[option['expiration']]
-    K = option['strike']
+    S = overrides['spot']; K = option['strike']
     is_call = option['instrumentName'][-1] == 'C'
     T = time_to_expiry(convert_GMT_EST(option['expiration']), now_EST())
-    sigma = Sigma(np.log(strike/index), surface[expiry])
+    sigma = Sigma(np.log(K/S), surface[expiry])
     func = BScall if is_call else BSput
 
-    S = overrides['spot']
     if overrides.get('vol') is not None:
         sigma = overrides['vol']
     if overrides.get('time') is not None:
