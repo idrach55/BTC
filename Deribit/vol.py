@@ -99,8 +99,11 @@ def gamma(option, surface, overrides={}):
 def vega(option, surface, overrides={}):
     expiry = expiry_codes[option['expiration']]
     dSigma = 0.01
-    overrides_H = overrides.copy(); overrides_H['vol_shift'] = dSigma
-    overrides_L = overrides.copy(); overrides_L['vol_shift'] = -dSigma
+    vol_shift = 0.0
+    if overrides.get('vol_shift') is not None:
+        vol_shift = overrides['vol_shift']
+    overrides_H = overrides.copy(); overrides_H['vol_shift'] = vol_shift+dSigma
+    overrides_L = overrides.copy(); overrides_L['vol_shift'] = vol_shift-dSigma
     pv_H = PV(option, surface, overrides_H)
     pv_L = PV(option, surface, overrides_L)
     return (pv_H - pv_L)/(dSigma/0.01)
@@ -108,7 +111,10 @@ def vega(option, surface, overrides={}):
 def theta(option, surface, overrides={}):
     expiry = expiry_codes[option['expiration']]
     dT = 1/365
-    overrides_H = overrides.copy(); overrides_H['time_shift'] = -dT
+    time_shift = 0.0
+    if overrides.get('time_shift') is not None:
+        time_shift = overrides['time_shift']
+    overrides_H = overrides.copy(); overrides_H['time_shift'] = time_shift-dT
     pv_H = PV(option, surface, overrides_H)
     pv_L = PV(option, surface, overrides)
     return pv_H - pv_L
