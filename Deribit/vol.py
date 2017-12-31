@@ -51,6 +51,8 @@ expiry_codes = {'2018-03-30 08:00:00 GMT': '30MAR18',
                 '2018-01-26 08:00:00 GMT': '26JAN18',
                 '2018-01-05 08:00:00 GMT': '5JAN18'}
 
+expiries = dict([(code, date) for date, code in expiry_codes.items()])
+
 ########################
 
 # Surface functional form
@@ -58,10 +60,16 @@ Sigma_explicit = lambda lK,pATM,pSKEW,pVoV: pATM -pSKEW*lK + pVoV*lK**2
 Sigma = lambda lK,surface: Sigma_explicit(lK,surface[0],surface[1],surface[2])
 
 def PV(option, surface, overrides={}):
-    expiry = expiry_codes[option['expiration']]
-    S = overrides['spot']; K = option['strike']
-    is_call = option['instrumentName'][-1] == 'C'
-    T = time_to_expiry(convert_GMT_EST(option['expiration']), now_EST())
+    #expiry = expiry_codes[option['expiration']]
+    #S = overrides['spot']; K = option['strike']
+    #is_call = option['instrumentName'][-1] == 'C'
+    #T = time_to_expiry(convert_GMT_EST(option['expiration']), now_EST())
+
+    expiry = option.split('-')[1]
+    S = overrides['spot']; K = float(option.split('-')[2])
+    is_call = option.split('-')[3] == 'C'
+    T = time_to_expiry(convert_GMT_EST(expiries[expiry]), now_EST())
+
     sigma = Sigma(np.log(K/S), surface[expiry])
     func = BScall if is_call else BSput
 
@@ -77,17 +85,15 @@ def PV(option, surface, overrides={}):
     return func(S,K,T,sigma,0.0,0.0)
 
 def delta(option, surface, overrides={}):
-    expiry = expiry_codes[option['expiration']]
     S = overrides['spot']
     dS = 0.01
     overrides_H = overrides.copy(); overrides_H['spot'] = S*(1+dS/2)
     overrides_L = overrides.copy(); overrides_L['spot'] = S*(1-dS/2)
     pv_H = PV(option, surface, overrides_H,)
     pv_L = PV(option, surface, overrides_L)
-    return (pv_H - pv_L)/(dS/0.01)
+    return (pv_H - pv_L)/dS
 
 def gamma(option, surface, overrides={}):
-    expiry = expiry_codes[option['expiration']]
     S = overrides['spot']
     dS = 0.01
     overrides_H = overrides.copy(); overrides_H['spot'] = S*(1+dS/2)
@@ -97,7 +103,6 @@ def gamma(option, surface, overrides={}):
     return (delta_H - delta_L)/(dS/0.01)
 
 def vega(option, surface, overrides={}):
-    expiry = expiry_codes[option['expiration']]
     dSigma = 0.01
     vol_shift = 0.0
     if overrides.get('vol_shift') is not None:
@@ -109,7 +114,6 @@ def vega(option, surface, overrides={}):
     return (pv_H - pv_L)/(dSigma/0.01)
 
 def theta(option, surface, overrides={}):
-    expiry = expiry_codes[option['expiration']]
     dT = 1/365
     time_shift = 0.0
     if overrides.get('time_shift') is not None:
