@@ -49,7 +49,8 @@ def time_to_expiry(expiry, now):
 
 expiry_codes = {'2018-03-30 08:00:00 GMT': '30MAR18',
                 '2018-01-26 08:00:00 GMT': '26JAN18',
-                '2018-01-05 08:00:00 GMT': '5JAN18'}
+                '2018-01-05 08:00:00 GMT': '5JAN18',
+                '2018-01-12 08:00:00 GMT': '12JAN18'}
 
 expiries = dict([(code, date) for date, code in expiry_codes.items()])
 
