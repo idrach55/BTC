@@ -47,9 +47,13 @@ def now_EST():
 def time_to_expiry(expiry, now):
     return (expiry - now).total_seconds()/3600/24/365
 
+#def expiry_codes(d):
+#    return d.strftime('%d')+d.strftime('%b').upper()+d.strftime('%y')
+
 expiry_codes = {'2018-03-30 08:00:00 GMT': '30MAR18',
-                '2018-01-26 08:00:00 GMT': '26JAN18',
-                '2018-01-19 08:00:00 GMT': '19JAN18'}
+                '2018-03-02 08:00:00 GMT': '2MAR18',
+                '2018-02-16 08:00:00 GMT': '16FEB18',
+                '2018-06-29 08:00:00 GMT': '29JUN18'}
 
 expiries = dict([(code, date) for date, code in expiry_codes.items()])
 
