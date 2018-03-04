@@ -50,12 +50,20 @@ def time_to_expiry(expiry, now):
 #def expiry_codes(d):
 #    return d.strftime('%d')+d.strftime('%b').upper()+d.strftime('%y')
 
+'''
 expiry_codes = {'2018-03-30 08:00:00 GMT': '30MAR18',
                 '2018-03-02 08:00:00 GMT': '2MAR18',
                 '2018-02-16 08:00:00 GMT': '16FEB18',
                 '2018-06-29 08:00:00 GMT': '29JUN18'}
+'''
 
-expiries = dict([(code, date) for date, code in expiry_codes.items()])
+#expiries = dict([(code, date) for date, code in expiry_codes.items()])
+
+def expiries(d):
+    return datetime.datetime.strptime(d[:d.find(' ')],'%Y-%m-%d').strftime('%d%b%y').upper()
+
+def code_to_expiry(code):
+    return datetime.datetime.strptime(code,'%d%b%y').strftime('%Y-%m-%d 08:00:00 GMT')
 
 ########################
 
@@ -72,7 +80,7 @@ def PV(option, surface, overrides={}):
     expiry = option.split('-')[1]
     S = overrides['spot']; K = float(option.split('-')[2])
     is_call = option.split('-')[3] == 'C'
-    T = time_to_expiry(convert_GMT_EST(expiries[expiry]), now_EST())
+    T = time_to_expiry(convert_GMT_EST(code_to_expiry(expiry)), now_EST())
 
     sigma = Sigma(np.log(K/S), surface[expiry])
     func = BScall if is_call else BSput
