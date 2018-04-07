@@ -48,7 +48,8 @@ class Book:
         return self.bids[0]['price'], self.asks[0]['price']
 
     def get_top_with_size(self):
-        return self.bids[0]['price'], self.bids[0]['size'], self.asks[0]['price'], self.asks['size']
+        return self.bids[0]['price'], self.bids[0]['quantity'], \
+               self.asks[0]['price'], self.asks[0]['quantity']
 
     def get_mid(self):
         return 0.5*(self.bids[0]['price'] + self.asks[0]['price'])

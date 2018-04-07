@@ -10,7 +10,7 @@ plt.ion()
 
 keys = strategy.read_keys()
 client = api.RestClient(keys[0], keys[1])
-book = strategy.Book('BTC-24NOV17', client)
+book = strategy.Book('BTC-27APR18', client)
 
 def get(ts, bid, ask, vwap_mid):
     ts.append(book.stamp)
@@ -37,6 +37,7 @@ def plot():
 
         # Styles...
         plt.grid(True)
+        plt.ylim(vwap_mid[-1]-10,vwap_mid[-1]+10)
         #plt.set
 
         # Pause...
