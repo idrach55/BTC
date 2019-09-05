@@ -28,13 +28,16 @@ def BScall(S, K, T, sigma, r, c):
 
 def BSput(S, K, T, sigma, r, c):
     if T <= 0.0:
-        return max(S-K,0.0)
+        return max(K-S,0.0)
     d1, d2 = BSsetup(S, K, T, sigma, r, c)
     return stats.norm.cdf(-d2)*K*np.exp(-r*T) - stats.norm.cdf(-d1)*S
 
 def BSvol(S, K, T, r, c, V, call=True):
     value = lambda sigma: BScall(S,K,T,sigma,r,c) if call else BSput(S,K,T,sigma,r,c)
-    return opt.brentq(lambda sigma: value(sigma)-V, 0.01, 10.0)
+    try: 
+        return opt.brentq(lambda sigma: value(sigma)-V, 0.0001, 100.0)
+    except:
+        print('error solving for vol S:%f,K:%f,T:%f,V:%f'%(S,K,T,V))
 
 ########################
 
@@ -46,16 +49,6 @@ def now_EST():
 # Expiry and now in same timezone
 def time_to_expiry(expiry, now):
     return (expiry - now).total_seconds()/3600/24/365
-
-#def expiry_codes(d):
-#    return d.strftime('%d')+d.strftime('%b').upper()+d.strftime('%y')
-
-'''
-expiry_codes = {'2018-03-30 08:00:00 GMT': '30MAR18',
-                '2018-03-02 08:00:00 GMT': '2MAR18',
-                '2018-02-16 08:00:00 GMT': '16FEB18',
-                '2018-06-29 08:00:00 GMT': '29JUN18'}
-'''
 
 #expiries = dict([(code, date) for date, code in expiry_codes.items()])
 
