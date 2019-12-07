@@ -1,5 +1,7 @@
-# BTC
-Bitcoin algorithmic trading library and research matieral. Partial/planned support for the following exchanges: GDAX (aka Coinbase), Bitfinex, Deribit (futures and options exchange.) Goal is to develop a robust and well-tested API to trade on several exchanges, and to implement liquidity provision and execution algorithms. 
+Deribit
+- Bitcoin/Ethereum derivatives exchange https://www.deribit.com/
+- futures trading and simple market making algo <code>strategy.py</code>
+- fitting volatility surfaces and pricing/scenario analysis for a portfolio <vol.ipynb>
 
-# Usage info
-To be written...
+GDAX
+- cash market
