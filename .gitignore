@@ -3,8 +3,7 @@
 */keys.txt
 /GDAX/data
 .cache/*
-./env
-/env/*
+env/
 /GDAX/.cache/*
 /Deribit/.cache/*
 /Deribit/.ipynb_checkpoints/*
