@@ -134,43 +134,6 @@ class Mid(Strategy):
                     if quantity > 0: self.bid(quantity, self.mid)
                     else:            self.ask(-quantity, self.mid)
 
-example_helium_params = {'size': 100, 'width': 0.7, 'vwap': 1000, 'update': 0.5, 'thresh': 0.20}
-class Helium(Strategy):
-    def __init__(self, contract, params):
-        Strategy.__init__(self, contract)
-        self.params = params
-        self.market = (None, None)
-
-    def run(self):
-        while True:
-            time.sleep(self.params['update'])
-            vwap_bid = self.book.get_vwap(-self.params['vwap'])
-            vwap_ask = self.book.get_vwap(self.params['vwap'])
-            spread = 4.00 #(vwap_ask - vwap_bid)*self.params['width']
-            #mid = self.book.get_mid()
-            mid = (vwap_bid + vwap_ask)/2
-            my_bid = mid - spread/2
-            my_ask = mid + spread/2
-            positions = [pos for pos in self.client.positions() if pos['instrument'] == self.contract]
-            inventory = 0
-            if len(positions) > 0:
-                inventory = positions[0]['size'] if positions[0]['direction'] == 'buy' else -positions[0]['size']
-            ask_size = self.params['size'] if inventory >= 100 else self.params['size'] + (inventory-100)
-            bid_size = self.params['size'] if inventory <= 100 else self.params['size'] - (inventory-100)
-            if ask_size < 100:
-                my_ask += 1.00
-            if bid_size < 100:
-                my_bid -= 1.00
-            print('vwap mid: %0.1f, top mid: %0.1f, inventory: %d, market: (%d) %0.1f | %0.1f (%d)' \
-                  %(mid,self.book.get_mid(), inventory, bid_size, my_bid, my_ask, ask_size))
-            if self.market != (None, None):
-                if abs(my_bid - self.market[0]) < self.params['thresh'] and abs(my_ask - self.market[1]) < self.params['thresh']:
-                    continue
-            self.client.cancelall()
-            self.ask(ask_size, my_ask)
-            self.bid(bid_size, my_bid)
-            self.market = (my_bid, my_ask)
-
 class TestBook(Strategy):
     def __init__(self, contract):
         Strategy.__init__(self, contract)
@@ -179,36 +142,3 @@ class TestBook(Strategy):
         while True:
             bidPrice, bidSize, askPrice, askSize = self.book.get_top_with_size()
             print('(%d) %0.1f | %0.1f (%d)      '%(bidSize, bidPrice, askPrice, askSize),end='\r')
-
-class Arber:
-    def __init__(self, threshold=10.0, max_trade=100):
-        self.A = Strategy('BTC-PERPETUAL')
-        self.B = Strategy('BTC-29MAR19')
-
-        self.threshold = threshold
-        self.max_trade = max_trade
-
-    def scan(self, trade=False):
-        bid_A, bsize_A, ask_A, asize_A = self.A.book.get_top_with_size()
-        bid_B, bsize_B, ask_B, asize_B = self.B.book.get_top_with_size()
-
-        long_A_short_B = bid_B - ask_A
-        long_B_short_A = bid_A - ask_B
-
-        if long_A_short_B >= self.threshold:
-            size = min(min(bsize_B, asize_A), self.max_trade)
-            print("buy %d A, sell %d B, collect %0.1f"%(size,size,long_A_short_B))
-
-            if trade:
-                self.A.bid(size, ask_A)
-                self.B.ask(size, bid_B)
-        elif long_B_short_A >= self.threshold:
-            size = min(min(bsize_A, asize_B), self.max_trade)
-            print("buy %d B, sell %d A, collect %0.1f"%(size,size,long_B_short_A))
-
-            if trade:
-                self.A.ask(size, bid_A)
-                self.B.bid(size, ask_B)
-        else:
-            return False
-        return True
