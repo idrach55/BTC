@@ -7,6 +7,7 @@
 - Bitcoin/Ethereum derivatives exchange https://www.deribit.com/
 - futures trading and simple market making algo <code>strategy.py</code>
 - fitting volatility surfaces and pricing/scenario analysis for a portfolio <code>vol.ipynb</code>
+- alas Deribit has since banned US-domiciled users
 
 ## GDAX
 - crypto cash exchange, now known as Coinbase Pro https://pro.coinbase.com/
