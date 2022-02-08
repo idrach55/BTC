@@ -8,7 +8,5 @@ env/
 /Deribit/.cache/*
 /Deribit/.ipynb_checkpoints/*
 /Deribit/keys.txt
-/GDAX/paramstight.py
-/GDAX/paramswide.py
 __pycache__/
 /GDAX/debug.log
