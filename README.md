@@ -1,5 +1,5 @@
 ## Research
-- paper I wrote for a class at NYU designing a platform to sells equity swaps quanto'd into BTC  
+- paper I wrote for a class at NYU designing a platform to sell equity swaps quanto'd into BTC  
 - some examples of microstructure models using GDAX (now Coinbase Pro) tick data
 - Glosten Milgrom model for using informed flow to imply fair value distribution <code>GlostenBig.ipynb</code>
 - probability of informed trading estimtion <code>PINBig.ipynb</code>
